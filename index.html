@@ -978,17 +978,52 @@
       `;
     }
 
-    function switchTab(name) {
+    const tabOrder = ['main', 'payments', 'favorites', 'research', 'chat'];
+    let currentTab = 'main';
+    let isModalOpen = false;
+    let currentModalIdx = null;
+
+    function switchTab(name, shouldPushState = true) {
+      if (!tabOrder.includes(name)) name = 'main';
+      currentTab = name;
+
       document.querySelectorAll(".dock-tab").forEach(b => b.classList.remove("active"));
       document.querySelectorAll(".tab-view").forEach(v => v.classList.remove("active"));
-      const tabBtn = event ? event.currentTarget : null;
-      if (tabBtn) tabBtn.classList.add("active");
+      
+      const tabButtons = document.querySelectorAll(".dock-tab");
+      const idx = tabOrder.indexOf(name);
+      if (tabButtons[idx]) {
+        tabButtons[idx].classList.add("active");
+      }
+      
       const v = document.getElementById("view-" + name);
       if (v) v.classList.add("active");
+
+      if (shouldPushState) {
+        history.pushState({ tab: name, modalOpen: false }, '', '#' + name);
+      }
     }
 
-    function openInsightModal(idx) {
+    function nextTab() {
+      const idx = tabOrder.indexOf(currentTab);
+      if (idx < tabOrder.length - 1) {
+        switchTab(tabOrder[idx + 1], true);
+      }
+    }
+
+    function prevTab() {
+      const idx = tabOrder.indexOf(currentTab);
+      if (idx > 0) {
+        switchTab(tabOrder[idx - 1], true);
+      }
+    }
+
+    function openInsightModal(idx, shouldPushState = true) {
       const n = mockData.news[idx];
+      if (!n) return;
+      currentModalIdx = idx;
+      isModalOpen = true;
+
       document.getElementById("modalTitle").textContent = n.title;
       document.getElementById("modalScoreBadge").textContent = `${n.score} (${n.priority})`;
       document.getElementById("modalFact").textContent = n.grounding.fact;
@@ -1035,10 +1070,24 @@
       `).join("");
 
       document.getElementById("sheetBackdrop").classList.remove("hidden");
+
+      if (shouldPushState) {
+        history.pushState({ tab: currentTab, modalOpen: true, modalIdx: idx }, '', '#' + currentTab + '?modal=' + idx);
+      }
     }
 
-    function closeModal() {
-      document.getElementById("sheetBackdrop").classList.add("hidden");
+    function closeModal(triggerHistoryBack = true) {
+      const backdrop = document.getElementById("sheetBackdrop");
+      if (!backdrop.classList.contains("hidden")) {
+        backdrop.classList.add("hidden");
+        const wasOpen = isModalOpen;
+        isModalOpen = false;
+        currentModalIdx = null;
+
+        if (triggerHistoryBack && wasOpen && window.location.hash.includes('modal=')) {
+          history.back();
+        }
+      }
     }
 
     function toggleModal() {
@@ -1083,7 +1132,107 @@
       }, 300);
     }
 
-    window.onload = renderAll;
+    // --- Browser Navigation: History Popstate (Back / Forward arrows) ---
+    window.addEventListener('popstate', (e) => {
+      if (e.state) {
+        if (e.state.modalOpen && typeof e.state.modalIdx === 'number') {
+          openInsightModal(e.state.modalIdx, false);
+        } else {
+          const backdrop = document.getElementById("sheetBackdrop");
+          if (backdrop && !backdrop.classList.contains("hidden")) {
+            backdrop.classList.add("hidden");
+            isModalOpen = false;
+            currentModalIdx = null;
+          }
+          if (e.state.tab) {
+            switchTab(e.state.tab, false);
+          }
+        }
+      } else {
+        const hash = window.location.hash.replace('#', '').split('?')[0];
+        if (tabOrder.includes(hash)) {
+          switchTab(hash, false);
+        } else {
+          switchTab('main', false);
+        }
+        const backdrop = document.getElementById("sheetBackdrop");
+        if (backdrop) backdrop.classList.add("hidden");
+        isModalOpen = false;
+      }
+    });
+
+    // --- Touchscreen & Mobile Swipe Gestures ---
+    let touchStartX = 0;
+    let touchStartY = 0;
+    let touchEndX = 0;
+    let touchEndY = 0;
+
+    window.addEventListener('touchstart', (e) => {
+      touchStartX = e.changedTouches[0].screenX;
+      touchStartY = e.changedTouches[0].screenY;
+    }, { passive: true });
+
+    window.addEventListener('touchend', (e) => {
+      touchEndX = e.changedTouches[0].screenX;
+      touchEndY = e.changedTouches[0].screenY;
+      const diffX = touchEndX - touchStartX;
+      const diffY = touchEndY - touchStartY;
+      
+      if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 50) {
+        if (diffX > 0) {
+          // Swipe Right -> previous tab (or close modal)
+          if (isModalOpen) closeModal(true);
+          else prevTab();
+        } else {
+          // Swipe Left -> next tab
+          if (!isModalOpen) nextTab();
+        }
+      } else if (isModalOpen && diffY > 60 && Math.abs(diffY) > Math.abs(diffX)) {
+        // Swipe Down on modal -> close
+        closeModal(true);
+      }
+    }, { passive: true });
+
+    // --- Trackpad 2-finger horizontal scroll & swipe gesture ---
+    let lastWheelTime = 0;
+    window.addEventListener('wheel', (e) => {
+      if (Math.abs(e.deltaX) > 40 && Math.abs(e.deltaX) > Math.abs(e.deltaY)) {
+        const now = Date.now();
+        if (now - lastWheelTime > 380) {
+          lastWheelTime = now;
+          if (e.deltaX > 0) {
+            if (!isModalOpen) nextTab();
+          } else {
+            if (isModalOpen) closeModal(true);
+            else prevTab();
+          }
+        }
+      }
+    }, { passive: true });
+
+    // --- Keyboard Arrow Navigation (← / →) and Escape ---
+    window.addEventListener('keydown', (e) => {
+      if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT' || e.target.tagName === 'TEXTAREA')) {
+        return;
+      }
+      if (e.key === 'Escape' && isModalOpen) {
+        closeModal(true);
+      } else if (e.key === 'ArrowRight') {
+        nextTab();
+      } else if (e.key === 'ArrowLeft') {
+        prevTab();
+      }
+    });
+
+    window.onload = () => {
+      renderAll();
+      const hash = window.location.hash.replace('#', '').split('?')[0];
+      if (tabOrder.includes(hash)) {
+        switchTab(hash, false);
+      } else {
+        history.replaceState({ tab: 'main', modalOpen: false }, '', '#main');
+      }
+    };
   </script>
 </body>
 </html>
