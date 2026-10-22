@@ -210,7 +210,40 @@ const app = {
     }
   },
 
-  // EXECUTIVE AI COPILOT HUB CONTROLLERS
+  // CHATGPT-STYLE AI COPILOT CONTROLLERS
+  escapeHtml(str) {
+    if (!str) return "";
+    return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+  },
+
+  resetChatgptThread() {
+    const hist = document.getElementById("chatgptHistoryContainer");
+    if (hist) hist.innerHTML = "";
+    
+    const factEl = document.getElementById("hubFactText");
+    const alfaEl = document.getElementById("hubAlfaText");
+    const aiEl = document.getElementById("hubAiText");
+    const flowEl = document.getElementById("hubChainFlow");
+    const evidenceEl = document.getElementById("hubEvidencePills");
+    const input = document.getElementById("aiHubInput");
+
+    if (input) input.value = "";
+    if (factEl) factEl.textContent = "Банк России сохранил ставку на уровне 14,0% и ужесточил сигнал по ДКП. Официальный пресс-релиз регулятора от 11.09.2026.";
+    if (alfaEl) alfaEl.textContent = "«Ключевая ставка без изменения на 14,0%, риторика стала жестче». ЦМИ Альфа-Банка прогнозирует сохранение ставки до конца 1П27. Рекомендован переход на инструменты хеджирования.";
+    if (aiEl) aiEl.textContent = "Для компании ПАО «АгроСоюз» (выручка 48.5 млрд ₽, заемный портфель активен) сохранение ставки блокирует дешевое финансирование. Рекомендуется процентный своп (IRS) и размещение остатков в овернайт под 13.9%.";
+    if (flowEl) flowEl.innerHTML = `<span class="flow-step">Ставка 14%</span> ➔ <span class="flow-step">Дорогой долг (CL_LOA)</span> ➔ <span class="flow-step">Заморозка CAPEX</span> ➔ <span class="flow-step warning">Сжатие EBITDA ↓</span> ➔ <span class="flow-step success">Овернайт 13.9% ↑</span>`;
+    if (evidenceEl) {
+      evidenceEl.innerHTML = `
+        <a class="evidence-pill" href="javascript:void(0)" onclick="app.openDetailSheet('NEWS-2026-09-001')">news:ЦБ-РФ-S3</a>
+        <a class="evidence-pill" href="javascript:void(0)" onclick="app.switchTab('research')">alfa:ЦМИ-Макро-p4</a>
+        <a class="evidence-pill" href="javascript:void(0)" onclick="app.toggleClientModal()">company:CL_PRODUCT_LOA_MARK</a>
+        <a class="evidence-pill" href="javascript:void(0)" onclick="app.switchTab('payments')">counterparty:PAY_ЮгАгро</a>
+      `;
+    }
+    const thread = document.getElementById("chatgptThread");
+    if (thread) thread.scrollTop = 0;
+  },
+
   async askQuickCopilot(promptText) {
     const input = document.getElementById("aiHubInput");
     if (input) input.value = promptText;
@@ -222,13 +255,28 @@ const app = {
     const q = input ? input.value.trim() : "";
     if (!q) return;
 
+    // Append user message bubble to ChatGPT thread
+    const hist = document.getElementById("chatgptHistoryContainer");
+    if (hist) {
+      const uMsg = document.createElement("div");
+      uMsg.className = "chatgpt-msg user";
+      uMsg.innerHTML = `<div class="chatgpt-user-bubble">${this.escapeHtml(q)}</div>`;
+      hist.appendChild(uMsg);
+    }
+    if (input) input.value = "";
+
     const factEl = document.getElementById("hubFactText");
     const alfaEl = document.getElementById("hubAlfaText");
     const aiEl = document.getElementById("hubAiText");
     const flowEl = document.getElementById("hubChainFlow");
     const evidenceEl = document.getElementById("hubEvidencePills");
+    const respMsg = document.getElementById("chatgptActiveResponseMsg");
 
+    if (respMsg) respMsg.style.display = "flex";
     if (aiEl) aiEl.innerHTML = "<em>Генерация аналитического вывода и расчет каузальной цепочки...</em>";
+
+    const thread = document.getElementById("chatgptThread");
+    if (thread) thread.scrollTop = thread.scrollHeight;
 
     try {
       const res = await fetch("/api/assistant/ask", {
@@ -260,6 +308,8 @@ const app = {
           <a class="evidence-pill" href="javascript:void(0)" onclick="app.handleEvidenceClick('${ev.id}')">${ev.id}</a>
         `).join("");
       }
+
+      if (thread) thread.scrollTop = thread.scrollHeight;
     } catch (err) {
       if (aiEl) aiEl.textContent = `Ошибка анализа: ${err.message}`;
     }
@@ -278,12 +328,26 @@ const app = {
   },
 
   async loadDailyBriefing() {
+    // Append user starter request bubble
+    const hist = document.getElementById("chatgptHistoryContainer");
+    if (hist) {
+      const uMsg = document.createElement("div");
+      uMsg.className = "chatgpt-msg user";
+      uMsg.innerHTML = `<div class="chatgpt-user-bubble">📊 Сформируй суточный дайджест рисков и возможностей (Daily Briefing)</div>`;
+      hist.appendChild(uMsg);
+    }
+
     const aiEl = document.getElementById("hubAiText");
     const factEl = document.getElementById("hubFactText");
     const alfaEl = document.getElementById("hubAlfaText");
     const flowEl = document.getElementById("hubChainFlow");
+    const respMsg = document.getElementById("chatgptActiveResponseMsg");
 
+    if (respMsg) respMsg.style.display = "flex";
     if (aiEl) aiEl.innerHTML = "<em>Загрузка суточного дайджеста рисков и возможностей...</em>";
+
+    const thread = document.getElementById("chatgptThread");
+    if (thread) thread.scrollTop = thread.scrollHeight;
 
     try {
       const res = await fetch(`/api/briefing?uid=${this.currentClientUid}&role=${encodeURIComponent(this.currentRole)}`);
@@ -303,18 +367,34 @@ const app = {
 
       if (aiEl) aiEl.innerHTML = briefingHtml;
       if (flowEl) flowEl.innerHTML = `<span class="flow-step warning">3 Риска P&L</span> ➔ <span class="flow-step success">2 Окна возможностей</span> ➔ <span class="flow-step">1 Решение ALCO</span>`;
+
+      if (thread) thread.scrollTop = thread.scrollHeight;
     } catch (err) {
       if (aiEl) aiEl.textContent = `Ошибка дайджеста: ${err.message}`;
     }
   },
 
   async loadExecutiveDelta() {
+    // Append user starter request bubble
+    const hist = document.getElementById("chatgptHistoryContainer");
+    if (hist) {
+      const uMsg = document.createElement("div");
+      uMsg.className = "chatgpt-msg user";
+      uMsg.innerHTML = `<div class="chatgpt-user-bubble">🔄 Что изменилось с моего прошлого входа в систему? (Executive Delta)</div>`;
+      hist.appendChild(uMsg);
+    }
+
     const aiEl = document.getElementById("hubAiText");
     const factEl = document.getElementById("hubFactText");
     const alfaEl = document.getElementById("hubAlfaText");
     const flowEl = document.getElementById("hubChainFlow");
+    const respMsg = document.getElementById("chatgptActiveResponseMsg");
 
+    if (respMsg) respMsg.style.display = "flex";
     if (aiEl) aiEl.innerHTML = "<em>Сравнение с предыдущей версией портфеля...</em>";
+
+    const thread = document.getElementById("chatgptThread");
+    if (thread) thread.scrollTop = thread.scrollHeight;
 
     try {
       const res = await fetch(`/api/delta?uid=${this.currentClientUid}`);
@@ -330,6 +410,8 @@ const app = {
 
       if (aiEl) aiEl.innerHTML = deltaHtml;
       if (flowEl) flowEl.innerHTML = `<span class="flow-step">Вход вчера 18:30</span> ➔ <span class="flow-step warning">+3 Сдвига рынка</span> ➔ <span class="flow-step success">Лимиты обновлены</span>`;
+
+      if (thread) thread.scrollTop = thread.scrollHeight;
     } catch (err) {
       if (aiEl) aiEl.textContent = `Ошибка дельты: ${err.message}`;
     }

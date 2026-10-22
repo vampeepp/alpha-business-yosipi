@@ -315,276 +315,284 @@
     .alfa-native-select { background-color: var(--alfa-card); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 10px 12px; font-size: 12.5px; color: var(--text-white); outline: none; width: 100%; }
     .btn-save-modal { background-color: var(--alfa-red); color: #FFF; border: none; border-radius: var(--radius-pill); padding: 9px 20px; font-size: 13px; font-weight: 700; cursor: pointer; }
 
-    /* EXECUTIVE AI COPILOT HUB STYLES (PROMINENT & CENTER STAGE) */
-    .executive-ai-hub-card {
-      background: linear-gradient(135deg, rgba(239, 49, 36, 0.12) 0%, rgba(18, 20, 26, 0.98) 100%);
-      border: 1px solid rgba(239, 49, 36, 0.42);
+    /* ============================================================ */
+    /* CHATGPT-STYLE AI ASSISTANT WINDOW (ALFA BANK DARK PALETTE)   */
+    /* ============================================================ */
+    .chatgpt-box {
+      background-color: var(--alfa-surface);
+      border: 1px solid var(--border-card);
       border-radius: var(--radius-xl);
-      padding: 18px 20px;
-      box-shadow: 0 10px 32px rgba(239, 49, 36, 0.16), 0 2px 10px rgba(0, 0, 0, 0.4);
+      overflow: hidden;
       display: flex;
       flex-direction: column;
-      gap: 12px;
-      transition: all 0.25s ease;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+      transition: border-color 0.2s ease;
     }
-    .executive-ai-hub-card:hover {
-      border-color: rgba(239, 49, 36, 0.65);
-      box-shadow: 0 12px 36px rgba(239, 49, 36, 0.22);
+    .chatgpt-box:focus-within {
+      border-color: rgba(255, 255, 255, 0.16);
     }
-    .ai-hub-top {
+    .chatgpt-header {
+      padding: 12px 18px;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      flex-wrap: wrap;
-      gap: 10px;
+      border-bottom: 1px solid var(--border-subtle);
+      background-color: rgba(255, 255, 255, 0.015);
     }
-    .ai-hub-title-box {
+    .chatgpt-header-left {
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 10px;
     }
-    .ai-spark-icon {
-      width: 38px;
-      height: 38px;
-      border-radius: 10px;
-      background: linear-gradient(135deg, #EF3124 0%, #B91C1C 100%);
-      color: #FFF;
+    .chatgpt-avatar-badge {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background-color: var(--alfa-card);
+      border: 1px solid rgba(239, 49, 36, 0.35);
+      color: var(--alfa-red);
+      font-weight: 800;
+      font-size: 13px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 18px;
-      box-shadow: 0 0 14px rgba(239, 49, 36, 0.5);
-      animation: pulse-spark 3s infinite alternate;
     }
-    @keyframes pulse-spark {
-      0% { transform: scale(1); filter: drop-shadow(0 0 4px rgba(239, 49, 36, 0.4)); }
-      100% { transform: scale(1.05); filter: drop-shadow(0 0 12px rgba(239, 49, 36, 0.8)); }
+    .chatgpt-header-info {
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
     }
-    .ai-hub-heading {
-      font-size: 15px;
-      font-weight: 800;
-      color: #FFF;
-      letter-spacing: 0.2px;
-    }
-    .ai-hub-subheading {
-      font-size: 11px;
-      color: var(--text-gray);
-      margin-top: 1px;
-    }
-    .ai-hub-badges {
+    .chatgpt-header-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-white);
       display: flex;
       align-items: center;
       gap: 6px;
-      flex-wrap: wrap;
     }
-    .ai-badge-live {
-      background: rgba(16, 185, 129, 0.15);
-      color: #34D399;
-      border: 1px solid rgba(16, 185, 129, 0.3);
-      font-size: 10px;
-      font-weight: 700;
-      padding: 3px 8px;
-      border-radius: var(--radius-pill);
-    }
-    .ai-badge-confidence {
-      background: rgba(56, 189, 248, 0.15);
-      color: #7DD3FC;
-      border: 1px solid rgba(56, 189, 248, 0.3);
-      font-size: 10px;
-      font-weight: 700;
-      padding: 3px 8px;
-      border-radius: var(--radius-pill);
-    }
-    .ai-badge-role {
-      background: rgba(239, 49, 36, 0.15);
-      color: #FCA5A5;
-      border: 1px solid rgba(239, 49, 36, 0.3);
-      font-size: 10px;
-      font-weight: 700;
-      padding: 3px 8px;
-      border-radius: var(--radius-pill);
-    }
-    .ai-hub-pills {
+    .chatgpt-header-model {
+      font-size: 10.5px;
+      color: var(--text-dim);
       display: flex;
-      gap: 8px;
-      overflow-x: auto;
-      padding: 2px 0 4px;
+      align-items: center;
+      gap: 5px;
     }
-    .ai-pill-btn {
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid rgba(255, 255, 255, 0.1);
+    .chatgpt-status-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background-color: #10B981;
+      display: inline-block;
+    }
+    .chatgpt-header-right {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .chatgpt-role-badge {
+      background-color: var(--alfa-card);
+      border: 1px solid var(--border-subtle);
       color: var(--text-gray);
-      border-radius: var(--radius-pill);
-      padding: 6px 12px;
-      font-size: 11px;
+      font-size: 10.5px;
       font-weight: 600;
-      cursor: pointer;
-      white-space: nowrap;
-      transition: all 0.2s ease;
-    }
-    .ai-pill-btn:hover {
-      background: rgba(239, 49, 36, 0.2);
-      color: #FFF;
-      border-color: #EF3124;
-    }
-    .ai-hub-ask-bar {
-      display: flex;
-      gap: 10px;
-      align-items: center;
-      background: rgba(0, 0, 0, 0.45);
-      border: 1px solid rgba(255, 255, 255, 0.12);
+      padding: 3px 9px;
       border-radius: var(--radius-pill);
-      padding: 4px 6px 4px 14px;
     }
-    .ai-input-wrap {
+    .chatgpt-icon-btn {
+      background: transparent;
+      border: 1px solid var(--border-subtle);
+      color: var(--text-dim);
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
       display: flex;
       align-items: center;
-      gap: 8px;
-      flex-grow: 1;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 13px;
+      transition: all 0.15s ease;
     }
-    .ai-input-icon {
-      font-size: 14px;
+    .chatgpt-icon-btn:hover {
+      background-color: var(--alfa-card);
+      color: var(--text-white);
+      border-color: rgba(255, 255, 255, 0.2);
     }
-    .ai-hub-ask-bar input {
-      background: transparent;
-      border: none;
-      outline: none;
-      color: #FFF;
-      font-size: 12.5px;
+    .chatgpt-thread {
+      padding: 16px 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      max-height: 480px;
+      overflow-y: auto;
+      scroll-behavior: smooth;
+    }
+    .chatgpt-msg {
+      display: flex;
+      gap: 12px;
       width: 100%;
     }
-    .ai-submit-btn {
-      background: linear-gradient(135deg, #EF3124 0%, #C91E12 100%);
-      color: #FFF;
-      border: none;
-      border-radius: var(--radius-pill);
-      padding: 8px 18px;
-      font-size: 12px;
-      font-weight: 700;
-      cursor: pointer;
-      box-shadow: 0 2px 10px rgba(239, 49, 36, 0.4);
-      white-space: nowrap;
-      transition: transform 0.15s ease;
+    .chatgpt-msg.user {
+      justify-content: flex-end;
     }
-    .ai-submit-btn:hover {
-      transform: scale(1.03);
-    }
-    .ai-hub-response-panel {
-      background: rgba(0, 0, 0, 0.35);
+    .chatgpt-user-bubble {
+      background-color: #2A2C34;
       border: 1px solid rgba(255, 255, 255, 0.08);
-      border-radius: var(--radius-lg);
-      padding: 14px;
+      color: var(--text-white);
+      border-radius: 18px 18px 4px 18px;
+      padding: 10px 16px;
+      font-size: 12.5px;
+      line-height: 1.45;
+      max-width: 80%;
+      word-break: break-word;
+    }
+    .chatgpt-msg-avatar {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background-color: var(--alfa-red);
+      color: #FFF;
+      font-size: 12px;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+    .chatgpt-msg-content {
+      flex-grow: 1;
       display: flex;
       flex-direction: column;
       gap: 12px;
+      font-size: 12.5px;
+      line-height: 1.5;
+      color: var(--text-white);
+      max-width: calc(100% - 40px);
     }
-    .ai-res-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-size: 11px;
-    }
-    .ai-res-tag {
-      color: #EF3124;
-      font-weight: 800;
-      letter-spacing: 0.5px;
-    }
-    .ai-res-actions {
-      display: flex;
-      gap: 6px;
-    }
-    .ai-action-btn {
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid rgba(255, 255, 255, 0.1);
+    .chatgpt-msg-text {
       color: var(--text-gray);
-      border-radius: var(--radius-pill);
-      padding: 4px 10px;
-      font-size: 10.5px;
-      cursor: pointer;
-      transition: all 0.15s ease;
+      font-size: 12.5px;
+      line-height: 1.5;
     }
-    .ai-action-btn:hover {
-      background: var(--alfa-card);
-      color: #FFF;
-    }
-    .three-views-grid {
+    .chatgpt-starters-grid {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 10px;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+      margin-top: 4px;
     }
-    @media (max-width: 900px) {
-      .three-views-grid {
+    @media (max-width: 640px) {
+      .chatgpt-starters-grid {
         grid-template-columns: 1fr;
       }
     }
-    .view-pane {
-      background: rgba(255, 255, 255, 0.02);
+    .chatgpt-starter-card {
+      background-color: var(--alfa-card);
+      border: 1px solid var(--border-subtle);
       border-radius: var(--radius-md);
-      padding: 10px 12px;
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      font-size: 11.5px;
-      line-height: 1.45;
-    }
-    .fact-pane {
-      border-left: 3px solid #38BDF8;
-    }
-    .alfa-pane {
-      border-left: 3px solid #EF3124;
-      background: rgba(239, 49, 36, 0.04);
-    }
-    .ai-pane {
-      border-left: 3px solid #A855F7;
-      background: rgba(168, 85, 247, 0.04);
-    }
-    .pane-title {
-      font-size: 11.5px;
-      font-weight: 700;
-      color: #FFF;
+      padding: 9px 12px;
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 8px;
+      color: var(--text-white);
+      font-size: 11.5px;
+      font-weight: 600;
+      cursor: pointer;
+      text-align: left;
+      transition: all 0.15s ease;
     }
-    .pane-num {
-      font-weight: 800;
-      font-size: 10px;
-      opacity: 0.8;
+    .chatgpt-starter-card:hover {
+      background-color: #272932;
+      border-color: rgba(255, 255, 255, 0.18);
+      transform: translateY(-1px);
     }
-    .hub-chain-row, .hub-evidence-row {
+    .starter-icon {
+      font-size: 14px;
+      flex-shrink: 0;
+    }
+    .starter-text {
+      flex-grow: 1;
+      color: var(--text-gray);
+      transition: color 0.15s ease;
+    }
+    .chatgpt-starter-card:hover .starter-text {
+      color: var(--text-white);
+    }
+
+    /* 3-Views Breakdown (Clean ChatGPT Quote / Callout style) */
+    .chatgpt-view-callouts {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .chatgpt-callout {
+      background-color: rgba(255, 255, 255, 0.02);
+      border-radius: var(--radius-sm);
+      padding: 8px 12px;
+      font-size: 12px;
+      line-height: 1.45;
+    }
+    .chatgpt-callout.fact-callout {
+      border-left: 3px solid #38BDF8;
+    }
+    .chatgpt-callout.alfa-callout {
+      border-left: 3px solid #EF3124;
+      background-color: rgba(239, 49, 36, 0.03);
+    }
+    .chatgpt-callout.ai-callout {
+      border-left: 3px solid #A855F7;
+      background-color: rgba(168, 85, 247, 0.03);
+    }
+    .callout-header {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-white);
+      margin-bottom: 3px;
+    }
+    .callout-text {
+      color: var(--text-gray);
+      font-size: 12px;
+    }
+
+    /* Causal Chain and Evidence Rows in ChatGPT style */
+    .chatgpt-chain-row, .chatgpt-evidence-row {
       display: flex;
       align-items: center;
       flex-wrap: wrap;
       gap: 8px;
       font-size: 11px;
+      padding: 4px 0;
     }
-    .chain-label, .evidence-label {
+    .chain-prefix, .evidence-prefix {
       color: var(--text-dim);
       font-weight: 600;
+      font-size: 10.5px;
     }
     .chain-flow-pills {
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 5px;
       flex-wrap: wrap;
       font-size: 10.5px;
       color: var(--text-gray);
     }
     .flow-step {
-      background: rgba(255, 255, 255, 0.04);
+      background-color: var(--alfa-card);
+      border: 1px solid var(--border-subtle);
       padding: 2px 7px;
       border-radius: 4px;
       color: var(--text-white);
     }
     .flow-step.warning {
-      background: rgba(239, 49, 36, 0.15);
+      background-color: rgba(239, 49, 36, 0.12);
+      border-color: rgba(239, 49, 36, 0.3);
       color: #FCA5A5;
-      font-weight: 700;
+      font-weight: 600;
     }
     .flow-step.success {
-      background: rgba(16, 185, 129, 0.15);
+      background-color: rgba(16, 185, 129, 0.12);
+      border-color: rgba(16, 185, 129, 0.3);
       color: #6EE7B7;
-      font-weight: 700;
+      font-weight: 600;
     }
     .evidence-pills {
       display: flex;
@@ -592,17 +600,120 @@
       flex-wrap: wrap;
     }
     .evidence-pill {
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid rgba(255, 255, 255, 0.1);
+      background-color: var(--alfa-card);
+      border: 1px solid var(--border-subtle);
       color: #38BDF8;
       font-size: 10px;
       font-weight: 600;
-      padding: 2px 8px;
+      padding: 2px 7px;
       border-radius: var(--radius-pill);
       text-decoration: none;
+      transition: all 0.15s ease;
     }
     .evidence-pill:hover {
-      background: rgba(56, 189, 248, 0.2);
+      background-color: rgba(56, 189, 248, 0.15);
+      border-color: rgba(56, 189, 248, 0.4);
+    }
+
+    /* Actions toolbar under response */
+    .chatgpt-msg-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding-top: 4px;
+    }
+    .chatgpt-action-pill {
+      background-color: transparent;
+      border: 1px solid var(--border-subtle);
+      color: var(--text-gray);
+      border-radius: var(--radius-pill);
+      padding: 4px 10px;
+      font-size: 10.5px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .chatgpt-action-pill:hover {
+      background-color: var(--alfa-card);
+      color: var(--text-white);
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+    .chatgpt-action-icon {
+      background: transparent;
+      border: 1px solid transparent;
+      color: var(--text-dim);
+      border-radius: 4px;
+      padding: 3px 6px;
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .chatgpt-action-icon:hover {
+      color: var(--text-white);
+      background-color: var(--alfa-card);
+    }
+
+    /* ChatGPT Bottom Input Area */
+    .chatgpt-input-area {
+      padding: 10px 18px 14px;
+      border-top: 1px solid var(--border-subtle);
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      background-color: rgba(255, 255, 255, 0.01);
+    }
+    .chatgpt-input-pill {
+      background-color: var(--alfa-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-pill);
+      padding: 5px 6px 5px 14px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      transition: all 0.2s ease;
+    }
+    .chatgpt-input-pill:focus-within {
+      border-color: rgba(255, 255, 255, 0.25);
+      background-color: #25272F;
+    }
+    .chatgpt-input-field {
+      flex-grow: 1;
+      background: transparent;
+      border: none;
+      outline: none;
+      color: var(--text-white);
+      font-size: 12.5px;
+      font-family: inherit;
+    }
+    .chatgpt-input-field::placeholder {
+      color: var(--text-dim);
+      font-size: 12px;
+    }
+    .chatgpt-send-btn {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background-color: var(--alfa-red);
+      color: #FFFFFF;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      font-weight: 700;
+      transition: transform 0.15s ease, background-color 0.15s ease;
+      flex-shrink: 0;
+    }
+    .chatgpt-send-btn:hover {
+      background-color: #D3271B;
+      transform: scale(1.06);
+    }
+    .chatgpt-disclaimer {
+      font-size: 9.5px;
+      color: var(--text-dim);
+      text-align: center;
+      line-height: 1.3;
     }
   </style>
 </head>
@@ -776,105 +887,130 @@
         </div>
 
         <!-- ============================================================ -->
-        <!-- DEDICATED EXECUTIVE AI COPILOT HUB (CENTER STAGE & PROMINENT) -->
+        <!-- CHATGPT-STYLE AI ASSISTANT WINDOW (ALFA BANK DARK PALETTE)   -->
         <!-- ============================================================ -->
-        <div class="executive-ai-hub-card" id="executiveAiHubCard">
-          <div class="ai-hub-top">
-            <div class="ai-hub-title-box">
-              <div class="ai-spark-icon">✨</div>
-              <div>
-                <h3 class="ai-hub-heading">Альфа-Интеллект • C-Level Executive Copilot</h3>
-                <p class="ai-hub-subheading">Автономный аналитический агент на базе ЦМИ Альфа-Банка и графа B2B-контрагентов</p>
+        <div class="chatgpt-box" id="executiveAiHubCard">
+          <!-- Minimalist Header -->
+          <div class="chatgpt-header">
+            <div class="chatgpt-header-left">
+              <div class="chatgpt-avatar-badge">А</div>
+              <div class="chatgpt-header-info">
+                <div class="chatgpt-header-title">Альфа-Ассистент</div>
+                <div class="chatgpt-header-model">
+                  <span class="chatgpt-status-dot"></span> qwen3.8-27b • ЦМИ Альфа-Банка
+                </div>
               </div>
             </div>
-            <div class="ai-hub-badges">
-              <span class="ai-badge-live">● qwen/qwen3.8-27b | В сети</span>
-              <span class="ai-badge-confidence">Точность: 98.4%</span>
-              <span class="ai-badge-role" id="hubRoleBadge">Роль: Генеральный директор</span>
+            <div class="chatgpt-header-right">
+              <span class="chatgpt-role-badge" id="hubRoleBadge">Роль: Генеральный директор</span>
+              <button class="chatgpt-icon-btn" onclick="app.resetChatgptThread()" title="Очистить диалог">↺</button>
             </div>
           </div>
 
-          <!-- Quick interactive suggestion pills -->
-          <div class="ai-hub-pills">
-            <button class="ai-pill-btn" onclick="app.askQuickCopilot('Как ставка 14% повлияет на наш кредитный портфель и P&L?')">
-              ⚡️ Ставка 14%: влияние на долг и P&L
-            </button>
-            <button class="ai-pill-btn" onclick="app.askQuickCopilot('Проанализируй финансовую устойчивость поставщика ООО Юг-Агро и цепочки поставок')">
-              ⛓️ Риски поставщика ООО «Юг-Агро»
-            </button>
-            <button class="ai-pill-btn" onclick="app.askQuickCopilot('Какие риски несет повышение пошлины на экспорт пшеницы в Турцию?')">
-              🌾 Пошлины на зерно (ВЭД: Турция)
-            </button>
-            <button class="ai-pill-btn" onclick="app.loadDailyBriefing()">
-              📊 Суточный дайджест (Daily Briefing)
-            </button>
-            <button class="ai-pill-btn" onclick="app.loadExecutiveDelta()">
-              🔄 Что изменилось с прошлого раза?
-            </button>
-            <button class="ai-pill-btn" onclick="app.openDetailSheet('NEWS-2026-09-001')">
-              🛡️ 8-шаговая трассировка (Agent Trace)
-            </button>
+          <!-- Messages Thread (ChatGPT Conversation Feed) -->
+          <div class="chatgpt-thread" id="chatgptThread">
+            <!-- Initial AI Message with Starters -->
+            <div class="chatgpt-msg ai" id="chatgptWelcomeMsg">
+              <div class="chatgpt-msg-avatar">А</div>
+              <div class="chatgpt-msg-content">
+                <div class="chatgpt-msg-text">
+                  Здравствуйте! Я корпоративный AI-ассистент Альфа-Банка. Анализирую влияние макроэкономических факторов, ставки ЦБ и рисков контрагентов на бизнес ПАО «АгроСоюз».
+                </div>
+                
+                <!-- Starter Prompts (Clean ChatGPT chips) -->
+                <div class="chatgpt-starters-grid">
+                  <button class="chatgpt-starter-card" onclick="app.askQuickCopilot('Как ставка 14% повлияет на наш кредитный портфель и P&L?')">
+                    <span class="starter-icon">⚡️</span>
+                    <span class="starter-text">Ставка 14%: влияние на долг и P&L</span>
+                  </button>
+                  <button class="chatgpt-starter-card" onclick="app.askQuickCopilot('Проанализируй финансовую устойчивость поставщика ООО Юг-Агро и цепочки поставок')">
+                    <span class="starter-icon">⛓️</span>
+                    <span class="starter-text">Риски поставщика ООО «Юг-Агро»</span>
+                  </button>
+                  <button class="chatgpt-starter-card" onclick="app.loadDailyBriefing()">
+                    <span class="starter-icon">📊</span>
+                    <span class="starter-text">Суточный дайджест (Daily Briefing)</span>
+                  </button>
+                  <button class="chatgpt-starter-card" onclick="app.loadExecutiveDelta()">
+                    <span class="starter-icon">🔄</span>
+                    <span class="starter-text">Что изменилось с прошлого раза?</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Dynamic Conversation History Container -->
+            <div id="chatgptHistoryContainer"></div>
+
+            <!-- Dynamic Active Response Card (Fact / Alfa View / AI View) -->
+            <div class="chatgpt-msg ai" id="chatgptActiveResponseMsg">
+              <div class="chatgpt-msg-avatar">А</div>
+              <div class="chatgpt-msg-content">
+                <!-- 3-Views Breakdown (Clean ChatGPT Quote / Callout style) -->
+                <div class="chatgpt-view-callouts">
+                  <div class="chatgpt-callout fact-callout">
+                    <div class="callout-header">📘 Что известно фактически (FACT)</div>
+                    <div class="callout-text" id="hubFactText">Банк России сохранил ставку на уровне 14,0% и ужесточил сигнал по ДКП. Официальный пресс-релиз регулятора от 11.09.2026.</div>
+                  </div>
+                  <div class="chatgpt-callout alfa-callout">
+                    <div class="callout-header">🔴 Экспертиза ЦМИ Альфа-Банка (ALFA VIEW)</div>
+                    <div class="callout-text" id="hubAlfaText">«Ключевая ставка без изменения на 14,0%, риторика стала жестче». ЦМИ Альфа-Банка прогнозирует сохранение ставки до конца 1П27. Рекомендован переход на инструменты хеджирования.</div>
+                  </div>
+                  <div class="chatgpt-callout ai-callout">
+                    <div class="callout-header">🟣 Персонализированный вывод (AI VIEW)</div>
+                    <div class="callout-text" id="hubAiText">Для компании ПАО «АгроСоюз» (выручка 48.5 млрд ₽, заемный портфель активен) сохранение ставки блокирует дешевое финансирование. Рекомендуется процентный своп (IRS) и размещение остатков в овернайт под 13.9%.</div>
+                  </div>
+                </div>
+
+                <!-- Impact Chain Summary (Criteria 7) -->
+                <div class="chatgpt-chain-row">
+                  <span class="chain-prefix">⛓️ Каузальная цепочка:</span>
+                  <div class="chain-flow-pills" id="hubChainFlow">
+                    <span class="flow-step">Ставка 14%</span> ➔
+                    <span class="flow-step">Дорогой долг (CL_LOA)</span> ➔
+                    <span class="flow-step">Заморозка CAPEX</span> ➔
+                    <span class="flow-step warning">Сжатие EBITDA ↓</span> ➔
+                    <span class="flow-step success">Овернайт 13.9% ↑</span>
+                  </div>
+                </div>
+
+                <!-- Evidence / Source Tracing (Criteria 10) -->
+                <div class="chatgpt-evidence-row">
+                  <span class="evidence-prefix">📌 Основания вывода:</span>
+                  <div class="evidence-pills" id="hubEvidencePills">
+                    <a class="evidence-pill" href="javascript:void(0)" onclick="app.openDetailSheet('NEWS-2026-09-001')">news:ЦБ-РФ-S3</a>
+                    <a class="evidence-pill" href="javascript:void(0)" onclick="app.switchTab('research')">alfa:ЦМИ-Макро-p4</a>
+                    <a class="evidence-pill" href="javascript:void(0)" onclick="app.toggleClientModal()">company:CL_PRODUCT_LOA_MARK</a>
+                    <a class="evidence-pill" href="javascript:void(0)" onclick="app.switchTab('payments')">counterparty:PAY_ЮгАгро</a>
+                  </div>
+                </div>
+
+                <!-- Action Toolbar (Clipboard, Feedback) -->
+                <div class="chatgpt-msg-actions">
+                  <button class="chatgpt-action-pill" onclick="app.copyToAlco()">📋 В протокол ALCO</button>
+                  <button class="chatgpt-action-icon" onclick="app.sendFeedback('thumbs_up', 'HUB_LAST')" title="Полезно">👍</button>
+                  <button class="chatgpt-action-icon" onclick="app.sendFeedback('thumbs_down', 'HUB_LAST')" title="Нерелевантно">👎</button>
+                </div>
+              </div>
+            </div>
           </div>
 
-          <!-- Interactive Ask Bar -->
-          <div class="ai-hub-ask-bar">
-            <div class="ai-input-wrap">
-              <span class="ai-input-icon">💬</span>
-              <input type="text" id="aiHubInput" placeholder="Задайте вопрос AI: влияние ставки, кассовые разрывы, риски дебиторки, лизинг..." onkeydown="if(event.key==='Enter') app.handleHubSubmit()" />
+          <!-- Bottom Prompt Bar (Iconic ChatGPT Pill) -->
+          <div class="chatgpt-input-area">
+            <div class="chatgpt-input-pill">
+              <input
+                type="text"
+                id="aiHubInput"
+                class="chatgpt-input-field"
+                placeholder="Спросите ассистента: влияние ставки, кассовые разрывы, лизинг, риски дебиторки..."
+                onkeydown="if(event.key==='Enter') app.handleHubSubmit()"
+              />
+              <button class="chatgpt-send-btn" id="aiHubSendBtn" onclick="app.handleHubSubmit()" title="Отправить">
+                ↑
+              </button>
             </div>
-            <button class="ai-submit-btn" onclick="app.handleHubSubmit()">
-              Спросить AI ➔
-            </button>
-          </div>
-
-          <!-- Live Dynamic Response Panel inside the card -->
-          <div class="ai-hub-response-panel" id="aiHubResponsePanel">
-            <div class="ai-res-header">
-              <span class="ai-res-tag">🎯 ОПЕРАТИВНЫЙ АНАЛИТИЧЕСКИЙ ВЫВОД</span>
-              <div class="ai-res-actions">
-                <button class="ai-action-btn" onclick="app.sendFeedback('thumbs_up', 'HUB_LAST')">👍 Полезно</button>
-                <button class="ai-action-btn" onclick="app.sendFeedback('thumbs_down', 'HUB_LAST')">👎 Нерелевантно</button>
-                <button class="ai-action-btn" onclick="app.copyToAlco()">📋 В протокол ALCO</button>
-              </div>
-            </div>
-
-            <!-- Distinct 3-View Architecture (Criteria 9) -->
-            <div class="three-views-grid">
-              <div class="view-pane fact-pane">
-                <div class="pane-title"><span class="pane-num">1</span> 📘 Что известно фактически (FACT)</div>
-                <p id="hubFactText">Банк России сохранил ставку на уровне 14,0% и ужесточил сигнал по ДКП. Официальный пресс-релиз регулятора от 11.09.2026.</p>
-              </div>
-              <div class="view-pane alfa-pane">
-                <div class="pane-title"><span class="pane-num">2</span> 🔴 Экспертиза ЦМИ Альфа-Банка (ALFA VIEW)</div>
-                <p id="hubAlfaText">«Ключевая ставка без изменения на 14,0%, риторика стала жестче». ЦМИ Альфа-Банка прогнозирует сохранение ставки до конца 1П27. Рекомендован переход на инструменты хеджирования.</p>
-              </div>
-              <div class="view-pane ai-pane">
-                <div class="pane-title"><span class="pane-num">3</span> 🟣 Персонализированный вывод (AI VIEW)</div>
-                <p id="hubAiText">Для компании ПАО «АгроСоюз» (выручка 48.5 млрд ₽, заемный портфель активен) сохранение ставки блокирует дешевое финансирование. Рекомендуется процентный своп (IRS) и размещение остатков в овернайт под 13.9%.</p>
-              </div>
-            </div>
-
-            <!-- Impact Chain Summary (Criteria 7) -->
-            <div class="hub-chain-row">
-              <span class="chain-label">⛓️ Каузальная цепочка:</span>
-              <div class="chain-flow-pills" id="hubChainFlow">
-                <span class="flow-step">Ставка 14%</span> ➔
-                <span class="flow-step">Дорогой долг (CL_LOA)</span> ➔
-                <span class="flow-step">Заморозка CAPEX</span> ➔
-                <span class="flow-step warning">Сжатие EBITDA ↓</span> ➔
-                <span class="flow-step success">Овернайт 13.9% ↑</span>
-              </div>
-            </div>
-
-            <!-- Evidence / Source Tracing (Criteria 10) -->
-            <div class="hub-evidence-row">
-              <span class="evidence-label">📌 Основания вывода (Data Lineage):</span>
-              <div class="evidence-pills" id="hubEvidencePills">
-                <a class="evidence-pill" href="javascript:void(0)" onclick="app.openDetailSheet('NEWS-2026-09-001')">news:ЦБ-РФ-S3</a>
-                <a class="evidence-pill" href="javascript:void(0)" onclick="app.switchTab('research')">alfa:ЦМИ-Макро-p4</a>
-                <a class="evidence-pill" href="javascript:void(0)" onclick="app.toggleClientModal()">company:CL_PRODUCT_LOA_MARK</a>
-                <a class="evidence-pill" href="javascript:void(0)" onclick="app.switchTab('payments')">counterparty:PAY_ЮгАгро</a>
-              </div>
+            <div class="chatgpt-disclaimer">
+              Альфа-Ассистент qwen3.8-27b опирается на данные ЦБ РФ, аналитику ЦМИ Альфа-Банка и граф контрагентов
             </div>
           </div>
         </div>
