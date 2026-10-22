@@ -22,16 +22,15 @@ EXTERNAL_NEWS_JSON = DATA_DIR / "external_news_stream.json"
 SERVER_HOST = os.getenv("HOST", "0.0.0.0")
 SERVER_PORT = int(os.getenv("PORT", "8080"))
 
-# LLM Configuration (Slide 18 approved models)
-# 1. Gemma 4 26B A4B
-# 2. GLM-5.3-Flash
-# 3. Qwen3.6 35B A3B
-# 4. DeepSeek-V4.1-Flash
-# 5. Qwen3-VL-30B-A3B-Instruct
-# 6. Kimi-K2.6
-DEFAULT_LLM_MODEL = os.getenv("LLM_MODEL", "Qwen3.6-35B-A3B")
-LLM_API_BASE = os.getenv("LLM_API_BASE", "https://api.openai.com/v1")
-LLM_API_KEY = os.getenv("LLM_API_KEY", "")
+# LLM Configuration conforming to AlfaHack / Boosters instructions
+# Model default: qwen/qwen3.8-27b
+# Primary Base URL: https://changellenge.up.railway.app/v1
+# Fallback Base URL: https://api.alfahack-gateway26.ru/v1
+DEFAULT_LLM_MODEL = os.getenv("OPENAI_MODEL", os.getenv("LLM_MODEL", "qwen/qwen3.8-27b"))
+LLM_API_BASE = os.getenv("OPENAI_BASE_URL", os.getenv("LLM_API_BASE", "https://changellenge.up.railway.app/v1"))
+LLM_API_KEY = os.getenv("OPENAI_API_KEY", os.getenv("LLM_API_KEY", ""))
+
+
 
 # Scoring & Agent Parameters
 MIN_RELEVANCE_THRESHOLD = float(os.getenv("MIN_RELEVANCE_THRESHOLD", "30.0"))

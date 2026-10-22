@@ -1,5 +1,10 @@
-# Optional dependencies for high-throughput production deployments
-# The application core is 100% self-contained and functions out-of-the-box on standard Python 3.9+
+# Production and AutoML dependencies for Boosters / AlfaHack platform
+openai>=1.12.0
+pandas>=2.0.0
+numpy>=1.24.0
+scikit-learn>=1.3.0
+lightgbm>=4.0.0
+scipy>=1.10.0
 fastapi>=0.109.0
 uvicorn>=0.27.0
 pydantic>=2.5.0
