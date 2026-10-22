@@ -332,12 +332,10 @@
       border-color: rgba(255, 255, 255, 0.16);
     }
     .chatgpt-header {
-      padding: 12px 18px;
+      padding: 14px 18px 6px;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      border-bottom: 1px solid var(--border-subtle);
-      background-color: rgba(255, 255, 255, 0.015);
     }
     .chatgpt-header-left {
       display: flex;
@@ -655,12 +653,10 @@
 
     /* ChatGPT Bottom Input Area */
     .chatgpt-input-area {
-      padding: 10px 18px 14px;
-      border-top: 1px solid var(--border-subtle);
+      padding: 8px 18px 14px;
       display: flex;
       flex-direction: column;
       gap: 6px;
-      background-color: rgba(255, 255, 255, 0.01);
     }
     .chatgpt-input-pill {
       background-color: var(--alfa-card);
@@ -890,102 +886,50 @@
         <!-- CHATGPT-STYLE AI ASSISTANT WINDOW (ALFA BANK DARK PALETTE)   -->
         <!-- ============================================================ -->
         <div class="chatgpt-box" id="executiveAiHubCard">
-          <!-- Minimalist Header -->
+          <!-- Minimalist Header: Only Альфа-Ассистент -->
           <div class="chatgpt-header">
             <div class="chatgpt-header-left">
               <div class="chatgpt-avatar-badge">А</div>
-              <div class="chatgpt-header-info">
-                <div class="chatgpt-header-title">Альфа-Ассистент</div>
-                <div class="chatgpt-header-model">
-                  <span class="chatgpt-status-dot"></span> qwen3.8-27b • ЦМИ Альфа-Банка
-                </div>
-              </div>
-            </div>
-            <div class="chatgpt-header-right">
-              <span class="chatgpt-role-badge" id="hubRoleBadge">Роль: Генеральный директор</span>
-              <button class="chatgpt-icon-btn" onclick="app.resetChatgptThread()" title="Очистить диалог">↺</button>
+              <div class="chatgpt-header-title">Альфа-Ассистент</div>
             </div>
           </div>
 
-          <!-- Messages Thread (ChatGPT Conversation Feed) -->
-          <div class="chatgpt-thread" id="chatgptThread">
-            <!-- Initial AI Message with Starters -->
-            <div class="chatgpt-msg ai" id="chatgptWelcomeMsg">
-              <div class="chatgpt-msg-avatar">А</div>
-              <div class="chatgpt-msg-content">
-                <div class="chatgpt-msg-text">
-                  Здравствуйте! Я корпоративный AI-ассистент Альфа-Банка. Анализирую влияние макроэкономических факторов, ставки ЦБ и рисков контрагентов на бизнес ПАО «АгроСоюз».
-                </div>
-                
-                <!-- Starter Prompts (Clean ChatGPT chips) -->
-                <div class="chatgpt-starters-grid">
-                  <button class="chatgpt-starter-card" onclick="app.askQuickCopilot('Как ставка 14% повлияет на наш кредитный портфель и P&L?')">
-                    <span class="starter-icon">⚡️</span>
-                    <span class="starter-text">Ставка 14%: влияние на долг и P&L</span>
-                  </button>
-                  <button class="chatgpt-starter-card" onclick="app.askQuickCopilot('Проанализируй финансовую устойчивость поставщика ООО Юг-Агро и цепочки поставок')">
-                    <span class="starter-icon">⛓️</span>
-                    <span class="starter-text">Риски поставщика ООО «Юг-Агро»</span>
-                  </button>
-                  <button class="chatgpt-starter-card" onclick="app.loadDailyBriefing()">
-                    <span class="starter-icon">📊</span>
-                    <span class="starter-text">Суточный дайджест (Daily Briefing)</span>
-                  </button>
-                  <button class="chatgpt-starter-card" onclick="app.loadExecutiveDelta()">
-                    <span class="starter-icon">🔄</span>
-                    <span class="starter-text">Что изменилось с прошлого раза?</span>
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            <!-- Dynamic Conversation History Container -->
+          <!-- Messages Thread (Initially hidden, revealed on query) -->
+          <div class="chatgpt-thread" id="chatgptThread" style="display: none;">
             <div id="chatgptHistoryContainer"></div>
 
-            <!-- Dynamic Active Response Card (Fact / Alfa View / AI View) -->
-            <div class="chatgpt-msg ai" id="chatgptActiveResponseMsg">
+            <div class="chatgpt-msg ai" id="chatgptActiveResponseMsg" style="display: none;">
               <div class="chatgpt-msg-avatar">А</div>
               <div class="chatgpt-msg-content">
-                <!-- 3-Views Breakdown (Clean ChatGPT Quote / Callout style) -->
+                <!-- 3-Views Breakdown (FACT / ALFA VIEW / AI VIEW) -->
                 <div class="chatgpt-view-callouts">
                   <div class="chatgpt-callout fact-callout">
                     <div class="callout-header">📘 Что известно фактически (FACT)</div>
-                    <div class="callout-text" id="hubFactText">Банк России сохранил ставку на уровне 14,0% и ужесточил сигнал по ДКП. Официальный пресс-релиз регулятора от 11.09.2026.</div>
+                    <div class="callout-text" id="hubFactText"></div>
                   </div>
                   <div class="chatgpt-callout alfa-callout">
                     <div class="callout-header">🔴 Экспертиза ЦМИ Альфа-Банка (ALFA VIEW)</div>
-                    <div class="callout-text" id="hubAlfaText">«Ключевая ставка без изменения на 14,0%, риторика стала жестче». ЦМИ Альфа-Банка прогнозирует сохранение ставки до конца 1П27. Рекомендован переход на инструменты хеджирования.</div>
+                    <div class="callout-text" id="hubAlfaText"></div>
                   </div>
                   <div class="chatgpt-callout ai-callout">
                     <div class="callout-header">🟣 Персонализированный вывод (AI VIEW)</div>
-                    <div class="callout-text" id="hubAiText">Для компании ПАО «АгроСоюз» (выручка 48.5 млрд ₽, заемный портфель активен) сохранение ставки блокирует дешевое финансирование. Рекомендуется процентный своп (IRS) и размещение остатков в овернайт под 13.9%.</div>
+                    <div class="callout-text" id="hubAiText"></div>
                   </div>
                 </div>
 
-                <!-- Impact Chain Summary (Criteria 7) -->
-                <div class="chatgpt-chain-row">
+                <!-- Impact Chain Summary -->
+                <div class="chatgpt-chain-row" id="hubChainRow" style="display: none;">
                   <span class="chain-prefix">⛓️ Каузальная цепочка:</span>
-                  <div class="chain-flow-pills" id="hubChainFlow">
-                    <span class="flow-step">Ставка 14%</span> ➔
-                    <span class="flow-step">Дорогой долг (CL_LOA)</span> ➔
-                    <span class="flow-step">Заморозка CAPEX</span> ➔
-                    <span class="flow-step warning">Сжатие EBITDA ↓</span> ➔
-                    <span class="flow-step success">Овернайт 13.9% ↑</span>
-                  </div>
+                  <div class="chain-flow-pills" id="hubChainFlow"></div>
                 </div>
 
-                <!-- Evidence / Source Tracing (Criteria 10) -->
-                <div class="chatgpt-evidence-row">
+                <!-- Evidence / Source Tracing -->
+                <div class="chatgpt-evidence-row" id="hubEvidenceRow" style="display: none;">
                   <span class="evidence-prefix">📌 Основания вывода:</span>
-                  <div class="evidence-pills" id="hubEvidencePills">
-                    <a class="evidence-pill" href="javascript:void(0)" onclick="app.openDetailSheet('NEWS-2026-09-001')">news:ЦБ-РФ-S3</a>
-                    <a class="evidence-pill" href="javascript:void(0)" onclick="app.switchTab('research')">alfa:ЦМИ-Макро-p4</a>
-                    <a class="evidence-pill" href="javascript:void(0)" onclick="app.toggleClientModal()">company:CL_PRODUCT_LOA_MARK</a>
-                    <a class="evidence-pill" href="javascript:void(0)" onclick="app.switchTab('payments')">counterparty:PAY_ЮгАгро</a>
-                  </div>
+                  <div class="evidence-pills" id="hubEvidencePills"></div>
                 </div>
 
-                <!-- Action Toolbar (Clipboard, Feedback) -->
+                <!-- Action Toolbar -->
                 <div class="chatgpt-msg-actions">
                   <button class="chatgpt-action-pill" onclick="app.copyToAlco()">📋 В протокол ALCO</button>
                   <button class="chatgpt-action-icon" onclick="app.sendFeedback('thumbs_up', 'HUB_LAST')" title="Полезно">👍</button>
@@ -995,22 +939,19 @@
             </div>
           </div>
 
-          <!-- Bottom Prompt Bar (Iconic ChatGPT Pill) -->
+          <!-- Bottom Prompt Bar -->
           <div class="chatgpt-input-area">
             <div class="chatgpt-input-pill">
               <input
                 type="text"
                 id="aiHubInput"
                 class="chatgpt-input-field"
-                placeholder="Спросите ассистента: влияние ставки, кассовые разрывы, лизинг, риски дебиторки..."
+                placeholder="Спросите ассистента..."
                 onkeydown="if(event.key==='Enter') app.handleHubSubmit()"
               />
               <button class="chatgpt-send-btn" id="aiHubSendBtn" onclick="app.handleHubSubmit()" title="Отправить">
                 ↑
               </button>
-            </div>
-            <div class="chatgpt-disclaimer">
-              Альфа-Ассистент qwen3.8-27b опирается на данные ЦБ РФ, аналитику ЦМИ Альфа-Банка и граф контрагентов
             </div>
           </div>
         </div>

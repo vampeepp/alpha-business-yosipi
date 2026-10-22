@@ -220,28 +220,14 @@ const app = {
     const hist = document.getElementById("chatgptHistoryContainer");
     if (hist) hist.innerHTML = "";
     
-    const factEl = document.getElementById("hubFactText");
-    const alfaEl = document.getElementById("hubAlfaText");
-    const aiEl = document.getElementById("hubAiText");
-    const flowEl = document.getElementById("hubChainFlow");
-    const evidenceEl = document.getElementById("hubEvidencePills");
-    const input = document.getElementById("aiHubInput");
-
-    if (input) input.value = "";
-    if (factEl) factEl.textContent = "Банк России сохранил ставку на уровне 14,0% и ужесточил сигнал по ДКП. Официальный пресс-релиз регулятора от 11.09.2026.";
-    if (alfaEl) alfaEl.textContent = "«Ключевая ставка без изменения на 14,0%, риторика стала жестче». ЦМИ Альфа-Банка прогнозирует сохранение ставки до конца 1П27. Рекомендован переход на инструменты хеджирования.";
-    if (aiEl) aiEl.textContent = "Для компании ПАО «АгроСоюз» (выручка 48.5 млрд ₽, заемный портфель активен) сохранение ставки блокирует дешевое финансирование. Рекомендуется процентный своп (IRS) и размещение остатков в овернайт под 13.9%.";
-    if (flowEl) flowEl.innerHTML = `<span class="flow-step">Ставка 14%</span> ➔ <span class="flow-step">Дорогой долг (CL_LOA)</span> ➔ <span class="flow-step">Заморозка CAPEX</span> ➔ <span class="flow-step warning">Сжатие EBITDA ↓</span> ➔ <span class="flow-step success">Овернайт 13.9% ↑</span>`;
-    if (evidenceEl) {
-      evidenceEl.innerHTML = `
-        <a class="evidence-pill" href="javascript:void(0)" onclick="app.openDetailSheet('NEWS-2026-09-001')">news:ЦБ-РФ-S3</a>
-        <a class="evidence-pill" href="javascript:void(0)" onclick="app.switchTab('research')">alfa:ЦМИ-Макро-p4</a>
-        <a class="evidence-pill" href="javascript:void(0)" onclick="app.toggleClientModal()">company:CL_PRODUCT_LOA_MARK</a>
-        <a class="evidence-pill" href="javascript:void(0)" onclick="app.switchTab('payments')">counterparty:PAY_ЮгАгро</a>
-      `;
-    }
     const thread = document.getElementById("chatgptThread");
-    if (thread) thread.scrollTop = 0;
+    if (thread) thread.style.display = "none";
+
+    const respMsg = document.getElementById("chatgptActiveResponseMsg");
+    if (respMsg) respMsg.style.display = "none";
+
+    const input = document.getElementById("aiHubInput");
+    if (input) input.value = "";
   },
 
   async askQuickCopilot(promptText) {
@@ -254,6 +240,10 @@ const app = {
     const input = document.getElementById("aiHubInput");
     const q = input ? input.value.trim() : "";
     if (!q) return;
+
+    // Show thread on submit
+    const thread = document.getElementById("chatgptThread");
+    if (thread) thread.style.display = "flex";
 
     // Append user message bubble to ChatGPT thread
     const hist = document.getElementById("chatgptHistoryContainer");
@@ -270,12 +260,15 @@ const app = {
     const aiEl = document.getElementById("hubAiText");
     const flowEl = document.getElementById("hubChainFlow");
     const evidenceEl = document.getElementById("hubEvidencePills");
+    const chainRow = document.getElementById("hubChainRow");
+    const evidenceRow = document.getElementById("hubEvidenceRow");
     const respMsg = document.getElementById("chatgptActiveResponseMsg");
 
     if (respMsg) respMsg.style.display = "flex";
     if (aiEl) aiEl.innerHTML = "<em>Генерация аналитического вывода и расчет каузальной цепочки...</em>";
+    if (factEl) factEl.textContent = "Анализ макроэкономических данных и позиции ЦБ РФ...";
+    if (alfaEl) alfaEl.textContent = "Поиск профильных исследований ЦМИ Альфа-Банка...";
 
-    const thread = document.getElementById("chatgptThread");
     if (thread) thread.scrollTop = thread.scrollHeight;
 
     try {
@@ -291,22 +284,28 @@ const app = {
       });
       const data = await res.json();
 
-      if (factEl) factEl.textContent = data.fact_statement || "Официальные макроэкономические данные согласованы.";
+      if (factEl) factEl.textContent = data.fact_statement || "Фактические данные согласованы с открытыми источниками.";
       if (alfaEl) alfaEl.textContent = data.alfa_view || "Центр макроэкономических исследований Альфа-Банка рекомендует консервативную стратегию.";
       if (aiEl) aiEl.innerHTML = this.formatMarkdown(data.ai_view || data.answer);
 
       if (flowEl && data.impact_chain_summary) {
+        if (chainRow) chainRow.style.display = "flex";
         const steps = data.impact_chain_summary.split("➔").map(s => s.trim());
         flowEl.innerHTML = steps.map((s, idx) => {
           const cls = idx === steps.length - 1 ? "success" : (idx >= 2 ? "warning" : "");
           return `<span class="flow-step ${cls}">${s}</span>`;
         }).join(" ➔ ");
+      } else if (chainRow) {
+        chainRow.style.display = "none";
       }
 
-      if (evidenceEl && data.evidence_sources) {
+      if (evidenceEl && data.evidence_sources && data.evidence_sources.length > 0) {
+        if (evidenceRow) evidenceRow.style.display = "flex";
         evidenceEl.innerHTML = data.evidence_sources.map(ev => `
           <a class="evidence-pill" href="javascript:void(0)" onclick="app.handleEvidenceClick('${ev.id}')">${ev.id}</a>
         `).join("");
+      } else if (evidenceRow) {
+        evidenceRow.style.display = "none";
       }
 
       if (thread) thread.scrollTop = thread.scrollHeight;
@@ -328,6 +327,9 @@ const app = {
   },
 
   async loadDailyBriefing() {
+    const thread = document.getElementById("chatgptThread");
+    if (thread) thread.style.display = "flex";
+
     // Append user starter request bubble
     const hist = document.getElementById("chatgptHistoryContainer");
     if (hist) {
@@ -341,12 +343,12 @@ const app = {
     const factEl = document.getElementById("hubFactText");
     const alfaEl = document.getElementById("hubAlfaText");
     const flowEl = document.getElementById("hubChainFlow");
+    const chainRow = document.getElementById("hubChainRow");
     const respMsg = document.getElementById("chatgptActiveResponseMsg");
 
     if (respMsg) respMsg.style.display = "flex";
     if (aiEl) aiEl.innerHTML = "<em>Загрузка суточного дайджеста рисков и возможностей...</em>";
 
-    const thread = document.getElementById("chatgptThread");
     if (thread) thread.scrollTop = thread.scrollHeight;
 
     try {
@@ -366,6 +368,7 @@ const app = {
       briefingHtml += `• ⚖️ <strong>Спорная тема:</strong> ${data.controversial.title} — <em>${data.controversial.solution}</em>`;
 
       if (aiEl) aiEl.innerHTML = briefingHtml;
+      if (chainRow) chainRow.style.display = "flex";
       if (flowEl) flowEl.innerHTML = `<span class="flow-step warning">3 Риска P&L</span> ➔ <span class="flow-step success">2 Окна возможностей</span> ➔ <span class="flow-step">1 Решение ALCO</span>`;
 
       if (thread) thread.scrollTop = thread.scrollHeight;
@@ -394,7 +397,10 @@ const app = {
     if (aiEl) aiEl.innerHTML = "<em>Сравнение с предыдущей версией портфеля...</em>";
 
     const thread = document.getElementById("chatgptThread");
-    if (thread) thread.scrollTop = thread.scrollHeight;
+    if (thread) {
+      thread.style.display = "flex";
+      thread.scrollTop = thread.scrollHeight;
+    }
 
     try {
       const res = await fetch(`/api/delta?uid=${this.currentClientUid}`);
