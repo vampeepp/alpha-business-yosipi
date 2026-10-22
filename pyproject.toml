@@ -1,0 +1,15 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "alfa-news-analytics"
+version = "1.0.0"
+description = "Alfa-Bank Corporate News Analytics & Autonomous Agentic Business Insights Platform"
+authors = [{ name = "Microsoft / Alfa-Bank Hackathon Team", email = "engineering@microsoft.com" }]
+requires-python = ">=3.9"
+dependencies = []
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["src*", "tests*"]

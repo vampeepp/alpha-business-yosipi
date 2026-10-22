@@ -1,0 +1,6 @@
+# Optional dependencies for high-throughput production deployments
+# The application core is 100% self-contained and functions out-of-the-box on standard Python 3.9+
+fastapi>=0.109.0
+uvicorn>=0.27.0
+pydantic>=2.5.0
+requests>=2.31.0

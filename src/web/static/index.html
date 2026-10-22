@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Альфа-Инсайт | Корпоративная новостная аналитика для крупного бизнеса</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <!-- Top Global Header styled in Alfa-Bank Corporate Identity -->
+  <header class="alfa-header">
+    <div class="header-container">
+      <div class="logo-area">
+        <div class="alfa-badge">А</div>
+        <div class="brand-titles">
+          <span class="bank-name">Альфа-Бизнес</span>
+          <span class="product-title">Альфа-Инсайт | Корпоративный Радар Событий</span>
+        </div>
+      </div>
+
+      <!-- Enterprise Client & Persona Switchers -->
+      <div class="client-controls">
+        <div class="control-group">
+          <label for="companySelect">Корпоративный клиент (>15 млрд ₽):</label>
+          <select id="companySelect" class="alfa-select">
+            <option value="" disabled selected>Загрузка клиентов...</option>
+          </select>
+        </div>
+
+        <div class="control-group">
+          <label for="roleSelect">Роль ЛПР (Лицо принимающее решения):</label>
+          <select id="roleSelect" class="alfa-select">
+            <option value="Генеральный директор" selected>Генеральный директор</option>
+            <option value="Финансовый директор (CFO)">Финансовый директор (CFO)</option>
+            <option value="Руководитель казначейства">Руководитель казначейства</option>
+            <option value="Главный бухгалтер">Главный бухгалтер</option>
+            <option value="Бенефициарный владелец">Бенефициарный владелец</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Client Executive Profile Bar -->
+  <section class="client-strip" id="clientStrip">
+    <div class="strip-container">
+      <div class="strip-item">
+        <span class="strip-label">Холдинг / Компания:</span>
+        <span class="strip-value" id="dispCompanyName">—</span>
+      </div>
+      <div class="strip-item">
+        <span class="strip-label">Годовая выручка:</span>
+        <span class="strip-value highlight-red" id="dispRevenue">—</span>
+      </div>
+      <div class="strip-item">
+        <span class="strip-label">Отрасль (ОКВЭД):</span>
+        <span class="strip-value" id="dispOkved">—</span>
+      </div>
+      <div class="strip-item">
+        <span class="strip-label">Кредитный профиль:</span>
+        <span class="strip-value" id="dispDebt">—</span>
+      </div>
+      <div class="strip-item">
+        <span class="strip-label">ВЭД / ФТС:</span>
+        <span class="strip-value" id="dispFts">—</span>
+      </div>
+      <div class="strip-item">
+        <span class="strip-label">Группа компаний:</span>
+        <span class="strip-value" id="dispGroup">—</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Main Navigation Tabs -->
+  <main class="main-container">
+    <nav class="view-tabs">
+      <button class="tab-btn active" data-tab="tab-feed">
+        <span class="tab-icon">⚡</span> Персонализированный радар событий
+      </button>
+      <button class="tab-btn" data-tab="tab-insight">
+        <span class="tab-icon">🔍</span> Глубокая 6-факторная интерпретация
+      </button>
+      <button class="tab-btn" data-tab="tab-graph">
+        <span class="tab-icon">🕸️</span> Цепочки поставок и риск контрагентов
+      </button>
+      <button class="tab-btn" data-tab="tab-research">
+        <span class="tab-icon">📚</span> Аналитика Альфа-Банка (ЦМИ)
+      </button>
+      <button class="tab-btn" data-tab="tab-trace">
+        <span class="tab-icon">🤖</span> AI-Трассировка и аудит агента
+      </button>
+      <button class="tab-btn" data-tab="tab-chat">
+        <span class="tab-icon">💬</span> Диалог с Альфа-Аналитиком
+      </button>
+    </nav>
+
+    <!-- TAB 1: Personalized News Feed -->
+    <div class="tab-pane active" id="tab-feed">
+      <div class="pane-header">
+        <div>
+          <h2>Персонализированная лента бизнес-событий</h2>
+          <p class="subtitle">События отранжированы многофакторной моделью с учетом финансовой нагрузки, ВЭД и цепочек поставок клиента.</p>
+        </div>
+        <div class="filter-pills">
+          <button class="pill active" data-filter="ALL">Все события</button>
+          <button class="pill" data-filter="CRITICAL">Критичные (70%+)</button>
+          <button class="pill" data-filter="HIGH">Высокая релевантность</button>
+          <button class="pill" data-filter="MEDIUM">Умеренные</button>
+        </div>
+      </div>
+
+      <div class="news-grid" id="newsGrid">
+        <div class="loading-state">Загрузка персонализированного радара...</div>
+      </div>
+    </div>
+
+    <!-- TAB 2: Deep 6-Pillar Insight View -->
+    <div class="tab-pane" id="tab-insight">
+      <div class="insight-container" id="insightContainer">
+        <div class="empty-state">
+          <h3>Выберите новость из ленты событий для генерации детального 6-факторного бизнес-инсайта</h3>
+          <p>Автономный мультиагентный комплекс выполнит поиск по исследованиям Альфа-Банка, сопоставит риски контрагентов и сформирует план действий.</p>
+          <button class="alfa-btn-primary" onclick="app.switchTab('tab-feed')">Перейти к ленте событий</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 3: Counterparty Supply Chain Graph -->
+    <div class="tab-pane" id="tab-graph">
+      <div class="pane-header">
+        <div>
+          <h2>Цепочки создания стоимости и концентрация рисков (df_Uid_payment_hack)</h2>
+          <p class="subtitle">Анализ финансовых потоков B2B-контрагентов: поставщики сырья, покупатели продукции и риск передачи макрошоков.</p>
+        </div>
+      </div>
+
+      <div class="graph-layout">
+        <div class="graph-visual-card">
+          <div class="card-title">Топология расчетной сети холдинга</div>
+          <div id="graphCanvas" class="network-canvas"></div>
+        </div>
+        <div class="graph-table-card">
+          <div class="card-title">Реестр взаимосвязанных контрагентов</div>
+          <div class="table-responsive">
+            <table class="alfa-table" id="counterpartyTable">
+              <thead>
+                <tr>
+                  <th>Контрагент</th>
+                  <th>Тип связи</th>
+                  <th>Объем платежей</th>
+                  <th>Транзакций</th>
+                  <th>Доля оборота</th>
+                  <th>Уровень риска</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td colspan="6">Загрузка данных...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 4: Alfa-Bank Research Library -->
+    <div class="tab-pane" id="tab-research">
+      <div class="pane-header">
+        <div>
+          <h2>Библиотека аналитических материалов Центра макроэкономических исследований Альфа-Банка</h2>
+          <p class="subtitle">Официальные обзоры, прогнозы динамики ВВП, ключевой ставки ЦБ РФ, товарных рынков и инфляции (Слайд 17).</p>
+        </div>
+      </div>
+      <div class="research-grid" id="researchGrid">
+        <div class="loading-state">Загрузка макроисследований...</div>
+      </div>
+    </div>
+
+    <!-- TAB 5: AI Agent Audit & Traceability -->
+    <div class="tab-pane" id="tab-trace">
+      <div class="pane-header">
+        <div>
+          <h2>Аудит и трассируемость AI-Агентов (Agent Execution Trace)</h2>
+          <p class="subtitle">Полная прозрачность принятия решений: планирование, вызовы инструментов (Tools), контекстная память и блок самопроверки (Critic).</p>
+        </div>
+      </div>
+      <div class="trace-timeline" id="traceTimeline">
+        <div class="empty-state">
+          <p>Сформируйте инсайт по любой новости, чтобы просмотреть пошаговый лог работы AI-агентов.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 6: Interactive Executive Q&A -->
+    <div class="tab-pane" id="tab-chat">
+      <div class="pane-header">
+        <div>
+          <h2>Диалог с Альфа-Аналитиком (Executive Copilot)</h2>
+          <p class="subtitle">Задайте любой уточняющий вопрос по событию, влиянию на цепочки поставок или банковским инструментам.</p>
+        </div>
+      </div>
+
+      <div class="chat-container">
+        <div class="chat-messages" id="chatMessages">
+          <div class="chat-bubble ai">
+            <strong>Альфа-Аналитик:</strong> Здравствуйте! Я ваш персональный аналитический ассистент по корпоративному бизнесу. Задайте любой вопрос по текущему событию, влиянию на контрагентов, валютный контроль или управление ликвидностью.
+          </div>
+        </div>
+        <div class="chat-input-area">
+          <input type="text" id="chatInput" class="chat-input" placeholder="Например: 'Какой инструмент хеджирования выбрать при кредите на 10 млрд руб?'" />
+          <button class="alfa-btn-primary" id="btnSendChat">Отправить</button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="alfa-footer">
+    <div class="footer-container">
+      <div>© 2026 АО «Альфа-Банк». Сервис новостной аналитики для принятия корпоративных бизнес-решений.</div>
+      <div class="tech-stack-tag">Enterprise Architecture: Hexagonal Multi-Agent System | Microservices & Docker Ready</div>
+    </div>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>

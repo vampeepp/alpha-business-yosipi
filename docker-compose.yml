@@ -1,0 +1,24 @@
+version: '3.8'
+
+services:
+  alfa-analytics:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: alfa_news_analytics_service
+    ports:
+      - "8080:8080"
+    environment:
+      - HOST=0.0.0.0
+      - PORT=8080
+      - LLM_MODEL=Qwen3.6-35B-A3B
+      - MIN_RELEVANCE_THRESHOLD=30.0
+      - CRITIC_PASSING_SCORE=85.0
+    volumes:
+      - ./data:/app/data:ro
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/api/clients"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
