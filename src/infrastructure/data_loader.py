@@ -130,6 +130,8 @@ class DataRepository:
                     tags=item.get("tags", []),
                     urgency=item.get("urgency", "MEDIUM"),
                     sentiment=item.get("sentiment", "NEUTRAL"),
+                    novelty_score=float(item.get("novelty_score", 90.0)),
+                    cross_verification_sources=item.get("cross_verification_sources", [item.get("source")]),
                 )
                 self.news_items[news.news_id] = news
 

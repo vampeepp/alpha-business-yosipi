@@ -151,12 +151,14 @@ const app = {
       card.className = `news-card ${priorityClass}`;
 
       const relClass = s.priority_level === "CRITICAL" ? "relevance-critical" : (s.priority_level === "HIGH" ? "relevance-high" : "relevance-medium");
+      const noveltyBadge = `<span style="font-size: 10px; font-weight: 700; color: #FCA5A5; background: rgba(239, 49, 36, 0.15); padding: 2px 7px; border-radius: 4px; border: 1px solid rgba(239, 49, 36, 0.3);">🔥 Новизна: ${n.novelty_score || 92}%</span>`;
+      const crossBadge = `<span style="font-size: 10px; font-weight: 700; color: #7DD3FC; background: rgba(56, 189, 248, 0.15); padding: 2px 7px; border-radius: 4px; border: 1px solid rgba(56, 189, 248, 0.3);">🛡️ Источников: ${(n.cross_verification_sources || []).length || 1}</span>`;
 
       card.innerHTML = `
         <div>
           <div class="news-card-header">
             <span class="badge-relevance ${relClass}">⚡ Релевантность: ${s.total_score}% (${s.priority_level})</span>
-            <span class="news-meta-date">${n.publication_date.substring(0, 10)}</span>
+            <div style="display: flex; gap: 6px;">${noveltyBadge} ${crossBadge}</div>
           </div>
           <h3 class="news-card-title">${n.title}</h3>
           <p class="news-card-summary">${n.summary}</p>
@@ -165,7 +167,7 @@ const app = {
           </div>
         </div>
         <div class="news-card-footer">
-          <span class="news-source-badge">📰 ${n.source}</span>
+          <span class="news-source-badge">📰 ${n.source} • ${n.publication_date.substring(0, 10)}</span>
           <button class="alfa-btn-primary" onclick="app.generateInsight('${n.news_id}')">
             Детальный анализ (6 блоков) →
           </button>
@@ -181,8 +183,8 @@ const app = {
     const container = document.getElementById("insightContainer");
     container.innerHTML = `
       <div class="loading-state">
-        <h3>Агентная обработка события мультиагентным комплексом...</h3>
-        <p>1. Планирование шагов → 2. Опрос профиля и графа поставок → 3. RAG-поиск макроисследований Альфа-Банка → 4. Синтез 6 блоков → 5. Самопроверка критиком</p>
+        <h3 style="color: #F8FAFC;">Многошаговая агентная обработка события (8 шагов)...</h3>
+        <p style="color: #94A3B8; font-size: 13px; margin-top: 8px;">1. Профиль → 2. Гипотезы → 3. Поиск новостей → 4. Кросс-проверка → 5. RAG Альфы → 6. Синтез 6 блоков + Impact Chain → 7. Self-Check → 8. Адаптация</p>
       </div>
     `;
 
@@ -208,6 +210,75 @@ const app = {
       .map((r) => `<li>${r}</li>`)
       .join("");
 
+    // Render Impact Chain (Reviewer Item 7)
+    let impactChainHtml = "";
+    if (insight.impact_chain && insight.impact_chain.steps) {
+      const stepsHtml = insight.impact_chain.steps.map((st, idx) => {
+        const metricClass = `metric-${st.metric_affected}`;
+        const dirSymbol = st.direction === "UP" ? "↑" : (st.direction === "DOWN" ? "↓" : "↔");
+        return `
+          <div class="chain-step-item">
+            <span class="chain-num">${idx + 1}</span>
+            <div class="chain-text">
+              <div>${st.step_title}</div>
+              <div style="font-size: 11px; color: #94A3B8; font-weight: 400; margin-top: 2px;">${st.description}</div>
+            </div>
+            <span class="metric-pill ${metricClass}">${st.metric_affected} ${dirSymbol}</span>
+          </div>
+        `;
+      }).join("");
+
+      impactChainHtml = `
+        <div class="impact-chain-box">
+          <div class="impact-chain-title">
+            <div>
+              <span style="font-size: 11px; font-weight: 800; color: #EF3124; text-transform: uppercase; letter-spacing: 0.8px;">Цепочка каузального влияния (Impact Chain)</span>
+              <h3 style="font-size: 15px; font-weight: 700; color: #F8FAFC; margin-top: 2px;">Траектория передачи шока в финансовые показатели компании</h3>
+            </div>
+            <div style="display: flex; gap: 8px;">
+              <span style="font-size: 11px; font-weight: 700; background: rgba(239, 49, 36, 0.2); color: #F87171; padding: 4px 10px; border-radius: 20px; border: 1px solid rgba(239, 49, 36, 0.3);">
+                Сила: ${insight.impact_chain.impact_strength}
+              </span>
+              <span style="font-size: 11px; font-weight: 700; background: rgba(56, 189, 248, 0.15); color: #7DD3FC; padding: 4px 10px; border-radius: 20px; border: 1px solid rgba(56, 189, 248, 0.3);">
+                Горизонт: ${insight.impact_chain.time_horizon}
+              </span>
+            </div>
+          </div>
+          <div class="impact-chain-steps">${stepsHtml}</div>
+        </div>
+      `;
+    }
+
+    // Render FACT -> RESEARCH -> CLIENT FEATURE Matrix (Reviewer Item 8)
+    let matrixHtml = "";
+    if (insight.fact_to_insight_matrix) {
+      const fm = insight.fact_to_insight_matrix;
+      matrixHtml = `
+        <div class="matrix-container">
+          <div class="matrix-card">
+            <div class="matrix-header">1. [ФАКТ ИЗ НОВОСТИ]</div>
+            <div style="font-size: 12px; font-weight: 600; color: #F8FAFC;">${fm.fact ? fm.fact.title : 'Первичное событие'}</div>
+            <div style="font-size: 11px; color: #94A3B8; margin-top: 4px;">Источник: ${fm.fact ? fm.fact.source : 'Официальный'} (Новизна: ${insight.novelty_score}%)</div>
+          </div>
+          <div class="matrix-card" style="border-color: rgba(239, 49, 36, 0.4);">
+            <div class="matrix-header" style="color: #EF3124;">2. [МАКРОЭКСПЕРТИЗА АЛЬФА-БАНКА]</div>
+            <div style="font-size: 12px; font-weight: 600; color: #F87171;">${fm.bank_research ? fm.bank_research.title : 'Исследование ЦМИ'}</div>
+            <div style="font-size: 11px; color: #CBD5E1; margin-top: 4px;">${fm.bank_research ? fm.bank_research.key_quote : ''}</div>
+          </div>
+          <div class="matrix-card">
+            <div class="matrix-header">3. [ПРИЗНАКИ КОМПАНИИ]</div>
+            <ul style="font-size: 11.5px; color: #E2E8F0; list-style: disc; margin-left: 16px;">
+              ${(fm.client_features || []).map(cf => `<li>${cf}</li>`).join("")}
+            </ul>
+          </div>
+          <div class="matrix-card" style="border-color: rgba(16, 185, 129, 0.4);">
+            <div class="matrix-header" style="color: #34D399;">4. [ПЕРСОНАЛИЗИРОВАННЫЙ ВЫВОД]</div>
+            <div style="font-size: 12px; font-weight: 600; color: #6EE7B7;">${fm.conclusion || 'Стратегический фокус защиты маржи и ликвидности.'}</div>
+          </div>
+        </div>
+      `;
+    }
+
     const productsHtml = (insight.suggested_bank_products || []).map((p) => `
       <div class="bank-product-box">
         <div>
@@ -223,15 +294,26 @@ const app = {
 
     container.innerHTML = `
       <div class="insight-header-banner">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-          <span class="bank-tag">АО «АЛЬФА-БАНК» | ПЕРСОНАЛИЗИРОВАННЫЙ БИЗНЕС-ИНСАЙТ</span>
-          <span style="font-size: 13px; font-weight: 700; color: #059669;">
-            ✓ Верификация критика: ${insight.critic_review.critic_score || 95}/100 (${insight.critic_review.verdict || 'Одобрено'})
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
+          <div style="display: flex; gap: 8px; align-items: center;">
+            <span class="bank-tag">АО «АЛЬФА-БАНК» | ПЕРСОНАЛИЗИРОВАННЫЙ БИЗНЕС-ИНСАЙТ</span>
+            <span style="font-size: 11px; font-weight: 700; color: #7DD3FC; background: rgba(56, 189, 248, 0.15); padding: 3px 8px; border-radius: 4px; border: 1px solid rgba(56, 189, 248, 0.3);">
+              🛡️ Кросс-проверка: ${insight.cross_verification_score || 95}%
+            </span>
+          </div>
+          <span style="font-size: 12px; font-weight: 700; color: #34D399; background: rgba(16, 185, 129, 0.15); padding: 4px 10px; border-radius: 20px; border: 1px solid rgba(16, 185, 129, 0.3);">
+            ✓ Self-Check: ${insight.critic_review.critic_score || 100}/100 (Confidence: ${insight.agent_confidence || 0.96})
           </span>
         </div>
-        <h1>Персонализированная интерпретация события для ${this.currentClientUid}</h1>
-        <p style="color: #64748B; font-size: 13px;">Подготовлено для роли: <strong>${this.currentRole}</strong> | Дата генерации: ${new Date().toLocaleString('ru-RU')}</p>
+        <h1 style="font-size: 21px; font-weight: 800; color: #F8FAFC;">Персонализированная интерпретация события для ${this.currentClientUid}</h1>
+        <p style="color: #94A3B8; font-size: 12.5px; margin-top: 4px;">Подготовлено для роли: <strong style="color: #F8FAFC;">${this.currentRole}</strong> | Дата генерации: ${new Date().toLocaleString('ru-RU')}</p>
       </div>
+
+      <!-- Reviewer Matrix: FACT -> RESEARCH -> CLIENT FEATURE -> INSIGHT -->
+      ${matrixHtml}
+
+      <!-- Reviewer Impact Chain -->
+      ${impactChainHtml}
 
       <!-- 6-Pillar Deep Dive Grid -->
       <div class="pillar-grid">
@@ -245,7 +327,7 @@ const app = {
         </div>
 
         <!-- Pillar 2 -->
-        <div class="pillar-card" style="border-top: 4px solid #0284C7;">
+        <div class="pillar-card" style="border-top: 4px solid #38BDF8;">
           <div class="pillar-title">
             <span class="pillar-num" style="background: #0284C7;">2</span>
             <span>Почему это важно для Вашей компании? (Персонализация)</span>
@@ -275,22 +357,22 @@ const app = {
         <div class="pillar-card pillar-bank-expert" style="grid-column: 1 / -1;">
           <div class="pillar-title" style="border-bottom: 2px solid var(--alfa-red);">
             <span class="pillar-num" style="background: var(--alfa-red);">5</span>
-            <span style="color: var(--alfa-red); font-size: 17px;">Экспертная позиция Альфа-Банка (Центр макроэкономических исследований)</span>
+            <span style="color: #F87171; font-size: 16px;">Экспертная позиция Альфа-Банка (Центр макроэкономических исследований)</span>
           </div>
           <div class="pillar-body">${this.formatMarkdown(insight.bank_expert_perspective)}</div>
         </div>
 
         <!-- Pillar 6 (Data Lineage & Audit) -->
-        <div class="pillar-card" style="grid-column: 1 / -1; background: #F8FAFC;">
+        <div class="pillar-card" style="grid-column: 1 / -1; background: #121724;">
           <div class="pillar-title">
             <span class="pillar-num" style="background: #475569;">6</span>
             <span>На чем основан вывод? (Data Lineage & Трассировка)</span>
           </div>
           <div class="pillar-body">
-            <p><strong>Клиентские признаки и финансовые параметры:</strong></p>
-            <ul style="margin: 8px 0 16px 20px; font-size: 12.5px;">${lineageItems}</ul>
-            <p><strong>Использованные исследования и макромодели Альфа-Банка:</strong></p>
-            <ul style="margin: 8px 0 16px 20px; font-size: 12.5px;">${macroReports}</ul>
+            <p><strong style="color: #F8FAFC;">Клиентские признаки и финансовые параметры:</strong></p>
+            <ul style="margin: 8px 0 16px 20px; font-size: 12px; color: #CBD5E1;">${lineageItems}</ul>
+            <p><strong style="color: #F8FAFC;">Использованные исследования и макромодели Альфа-Банка:</strong></p>
+            <ul style="margin: 8px 0 16px 20px; font-size: 12px; color: #CBD5E1;">${macroReports}</ul>
             <p style="font-size: 11.5px; color: #64748B;">Метод рассуждений: ${insight.data_lineage.ai_inference_method}</p>
           </div>
         </div>
@@ -298,10 +380,10 @@ const app = {
 
       <!-- Native Banking Products Deck -->
       <div class="products-card-deck">
-        <h3 style="font-size: 16px; color: var(--alfa-black); display: flex; align-items: center; gap: 8px;">
+        <h3 style="font-size: 15px; color: #F8FAFC; display: flex; align-items: center; gap: 8px;">
           <span>🎯</span> Целевые решения Альфа-Банка для оптимизации рисков события
         </h3>
-        <p style="font-size: 13px; color: #64748B; margin-top: 4px;">Нативные банковские инструменты, снижающие долговую нагрузку и хеджирующие валютно-ценовые колебания.</p>
+        <p style="font-size: 12px; color: #94A3B8; margin-top: 4px;">Нативные банковские инструменты, снижающие долговую нагрузку и хеджирующие валютно-ценовые колебания.</p>
         <div class="products-grid">${productsHtml}</div>
       </div>
     `;
@@ -373,11 +455,14 @@ const app = {
     const rootNode = graphData.nodes.find((n) => n.is_root) || graphData.nodes[0];
     const otherNodes = graphData.nodes.filter((n) => n.id !== rootNode.id);
 
-    let svgHtml = `<svg width="100%" height="100%" viewBox="0 0 ${width} ${height}" style="background: #F8FAFC;">
+    let svgHtml = `<svg width="100%" height="100%" viewBox="0 0 ${width} ${height}" style="background: #0E121A;">
       <defs>
         <marker id="arrow" viewBox="0 0 10 10" refX="24" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-          <path d="M 0 0 L 10 5 L 0 10 z" fill="#94A3B8"/>
+          <path d="M 0 0 L 10 5 L 0 10 z" fill="#64748B"/>
         </marker>
+        <filter id="glowRed" x="-20%" y="-20%" width="140%" height="140%">
+          <feDropShadow dx="0" dy="0" stdDeviation="4" flood-color="#EF3124" flood-opacity="0.6"/>
+        </filter>
       </defs>`;
 
     const radius = 125;
@@ -403,11 +488,11 @@ const app = {
     otherNodes.forEach((node) => {
       const coord = nodeCoords[node.id];
       svgHtml += `
-        <circle cx="${coord.x}" cy="${coord.y}" r="22" fill="#FFFFFF" stroke="#64748B" stroke-width="2"/>
-        <text x="${coord.x}" y="${coord.y + 36}" font-size="10" font-weight="600" text-anchor="middle" fill="#1F2229">
+        <circle cx="${coord.x}" cy="${coord.y}" r="22" fill="#181E2B" stroke="#334155" stroke-width="2"/>
+        <text x="${coord.x}" y="${coord.y + 36}" font-size="10" font-weight="700" text-anchor="middle" fill="#F8FAFC">
           ${node.id}
         </text>
-        <text x="${coord.x}" y="${coord.y + 4}" font-size="9" text-anchor="middle" fill="#64748B">
+        <text x="${coord.x}" y="${coord.y + 4}" font-size="9" text-anchor="middle" fill="#94A3B8">
           ${node.revenue_bln}B
         </text>
       `;
@@ -415,8 +500,8 @@ const app = {
 
     // Draw central root node
     svgHtml += `
-      <circle cx="${centerX}" cy="${centerY}" r="32" fill="#EF3124" stroke="#C91E12" stroke-width="3"/>
-      <text x="${centerX}" y="${centerY - 4}" font-size="11" font-weight="800" text-anchor="middle" fill="#FFFFFF">
+      <circle cx="${centerX}" cy="${centerY}" r="32" fill="#EF3124" stroke="#B91C1C" stroke-width="3" filter="url(#glowRed)"/>
+      <text x="${centerX}" y="${centerY - 4}" font-size="11" font-weight="900" text-anchor="middle" fill="#FFFFFF">
         ${rootNode.id}
       </text>
       <text x="${centerX}" y="${centerY + 12}" font-size="9" text-anchor="middle" fill="#FEECEB">

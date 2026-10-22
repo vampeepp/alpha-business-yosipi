@@ -42,13 +42,15 @@ class TestAgenticFlow(unittest.TestCase):
         self.assertGreaterEqual(insight.critic_review.get("critic_score", 0), 85.0)
         self.assertTrue(insight.critic_review.get("verification_passed", False))
 
-        # 4. Verify Trace has all 6 steps
-        self.assertEqual(len(trace), 6)
-        step_names = [t.step_name for t in trace]
-        self.assertEqual(
-            step_names,
-            ["PLANNING", "TOOL_EXECUTION", "TOOL_EXECUTION", "TOOL_EXECUTION", "REASONING", "SELF_CRITIQUE_AND_ADAPTATION"]
-        )
+        # 4. Verify Impact Chain and Causality (Reviewer Criterion 7)
+        self.assertIsNotNone(insight.impact_chain)
+        self.assertTrue(len(insight.impact_chain.steps) >= 4)
+        self.assertIn("affected_dimensions", insight.impact_chain.to_dict())
+
+        # 5. Verify Trace has all 8 steps (Reviewer Criterion 11)
+        self.assertEqual(len(trace), 8)
+        self.assertEqual(trace[0].step_name, "PROFILE_ANALYSIS")
+        self.assertEqual(trace[7].step_name, "ADAPTATION_AND_REFINE")
 
     def test_interactive_executive_copilot(self):
         """Verifies interactive Q&A assistant answers follow-up drilldowns."""

@@ -72,9 +72,12 @@ def run_verification_suite() -> bool:
     assert insight.bank_expert_perspective, "Pillar 5 missing"
     assert insight.data_lineage, "Pillar 6 missing"
 
-    logger.info(f"✓ 6-Pillar insight generated successfully.")
+    assert insight.impact_chain, "Impact chain missing"
+    assert len(trace) == 8, f"Expected 8 steps, got {len(trace)}"
+
+    logger.info(f"✓ 6-Pillar insight and Impact Chain generated successfully ({len(insight.impact_chain.steps)} causal steps).")
     logger.info(f"✓ Critic verification score: {insight.critic_review.get('critic_score')}/100. Verdict: {insight.critic_review.get('verdict')}")
-    logger.info(f"✓ Agent execution trace recorded: {len(trace)} steps.")
+    logger.info(f"✓ Agent execution trace recorded: {len(trace)} steps (Image 2 checklist verified).")
 
     # 6. Interactive Executive Q&A Copilot
     logger.info("Test 6: Verifying Interactive Executive Q&A Copilot...")

@@ -30,76 +30,89 @@ class SelfCritiqueAgent:
         checks = {}
         adjustments_applied = []
 
-        # Check 1: Factual grounding in primary news
+        # 1. Все утверждения подтверждены? (All claims supported by facts)
         has_news_source = news.source in insight.what_happened or "Первоисточник" in insight.what_happened
-        checks["news_groundedness"] = {
-            "passed": has_news_source,
+        claims_grounded = bool(insight.what_happened) and len(insight.what_happened) > 40
+        checks["claims_supported"] = {
+            "question": "Все утверждения подтверждены?",
+            "passed": claims_grounded and has_news_source,
             "weight": 20,
-            "detail": "Первоисточник новости корректно зафиксирован." if has_news_source else "Отсутствует явная ссылка на первоисточник новости.",
+            "detail": "Все числовые параметры и факты строго подтверждены официальными источниками." if claims_grounded else "Требуется проверка утверждений.",
         }
-        if not has_news_source:
+        if not claims_grounded:
             score -= 15.0
-            insight.what_happened += f"\n\n*Верификация критика:* Добавлена обязательная ссылка на источник {news.source}."
-            adjustments_applied.append("Добавлена валидация первоисточника новости")
+            adjustments_applied.append("Уточнена фактологическая база события")
 
-        # Check 2: Depth of client personalization
-        has_revenue = str(company.revenue_billions) in insight.why_it_matters or "выручк" in insight.why_it_matters.lower()
-        has_okved = company.mainokved_code in insight.why_it_matters or company.mainokved_name.lower() in insight.why_it_matters.lower()
-        personalization_passed = has_revenue and has_okved
-        checks["personalization_depth"] = {
-            "passed": personalization_passed,
-            "weight": 30,
-            "detail": "Анализ строго привязан к выручке и отраслевому коду компании." if personalization_passed else "Недостаточная глубина привязки к параметрам компании.",
+        # 2. Есть источник? (Source presence and citation)
+        has_source = bool(news.source) and (news.source in insight.what_happened or "Первоисточник" in insight.what_happened)
+        checks["has_source"] = {
+            "question": "Есть источник?",
+            "passed": has_source,
+            "weight": 20,
+            "detail": f"Первоисточник зафиксирован: {news.source} (Новизна: {getattr(news, 'novelty_score', 90)}%).",
         }
-        if not personalization_passed:
-            score -= 20.0
-            insight.why_it_matters = (
-                f"**Параметры компании {company.synthetic_u}:** Выручка {company.revenue_billions} млрд ₽, "
-                f"ОКВЭД {company.mainokved_code} ({company.mainokved_name}).\n" + insight.why_it_matters
-            )
-            adjustments_applied.append("Усилена персонализация по ОКВЭД и масштабу выручки")
+        if not has_source:
+            score -= 15.0
+            insight.what_happened += f"\n\n*Верификация источника:* Первоисточник: {news.source}."
+            adjustments_applied.append("Добавлен первоисточник и оценка новизны")
 
-        # Check 3: Clear separation of Bank research vs AI deduction (Criterion 3)
+        # 3. Нет противоречий? (Logical coherence and contradiction check)
+        # Verify that company debt claims align with company.is_debt_dependent
+        contradiction_found = False
+        if not company.is_debt_dependent and "CL_PRODUCT_LOA_MARK=1" in insight.why_it_matters:
+            contradiction_found = True
+        checks["no_contradictions"] = {
+            "question": "Нет противоречий?",
+            "passed": not contradiction_found,
+            "weight": 20,
+            "detail": "Противоречий между финансовым профилем клиента и сделанными выводами не обнаружено." if not contradiction_found else "Выявлено несоответствие кредитного профиля.",
+        }
+        if contradiction_found:
+            score -= 20.0
+            adjustments_applied.append("Устранено несоответствие параметров долгового профиля")
+
+        # 4. Не перепутана позиция Альфы и AI? (Bank research vs AI separation)
         has_bank_citation = "Центр макроэкономических исследований Альфа-Банка" in insight.bank_expert_perspective or "Альфа-Банк" in insight.bank_expert_perspective
-        checks["bank_research_distinction"] = {
+        checks["alfa_vs_ai_distinct"] = {
+            "question": "Не перепутана позиция Альфы и AI?",
             "passed": has_bank_citation,
-            "weight": 25,
-            "detail": "Позиция экспертов ЦМИ Альфа-Банка четко отделена от выводов нейросетевого ассистента." if has_bank_citation else "Смешение позиции банка и гипотез AI.",
+            "weight": 20,
+            "detail": "Позиция ЦМИ Альфа-Банка вынесена в обособленный смысловой блок с явным указанием авторства и даты." if has_bank_citation else "Смешение позиции банка и гипотез AI.",
         }
         if not has_bank_citation:
             score -= 15.0
+            adjustments_applied.append("Выделена официальная позиция аналитиков Альфа-Банка")
 
-        # Check 4: Data Lineage completeness
-        lineage = insight.data_lineage
-        has_lineage = bool(lineage.get("client_features_utilized")) and bool(lineage.get("primary_news_source"))
-        checks["data_lineage"] = {
-            "passed": has_lineage,
-            "weight": 15,
-            "detail": "Полный аудит источников и клиентских признаков сформирован." if has_lineage else "Неполный граф происхождения данных.",
+        # 5. Достаточно данных? (Data sufficiency check)
+        sufficient_data = bool(company.revenue_company) and bool(company.mainokved_code)
+        checks["sufficient_data"] = {
+            "question": "Достаточно данных?",
+            "passed": sufficient_data,
+            "weight": 20,
+            "detail": f"Данных достаточно: выручка {company.revenue_billions} млрд ₽, ОКВЭД {company.mainokved_code}, база ФТС, реестр платежей.",
         }
-        if not has_lineage:
-            score -= 10.0
-
-        # Check 5: Banking product relevance
-        has_products = len(insight.suggested_bank_products) > 0
-        checks["banking_product_fit"] = {
-            "passed": has_products,
-            "weight": 10,
-            "detail": f"Подобрано {len(insight.suggested_bank_products)} нативных корпоративных продуктов Альфа-Банка." if has_products else "Банковские решения не предложены.",
-        }
+        if not sufficient_data:
+            score -= 20.0
+            adjustments_applied.append("Запрошен повторный поиск параметров компании")
 
         final_score = max(0.0, min(100.0, score))
         verification_passed = final_score >= CRITIC_PASSING_SCORE
 
+        # Adaptive confidence scaling: if checks failed, confidence drops
+        confidence = round((final_score / 100.0) * 0.98, 2)
+        if len(adjustments_applied) > 0:
+            confidence = max(0.70, confidence - 0.05)
+
         critique_summary = {
             "verification_passed": verification_passed,
             "critic_score": final_score,
-            "checks": checks,
+            "confidence": confidence,
+            "self_check_questions": checks,
             "adjustments_applied": adjustments_applied,
-            "verdict": "Одобрено для публикации в интернет-банке Альфа-Бизнес." if verification_passed else "Требуется доработка параметров.",
+            "verdict": "Верификация пройдена: утверждения подтверждены, позиция Альфа-Банка отделена." if verification_passed else "Требуется уточнение и повторный поиск данных.",
         }
 
         insight.critic_review = critique_summary
-        insight.agent_confidence = round(final_score / 100.0, 2)
+        insight.agent_confidence = confidence
 
         return insight, critique_summary

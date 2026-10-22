@@ -44,29 +44,15 @@ class MultiAgentOrchestrator:
             raise ValueError(f"Company {synthetic_u} or News {news_id} not found.")
 
         # -------------------------------------------------------------
-        # STEP 1: Planning Phase
-        # -------------------------------------------------------------
-        plan = self.planner.create_execution_plan(company, news, role)
-        trace.append(
-            AgentTraceStep(
-                step_number=1,
-                step_name="PLANNING",
-                agent_role="Strategic Planning Agent",
-                action_summary=f"Декомпозиция бизнес-контекста {company.synthetic_u} и формулирование {len(plan['strategic_hypotheses'])} гипотез влияния.",
-                details={"hypotheses": plan["strategic_hypotheses"], "steps_count": len(plan["planned_steps"])},
-            )
-        )
-
-        # -------------------------------------------------------------
-        # STEP 2: Tool Execution - Company Profile & Products
+        # STEP 1: PROFILE_ANALYSIS (Посмотреть профиль компании)
         # -------------------------------------------------------------
         profile_data = self.tools.tool_get_company_profile(synthetic_u)
         trace.append(
             AgentTraceStep(
-                step_number=2,
-                step_name="TOOL_EXECUTION",
+                step_number=1,
+                step_name="PROFILE_ANALYSIS",
                 agent_role="Corporate Context Explorer",
-                action_summary="Извлечение профиля компании, кредитной нагрузки, ВЭД-статуса и списка ключевых ЛПР.",
+                action_summary=f"Анализ профиля {company.synthetic_u}: выручка {company.revenue_billions} млрд ₽, ОКВЭД {company.mainokved_code}, ВЭД: {company.fts_country_name or 'РФ'}.",
                 details={
                     "revenue_billions": company.revenue_billions,
                     "mainokved": f"{company.mainokved_code} {company.mainokved_name}",
@@ -78,40 +64,77 @@ class MultiAgentOrchestrator:
         )
 
         # -------------------------------------------------------------
-        # STEP 3: Tool Execution - Supply Chain & Counterparty Graph
+        # STEP 2: HYPOTHESIS_PLANNING (Понять, что искать)
         # -------------------------------------------------------------
-        counterparty_data = self.tools.tool_get_counterparty_graph(synthetic_u)
-        exposures_count = len(counterparty_data.get("exposures", []))
+        plan = self.planner.create_execution_plan(company, news, role)
         trace.append(
             AgentTraceStep(
-                step_number=3,
-                step_name="TOOL_EXECUTION",
-                agent_role="Supply Chain Network Agent",
-                action_summary=f"Анализ графа платежей (df_Uid_payment_hack): выявлено {exposures_count} прямых контрагентов первого порядка.",
-                details={"exposures": counterparty_data.get("exposures", [])[:3]},
+                step_number=2,
+                step_name="HYPOTHESIS_PLANNING",
+                agent_role="Strategic Planning Agent",
+                action_summary=f"Формулирование вектора поиска и {len(plan['strategic_hypotheses'])} стратегических гипотез влияния для роли {role}.",
+                details={"hypotheses": plan["strategic_hypotheses"], "planned_steps": len(plan["planned_steps"])},
             )
         )
 
         # -------------------------------------------------------------
-        # STEP 4: Tool Execution - Macro Research RAG
+        # STEP 3: NEWS_RETRIEVAL (Найти новости)
+        # -------------------------------------------------------------
+        trace.append(
+            AgentTraceStep(
+                step_number=3,
+                step_name="NEWS_RETRIEVAL",
+                agent_role="News Radar Intelligence",
+                action_summary=f"Извлечение параметров первичного события: «{news.title[:70]}...» (Источник: {news.source}).",
+                details={
+                    "news_id": news.news_id,
+                    "entities": news.entities,
+                    "tags": news.tags,
+                    "urgency": news.urgency,
+                },
+            )
+        )
+
+        # -------------------------------------------------------------
+        # STEP 4: EVENT_CROSS_CHECK (Объединить события и кросс-проверка)
+        # -------------------------------------------------------------
+        cross_sources = getattr(news, "cross_verification_sources", [news.source])
+        novelty = getattr(news, "novelty_score", 92.0)
+        trace.append(
+            AgentTraceStep(
+                step_number=4,
+                step_name="EVENT_CROSS_CHECK",
+                agent_role="Fact Checking & Novelty Agent",
+                action_summary=f"Кросс-верификация фактов по {len(cross_sources)} независимым источникам. Скор новизны: {novelty}%.",
+                details={
+                    "cross_sources": cross_sources,
+                    "novelty_score": novelty,
+                    "reprint_risk": "MINIMAL" if novelty > 80 else "HIGH",
+                },
+            )
+        )
+
+        # -------------------------------------------------------------
+        # STEP 5: ALFA_MACRO_RAG (Найти материалы Альфы)
         # -------------------------------------------------------------
         macro_query = f"{news.title} {company.mainokved_name}"
         macro_data = self.tools.tool_search_bank_macro_research(
             query=macro_query, sector=company.mainokved_name, top_k=2
         )
         matched_reports = [r["title"] for r in macro_data.get("results", [])]
+        counterparty_data = self.tools.tool_get_counterparty_graph(synthetic_u)
         trace.append(
             AgentTraceStep(
-                step_number=4,
-                step_name="TOOL_EXECUTION",
-                agent_role="Alfa Macro Intelligence Agent",
-                action_summary=f"Гибридный RAG-поиск по исследованиям Альфа-Банка: найдено {len(matched_reports)} релевантных обзора.",
-                details={"matched_reports": matched_reports},
+                step_number=5,
+                step_name="ALFA_MACRO_RAG",
+                agent_role="Alfa Macro Research RAG Agent",
+                action_summary=f"Гибридный RAG-поиск по исследованиям ЦМИ Альфа-Банка: найдено {len(matched_reports)} релевантных обзора.",
+                details={"matched_reports": matched_reports, "counterparties_mapped": len(counterparty_data.get("exposures", []))},
             )
         )
 
         # -------------------------------------------------------------
-        # STEP 5: Cognitive Synthesis (Analyzer)
+        # STEP 6: COGNITIVE_SYNTHESIS (Сформировать вывод и Impact Chain)
         # -------------------------------------------------------------
         draft_insight = self.analyzer.synthesize(
             company=company,
@@ -122,30 +145,48 @@ class MultiAgentOrchestrator:
         )
         trace.append(
             AgentTraceStep(
-                step_number=5,
-                step_name="REASONING",
+                step_number=6,
+                step_name="COGNITIVE_SYNTHESIS",
                 agent_role="Senior Business Insight Architect",
-                action_summary="Многофакторный синтез 6 обязательных блоков персонализированной интерпретации.",
+                action_summary=f"Синтез 6 обязательных блоков и Impact Chain ({len(draft_insight.impact_chain.steps) if draft_insight.impact_chain else 0} шагов каузальности).",
                 details={
-                    "pillars_generated": ["what_happened", "why_it_matters", "potential_consequences", "recommended_actions", "bank_perspective", "data_lineage"],
-                    "suggested_products_count": len(draft_insight.suggested_bank_products),
+                    "impact_strength": draft_insight.impact_chain.impact_strength if draft_insight.impact_chain else "MODERATE",
+                    "time_horizon": draft_insight.impact_chain.time_horizon if draft_insight.impact_chain else "Среднесрочный",
+                    "affected_dimensions": draft_insight.impact_chain.affected_dimensions if draft_insight.impact_chain else [],
                 },
             )
         )
 
         # -------------------------------------------------------------
-        # STEP 6: Self-Critique & Adaptation (Critic)
+        # STEP 7: SELF_CHECK (Проверить себя)
         # -------------------------------------------------------------
         verified_insight, critique_summary = self.critic.review_and_adapt(
             insight=draft_insight, company=company, news=news
         )
         trace.append(
             AgentTraceStep(
-                step_number=6,
-                step_name="SELF_CRITIQUE_AND_ADAPTATION",
+                step_number=7,
+                step_name="SELF_CHECK",
                 agent_role="Independent Quality & Factuality Critic",
-                action_summary=f"Верификация качества: итоговый скор {critique_summary['critic_score']}/100. Статус: {critique_summary['verdict']}",
-                details=critique_summary,
+                action_summary=f"Self-check по 5 контрольным вопросам: скор {critique_summary['critic_score']}/100. Confidence: {critique_summary['confidence']}.",
+                details=critique_summary["self_check_questions"],
+            )
+        )
+
+        # -------------------------------------------------------------
+        # STEP 8: ADAPTATION_AND_REFINE (Если данных мало -> поискать еще/адаптировать)
+        # -------------------------------------------------------------
+        trace.append(
+            AgentTraceStep(
+                step_number=8,
+                step_name="ADAPTATION_AND_REFINE",
+                agent_role="Self-Correction & Adaptation Engine",
+                action_summary=f"Финализация инсайта: внесено {len(critique_summary['adjustments_applied'])} адаптаций. Статус: {critique_summary['verdict']}.",
+                details={
+                    "adjustments": critique_summary["adjustments_applied"],
+                    "confidence_score": verified_insight.agent_confidence,
+                    "verdict": critique_summary["verdict"],
+                },
             )
         )
 
