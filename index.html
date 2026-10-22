@@ -2,394 +2,819 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Альфа-Инсайт | Apple Liquid Glass Edition</title>
-  <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Альфа-Онлайн | Корпоративный радар событий</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', sans-serif;
-      background-color: #06080D;
-      background-image: 
-        radial-gradient(circle at 10% 0%, rgba(239, 49, 36, 0.08) 0%, transparent 45%),
-        radial-gradient(circle at 90% 15%, rgba(56, 189, 248, 0.05) 0%, transparent 40%),
-        radial-gradient(circle at 50% 90%, rgba(147, 51, 234, 0.04) 0%, transparent 50%);
-      background-attachment: fixed;
-      color: #F1F5F9;
-      -webkit-font-smoothing: antialiased;
+    :root {
+      --alfa-bg: #111214;
+      --alfa-surface: #1B1C20;
+      --alfa-card: #222328;
+      --alfa-card-hover: #2B2C33;
+      --alfa-card-light: #2E3038;
+      --alfa-red: #EF3124;
+      --alfa-red-dark: #C91E12;
+      --alfa-red-light: rgba(239, 49, 36, 0.15);
+      --alfa-red-border: rgba(239, 49, 36, 0.35);
+      --text-white: #FFFFFF;
+      --text-gray: #8E93A0;
+      --text-dim: #606470;
+      --border-subtle: rgba(255, 255, 255, 0.08);
+      --border-card: rgba(255, 255, 255, 0.06);
+      --radius-pill: 9999px;
+      --radius-xl: 24px;
+      --radius-lg: 18px;
+      --radius-md: 14px;
+      --radius-sm: 10px;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
     }
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-font-smoothing: antialiased; }
+    body.alfa-app {
+      background-color: var(--alfa-bg);
+      color: var(--text-white);
+      min-height: 100vh;
+      line-height: 1.45;
+      overflow-x: hidden;
+      padding-bottom: 50px;
+    }
+    .app-top-bar {
+      position: sticky; top: 0; z-index: 100;
+      background-color: var(--alfa-bg);
+      padding: 12px 20px;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+    .top-bar-inner {
+      max-width: 1440px; margin: 0 auto;
+      display: flex; justify-content: space-between; align-items: center; gap: 14px; flex-wrap: wrap;
+    }
+    .user-profile-pill {
+      display: flex; align-items: center; gap: 10px;
+      background-color: var(--alfa-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-pill);
+      padding: 6px 14px 6px 8px; cursor: pointer; transition: all 0.2s ease;
+    }
+    .user-profile-pill:hover { background-color: var(--alfa-card); }
+    .profile-avatar {
+      width: 32px; height: 32px; border-radius: 50%;
+      background: #2D2F36; color: #A0A5B5;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .profile-meta { display: flex; flex-direction: column; }
+    .company-badge-name { font-size: 13px; font-weight: 700; color: var(--text-white); line-height: 1.2; }
+    .company-sub-role { font-size: 10.5px; color: var(--text-gray); }
+    .profile-switch-btn { color: var(--text-gray); margin-left: 4px; }
+    .app-nav-dock {
+      display: flex; align-items: center;
+      background-color: var(--alfa-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-pill);
+      padding: 4px; gap: 2px;
+    }
+    .dock-tab {
+      background: transparent; border: none; border-radius: var(--radius-pill);
+      padding: 7px 16px; color: var(--text-gray); font-size: 13px; font-weight: 500;
+      display: flex; align-items: center; gap: 6px; cursor: pointer; transition: all 0.2s ease;
+      white-space: nowrap;
+    }
+    .dock-tab:hover { color: var(--text-white); }
+    .dock-tab.active { background-color: #2D2F36; color: var(--text-white); font-weight: 600; }
+    .dock-tab.dock-heart { padding: 7px 12px; }
+    .heart-icon { font-size: 15px; }
 
-    /* Apple Liquid Glass Tokens */
-    .liquid-glass {
-      background: rgba(18, 24, 38, 0.55);
-      backdrop-filter: blur(26px) saturate(190%);
-      -webkit-backdrop-filter: blur(26px) saturate(190%);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      border-top: 1px solid rgba(255, 255, 255, 0.18);
-      box-shadow: 0 16px 36px -8px rgba(0, 0, 0, 0.5), inset 0 1px 0 0 rgba(255, 255, 255, 0.12);
-      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    .app-main-layout {
+      max-width: 1440px; margin: 20px auto 0; padding: 0 20px;
+      display: grid; grid-template-columns: 320px 1fr; gap: 28px;
     }
+    @media (max-width: 960px) {
+      .app-main-layout { grid-template-columns: 1fr; gap: 20px; }
+    }
+    .left-sidebar { display: flex; flex-direction: column; gap: 16px; }
+    .sidebar-header { display: flex; justify-content: space-between; align-items: center; padding: 0 4px; }
+    .sidebar-title { font-size: 22px; font-weight: 800; letter-spacing: -0.4px; color: var(--text-white); }
+    .gear-btn { background: transparent; border: none; color: var(--text-gray); cursor: pointer; padding: 4px; }
+    .gear-btn:hover { color: var(--text-white); }
+    .total-balance-card {
+      background-color: var(--alfa-surface); border-radius: var(--radius-lg);
+      padding: 16px; position: relative; cursor: pointer; transition: background-color 0.2s ease;
+    }
+    .total-balance-card:hover { background-color: var(--alfa-card); }
+    .balance-sub { font-size: 11.5px; color: var(--text-gray); display: flex; align-items: center; gap: 6px; }
+    .balance-value { font-size: 24px; font-weight: 800; color: var(--text-white); margin-top: 6px; letter-spacing: -0.5px; }
+    .card-chevron { position: absolute; right: 16px; top: 50%; transform: translateY(-50%); color: var(--text-dim); }
+    .product-group { display: flex; flex-direction: column; gap: 8px; }
+    .group-header { display: flex; justify-content: space-between; align-items: center; padding: 4px 6px; cursor: pointer; }
+    .group-name { font-size: 13.5px; font-weight: 600; color: var(--text-white); }
+    .group-arrow { font-size: 13px; color: var(--text-gray); }
+    .group-items { display: flex; flex-direction: column; gap: 8px; }
+    .product-item {
+      background-color: var(--alfa-surface); border-radius: var(--radius-md);
+      padding: 12px 14px; display: flex; justify-content: space-between; align-items: center;
+      transition: background-color 0.2s ease;
+    }
+    .product-item:hover { background-color: var(--alfa-card); }
+    .item-info { display: flex; flex-direction: column; gap: 2px; }
+    .item-name-row { display: flex; align-items: center; gap: 8px; }
+    .item-name { font-size: 11.5px; color: var(--text-gray); }
+    .item-amount { font-size: 14px; font-weight: 700; color: var(--text-white); }
+    .badge-rate { font-size: 10px; font-weight: 700; background-color: rgba(255, 255, 255, 0.1); padding: 1px 6px; border-radius: 6px; }
+    .badge-ved { font-size: 10px; font-weight: 700; background-color: rgba(56, 189, 248, 0.15); color: #38BDF8; padding: 1px 6px; border-radius: 6px; }
+    .mini-alfa-card {
+      width: 52px; height: 34px;
+      background: linear-gradient(135deg, #EF3124 0%, #C91E12 100%);
+      border-radius: 6px; padding: 4px;
+      display: flex; flex-direction: column; justify-content: space-between; position: relative;
+    }
+    .mini-alfa-card.dark-red { background: linear-gradient(135deg, #A81B10 0%, #690E07 100%); }
+    .card-alfa-badge { font-size: 9px; font-weight: 900; color: #FFF; }
+    .card-number { font-size: 8px; font-weight: 700; color: #FFF; }
+    .card-system { font-size: 6.5px; font-weight: 800; color: #FFF; align-self: flex-end; }
+    .card-close { font-size: 11px; font-weight: 800; color: rgba(255, 255, 255, 0.6); position: absolute; right: 5px; bottom: 3px; }
+    .btn-new-product {
+      background-color: #FFFFFF; color: #111214; border: none; border-radius: var(--radius-pill);
+      padding: 13px; font-size: 13.5px; font-weight: 700; text-align: center; cursor: pointer; margin-top: 4px;
+    }
+    .btn-new-product:hover { opacity: 0.92; }
+    .client-mini-spec {
+      background-color: rgba(255, 255, 255, 0.02); border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md); padding: 12px; display: flex; flex-direction: column; gap: 6px; font-size: 11px;
+    }
+    .spec-row { display: flex; justify-content: space-between; color: var(--text-gray); }
+    .spec-row strong { color: var(--text-white); font-weight: 600; text-align: right; max-width: 65%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
-    .liquid-glass-subtle {
-      background: rgba(255, 255, 255, 0.03);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      border: 1px solid rgba(255, 255, 255, 0.06);
-      border-top: 1px solid rgba(255, 255, 255, 0.14);
-      box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.08);
+    .main-content-pane { display: flex; flex-direction: column; gap: 24px; }
+    .search-action-bar { display: flex; align-items: center; gap: 10px; }
+    .search-input-pill {
+      flex-grow: 1; background-color: var(--alfa-surface); border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-pill); padding: 11px 18px; display: flex; align-items: center; gap: 10px;
     }
+    .search-input-pill input { background: transparent; border: none; outline: none; font-size: 13px; color: var(--text-white); width: 100%; }
+    .search-icon { color: var(--text-dim); }
+    .action-square-btn {
+      width: 44px; height: 44px; border-radius: var(--radius-md); background-color: var(--alfa-surface);
+      border: 1px solid var(--border-subtle); color: var(--text-gray); display: flex; align-items: center;
+      justify-content: center; cursor: pointer; flex-shrink: 0;
+    }
+    .action-square-btn:hover { background-color: var(--alfa-card); color: var(--text-white); }
+    .section-container { display: flex; flex-direction: column; gap: 12px; }
+    .section-header-row { display: flex; justify-content: space-between; align-items: center; padding: 0 4px; }
+    .section-heading { font-size: 18px; font-weight: 800; color: var(--text-white); }
+    .section-subheading { font-size: 11.5px; color: var(--text-gray); margin-top: 1px; }
+    .carousel-nav-arrows { display: flex; gap: 6px; }
+    .nav-circle-btn {
+      width: 28px; height: 28px; border-radius: 50%; background-color: var(--alfa-surface);
+      border: 1px solid var(--border-subtle); color: var(--text-gray); font-size: 15px;
+      display: flex; align-items: center; justify-content: center; cursor: pointer;
+    }
+    .nav-circle-btn:hover { background-color: var(--alfa-card); color: var(--text-white); }
 
-    .liquid-glass:hover {
-      background: rgba(26, 35, 54, 0.65);
-      border-color: rgba(255, 255, 255, 0.15);
-      border-top-color: rgba(255, 255, 255, 0.28);
-      transform: translateY(-2px);
-      box-shadow: 0 22px 46px -10px rgba(0, 0, 0, 0.65), inset 0 1px 0 0 rgba(255, 255, 255, 0.18);
+    .stories-carousel {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 12px; overflow-x: auto; scroll-behavior: smooth; padding-bottom: 4px;
     }
+    .story-card {
+      background-color: var(--alfa-surface); border-radius: var(--radius-lg);
+      overflow: hidden; display: flex; flex-direction: column; cursor: pointer;
+      border: 1px solid var(--border-card); transition: transform 0.2s ease;
+    }
+    .story-card:hover { transform: translateY(-2px); }
+    .story-graphic-top {
+      height: 100px; background: linear-gradient(135deg, #3A2022 0%, #1F1B2A 100%);
+      padding: 12px; display: flex; flex-direction: column; justify-content: space-between;
+    }
+    .story-graphic-top.lavender-bg { background: linear-gradient(135deg, #312E4A 0%, #222330 100%); }
+    .story-graphic-top.blue-bg { background: linear-gradient(135deg, #1C2D4A 0%, #1A2130 100%); }
+    .story-graphic-top.dark-bg { background: linear-gradient(135deg, #2A2520 0%, #1A1C20 100%); }
+    .story-big-badge { font-size: 20px; font-weight: 800; color: var(--text-white); }
+    .story-sub-tag { font-size: 9.5px; font-weight: 700; color: rgba(255, 255, 255, 0.7); text-transform: uppercase; }
+    .story-text-bottom { padding: 12px 14px 14px; display: flex; flex-direction: column; gap: 4px; }
+    .story-text-bottom h4 { font-size: 13px; font-weight: 700; color: var(--text-white); line-height: 1.35; }
+    .story-text-bottom p { font-size: 11px; color: var(--text-gray); line-height: 1.35; }
 
-    .apple-pill-btn {
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      border-top: 1px solid rgba(255, 255, 255, 0.16);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      border-radius: 9999px;
-      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    .quick-actions-row { display: flex; align-items: center; gap: 20px; overflow-x: auto; padding: 6px 4px 10px; }
+    .quick-action-item { display: flex; flex-direction: column; align-items: center; gap: 8px; cursor: pointer; flex-shrink: 0; }
+    .action-circle-icon {
+      width: 54px; height: 54px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+      transition: transform 0.2s ease;
     }
+    .quick-action-item:hover .action-circle-icon { transform: scale(1.06); }
+    .icon-rainbow { background: linear-gradient(135deg, #EF3124 0%, #F59E0B 50%, #38BDF8 100%); color: #FFF; }
+    .icon-grey { background-color: var(--alfa-surface); border: 1px solid var(--border-subtle); color: var(--text-white); }
+    .icon-avatar { background-color: #2D313D; color: #8E93A0; }
+    .icon-initials { background-color: #4C2623; color: #EF3124; font-weight: 800; font-size: 14px; }
+    .action-label { font-size: 11.5px; font-weight: 500; color: var(--text-gray); text-align: center; }
 
-    .apple-pill-btn:hover {
-      background: rgba(255, 255, 255, 0.1);
-      border-color: rgba(255, 255, 255, 0.2);
+    .feed-filter-chips { display: flex; gap: 6px; }
+    .chip {
+      background-color: var(--alfa-surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-pill);
+      padding: 5px 12px; font-size: 11px; font-weight: 600; color: var(--text-gray); cursor: pointer;
     }
+    .chip.active { background-color: #2D2F36; color: var(--text-white); border-color: rgba(255, 255, 255, 0.2); }
+    .news-feed-list { display: flex; flex-direction: column; gap: 10px; }
+    .news-item-card {
+      background-color: var(--alfa-surface); border: 1px solid var(--border-card); border-radius: var(--radius-lg);
+      padding: 16px 18px; display: flex; flex-direction: column; gap: 10px; cursor: pointer;
+      transition: background-color 0.2s ease;
+    }
+    .news-item-card:hover { background-color: var(--alfa-card); }
+    .news-item-top { display: flex; justify-content: space-between; align-items: center; font-size: 10.5px; font-weight: 700; }
+    .news-category-tag { color: var(--text-gray); }
+    .news-score-badge { padding: 3px 8px; border-radius: var(--radius-pill); font-size: 10px; }
+    .score-critical { background-color: var(--alfa-red-light); color: #F87171; border: 1px solid var(--alfa-red-border); }
+    .score-high { background-color: rgba(245, 158, 11, 0.15); color: #FBBF24; border: 1px solid rgba(245, 158, 11, 0.3); }
+    .news-item-title { font-size: 14.5px; font-weight: 700; color: var(--text-white); line-height: 1.35; }
+    .news-item-summary { font-size: 12px; color: var(--text-gray); line-height: 1.45; }
+    .news-item-footer { display: flex; justify-content: space-between; align-items: center; border-top: 1px solid rgba(255, 255, 255, 0.05); padding-top: 10px; font-size: 11px; }
+    .news-source-label { color: var(--text-dim); }
+    .open-insight-link { color: var(--alfa-red); font-weight: 700; }
 
-    .apple-pill-btn.active {
-      background: linear-gradient(180deg, rgba(239, 49, 36, 0.9) 0%, rgba(200, 29, 18, 0.9) 100%);
-      color: #FFFFFF;
-      border: 1px solid rgba(255, 255, 255, 0.25);
-      border-top: 1px solid rgba(255, 255, 255, 0.4);
-      box-shadow: 0 4px 18px rgba(239, 49, 36, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.3);
-    }
+    .tab-view { display: none; }
+    .tab-view.active { display: flex; flex-direction: column; gap: 18px; }
+    .sub-view-header h2 { font-size: 20px; font-weight: 800; color: var(--text-white); }
+    .sub-view-header p { font-size: 12px; color: var(--text-gray); margin-top: 2px; }
 
-    .impact-step-chain {
-      position: relative;
+    .graph-card-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+    @media (max-width: 900px) { .graph-card-layout { grid-template-columns: 1fr; } }
+    .visual-network-box, .counterparty-table-box {
+      background-color: var(--alfa-surface); border: 1px solid var(--border-card); border-radius: var(--radius-lg); padding: 18px;
     }
-    .impact-step-chain:not(:last-child)::after {
-      content: '➔';
-      position: absolute;
-      right: -12px;
-      top: 50%;
-      transform: translateY(-50%);
-      color: rgba(255, 255, 255, 0.3);
-      font-size: 13px;
-      font-weight: 700;
-      z-index: 10;
-    }
-    @media (max-width: 768px) {
-      .impact-step-chain:not(:last-child)::after {
-        content: '↓';
-        right: 50%;
-        bottom: -14px;
-        top: auto;
-        transform: translateX(50%);
-      }
-    }
+    .box-title { font-size: 13.5px; font-weight: 700; color: var(--text-white); margin-bottom: 12px; }
+    .network-svg-wrap { height: 300px; background-color: #0E0F12; border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; }
+    .alfa-data-table { width: 100%; border-collapse: collapse; font-size: 11.5px; }
+    .alfa-data-table th { text-align: left; padding: 8px 10px; color: var(--text-dim); font-size: 10px; text-transform: uppercase; border-bottom: 1px solid var(--border-subtle); }
+    .alfa-data-table td { padding: 10px; color: var(--text-gray); border-bottom: 1px solid rgba(255, 255, 255, 0.03); }
 
-    /* Scrollbars */
-    ::-webkit-scrollbar {
-      width: 5px;
-      height: 5px;
+    .chat-app-box {
+      background-color: var(--alfa-surface); border: 1px solid var(--border-card); border-radius: var(--radius-xl); padding: 16px;
+      display: flex; flex-direction: column; height: 500px;
     }
-    ::-webkit-scrollbar-track {
-      background: transparent;
+    .chat-thread { flex-grow: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; padding: 8px 4px; }
+    .chat-msg { display: flex; gap: 10px; max-width: 82%; }
+    .chat-msg.user { align-self: flex-end; flex-direction: row-reverse; }
+    .msg-avatar { width: 28px; height: 28px; border-radius: 50%; background-color: var(--alfa-red); color: #FFF; font-size: 12px; font-weight: 800; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .chat-msg.user .msg-avatar { background-color: #38BDF8; }
+    .msg-bubble { background-color: var(--alfa-card); border-radius: var(--radius-lg); padding: 12px 14px; font-size: 12.5px; color: var(--text-white); }
+    .chat-msg.user .msg-bubble { background: linear-gradient(135deg, #EF3124 0%, #C91E12 100%); color: #FFF; }
+    .chat-bottom-bar { display: flex; gap: 10px; padding-top: 12px; border-top: 1px solid var(--border-subtle); }
+    .chat-bottom-bar input { flex-grow: 1; background-color: var(--alfa-card); border: 1px solid var(--border-subtle); border-radius: var(--radius-pill); padding: 10px 16px; font-size: 12.5px; color: var(--text-white); outline: none; }
+    .chat-send-btn { width: 40px; height: 40px; border-radius: 50%; background-color: var(--alfa-red); color: #FFF; border: none; cursor: pointer; }
+
+    /* Modal / Bottom Sheet */
+    .sheet-backdrop {
+      position: fixed; inset: 0; background-color: rgba(0, 0, 0, 0.75); backdrop-filter: blur(8px);
+      z-index: 200; display: flex; align-items: flex-end; justify-content: center;
     }
-    ::-webkit-scrollbar-thumb {
-      background: rgba(255, 255, 255, 0.15);
-      border-radius: 9999px;
+    .sheet-backdrop.hidden { display: none; }
+    .sheet-modal {
+      background-color: var(--alfa-surface); border-top: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 24px 24px 0 0; max-width: 900px; width: 100%; max-height: 90vh; display: flex; flex-direction: column;
+      animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
     }
-    ::-webkit-scrollbar-thumb:hover {
-      background: rgba(239, 49, 36, 0.6);
-    }
+    @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+    .sheet-header { padding: 14px 20px; border-bottom: 1px solid var(--border-subtle); }
+    .sheet-handle { width: 36px; height: 4px; background-color: rgba(255, 255, 255, 0.2); border-radius: 2px; margin: 0 auto 10px; }
+    .sheet-top-row { display: flex; justify-content: space-between; align-items: center; }
+    .badge-alfa-tag { font-size: 10px; font-weight: 800; color: var(--alfa-red); }
+    .badge-relevance-chip { font-size: 10px; font-weight: 700; background: var(--alfa-red-light); color: #F87171; padding: 2px 8px; border-radius: var(--radius-pill); }
+    .sheet-close-btn { background: transparent; border: none; color: var(--text-gray); font-size: 16px; cursor: pointer; }
+    .sheet-title { font-size: 16px; font-weight: 800; color: var(--text-white); margin-top: 6px; }
+    .sheet-body-content { padding: 16px 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 16px; }
+    .grounding-matrix-box, .impact-chain-section { background-color: var(--alfa-card); border-radius: var(--radius-md); padding: 14px; display: flex; flex-direction: column; gap: 10px; }
+    .matrix-grid-4 { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; }
+    .matrix-tile { background-color: rgba(255, 255, 255, 0.03); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 10px; display: flex; flex-direction: column; gap: 4px; }
+    .matrix-tile.tile-alfa { border-color: var(--alfa-red-border); background-color: var(--alfa-red-light); }
+    .matrix-tile.tile-insight { border-color: rgba(16, 185, 129, 0.35); background-color: rgba(16, 185, 129, 0.08); }
+    .tile-label { font-size: 9.5px; font-weight: 700; color: var(--text-dim); text-transform: uppercase; }
+    .tile-val { font-size: 11.5px; color: var(--text-white); }
+    .chain-flow-steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 8px; }
+    .chain-step-chip { background-color: rgba(255, 255, 255, 0.03); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 8px; }
+    .chip-step-num { font-size: 9px; font-weight: 800; color: var(--alfa-red); }
+    .chip-step-title { font-size: 11px; font-weight: 600; color: var(--text-white); }
+    .chip-step-metric { font-size: 9.5px; font-weight: 700; color: var(--text-gray); display: flex; justify-content: space-between; margin-top: 4px; }
+    .self-check-card { background-color: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.25); border-radius: var(--radius-md); padding: 12px; display: flex; justify-content: space-between; align-items: center; font-size: 11px; }
+    .check-icon { width: 20px; height: 20px; border-radius: 50%; background-color: #10B981; color: #FFF; display: flex; align-items: center; justify-content: center; font-weight: 800; }
+    .six-pillars-accordion { display: flex; flex-direction: column; gap: 8px; }
+    .pillar-box { background-color: var(--alfa-card); border-radius: var(--radius-md); padding: 12px 14px; }
+    .pillar-box-title { font-size: 12.5px; font-weight: 700; color: var(--text-white); margin-bottom: 6px; }
+    .pillar-box-text { font-size: 11.5px; color: var(--text-gray); }
+    .prod-banner { background-color: var(--alfa-card); border-radius: var(--radius-md); padding: 10px 12px; display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+    .prod-banner-title { font-size: 12px; font-weight: 700; color: var(--text-white); }
+    .prod-banner-desc { font-size: 10.5px; color: var(--text-gray); }
+    .prod-banner-btn { background-color: var(--alfa-red); color: #FFF; border: none; border-radius: var(--radius-pill); padding: 6px 12px; font-size: 11px; font-weight: 700; cursor: pointer; }
+    .sheet-footer { padding: 12px 20px; border-top: 1px solid var(--border-subtle); display: flex; justify-content: flex-end; }
+    .sheet-dismiss-btn { background-color: var(--alfa-card); color: var(--text-white); border: 1px solid var(--border-subtle); border-radius: var(--radius-pill); padding: 8px 18px; font-size: 12px; font-weight: 600; cursor: pointer; }
+
+    .client-modal-backdrop { position: fixed; inset: 0; background-color: rgba(0, 0, 0, 0.75); z-index: 300; display: flex; align-items: center; justify-content: center; padding: 16px; }
+    .client-modal-backdrop.hidden { display: none; }
+    .client-modal-card { background-color: var(--alfa-surface); border-radius: var(--radius-xl); max-width: 440px; width: 100%; padding: 20px; display: flex; flex-direction: column; gap: 16px; }
+    .modal-header { display: flex; justify-content: space-between; align-items: center; }
+    .modal-header h3 { font-size: 16px; font-weight: 800; color: var(--text-white); }
+    .modal-close { background: transparent; border: none; color: var(--text-gray); font-size: 16px; cursor: pointer; }
+    .alfa-native-select { background-color: var(--alfa-card); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 10px 12px; font-size: 12.5px; color: var(--text-white); outline: none; width: 100%; }
+    .btn-save-modal { background-color: var(--alfa-red); color: #FFF; border: none; border-radius: var(--radius-pill); padding: 9px 20px; font-size: 13px; font-weight: 700; cursor: pointer; }
   </style>
 </head>
-<body class="p-3 sm:p-6 min-h-screen">
-  <div class="max-w-7xl mx-auto space-y-4">
+<body class="alfa-app">
 
-    <!-- Apple Floating Liquid Glass Navigation Bar -->
-    <header class="liquid-glass rounded-2xl sm:rounded-3xl p-3.5 sm:p-4 flex flex-wrap items-center justify-between gap-4 sticky top-3 z-50">
-      <div class="flex items-center gap-3">
-        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-[#EF3124] to-[#B91C1C] flex items-center justify-center font-extrabold text-xl text-white shadow-lg shadow-red-600/30 border-t border-white/30">
-          А
+  <!-- TOP APP BAR (Exact match to reference screenshot) -->
+  <header class="app-top-bar">
+    <div class="top-bar-inner">
+      <div class="user-profile-pill" onclick="toggleModal()">
+        <div class="profile-avatar">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+            <circle cx="12" cy="7" r="4"></circle>
+          </svg>
         </div>
-        <div>
-          <div class="flex items-center gap-2">
-            <span class="text-[10px] font-bold text-[#EF3124] tracking-wider uppercase">Альфа-Бизнес</span>
-            <span class="text-[9px] font-medium text-slate-400 bg-white/5 border border-white/10 px-2 py-0.5 rounded-full">Крупный корпоративный бизнес (>15 млрд ₽)</span>
-          </div>
-          <h1 class="text-sm sm:text-base font-semibold text-white tracking-tight">Альфа-Инсайт | Радар Событий</h1>
+        <div class="profile-meta">
+          <span class="company-badge-name" id="topCompanyName">ПАО «АгроСоюз»</span>
+          <span class="company-sub-role" id="topRoleName">Генеральный директор</span>
+        </div>
+        <div class="profile-switch-btn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
         </div>
       </div>
 
-      <!-- Segmented Selectors -->
-      <div class="flex flex-wrap items-center gap-2.5">
-        <div class="flex flex-col">
-          <label class="text-[9px] font-semibold text-slate-400 uppercase tracking-wider mb-0.5">Клиент:</label>
-          <select id="clientSelect" onchange="renderApp()" class="text-xs bg-white/5 text-slate-100 border border-white/10 border-t-white/20 rounded-xl px-3 py-1.5 focus:outline-none focus:border-[#EF3124] cursor-pointer">
+      <nav class="app-nav-dock">
+        <button class="dock-tab active" onclick="switchTab('main')">
+          <span class="dock-icon">🏠</span>
+          <span class="dock-label">Главный</span>
+        </button>
+        <button class="dock-tab" onclick="switchTab('payments')">
+          <span class="dock-icon">⇄</span>
+          <span class="dock-label">Платежи</span>
+        </button>
+        <button class="dock-tab dock-heart" onclick="switchTab('favorites')">
+          <span class="dock-icon heart-icon">❤️</span>
+        </button>
+        <button class="dock-tab" onclick="switchTab('research')">
+          <span class="dock-icon">🕒</span>
+          <span class="dock-label">История / ЦМИ</span>
+        </button>
+        <button class="dock-tab" onclick="switchTab('chat')">
+          <span class="dock-icon">💬</span>
+          <span class="dock-label">Чаты</span>
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <!-- MAIN TWO-COLUMN CONTAINER -->
+  <main class="app-main-layout">
+    
+    <!-- LEFT SIDEBAR: "Мои продукты" -->
+    <aside class="left-sidebar">
+      <div class="sidebar-header">
+        <h2 class="sidebar-title">Мои продукты</h2>
+        <button class="gear-btn" onclick="toggleModal()" title="Настройки профиля">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="3"></circle>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+          </svg>
+        </button>
+      </div>
+
+      <div class="product-card total-balance-card" onclick="switchTab('payments')">
+        <div class="balance-sub">
+          <span>Годовой оборот / выручка</span>
+          <span>👁️</span>
+        </div>
+        <div class="balance-value" id="dispRevenueVal">48,50 млрд ₽</div>
+        <div class="card-chevron"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg></div>
+      </div>
+
+      <div class="product-group">
+        <div class="group-header">
+          <span class="group-name">Финансирование и карты</span>
+          <span class="group-arrow">⌃</span>
+        </div>
+        <div class="group-items">
+          <div class="product-item">
+            <div class="item-info">
+              <span class="item-name">Кредитная линия (CL_LOA)</span>
+              <span class="item-amount" id="dispLoanVal">14,20 млрд ₽</span>
+            </div>
+            <div class="mini-alfa-card">
+              <div class="card-alfa-badge">А</div>
+              <span class="card-number">2084</span>
+              <span class="card-system">МИР</span>
+            </div>
+          </div>
+          <div class="product-item">
+            <div class="item-info">
+              <span class="item-name">Лизинг агротехники</span>
+              <span class="item-amount">4,85 млрд ₽</span>
+            </div>
+            <div class="mini-alfa-card dark-red">
+              <div class="card-alfa-badge">А</div>
+              <span class="card-close">✕</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="product-group">
+        <div class="group-header">
+          <span class="group-name">Накопления и казначейство</span>
+          <span class="group-arrow">⌃</span>
+        </div>
+        <div class="group-items">
+          <div class="product-item">
+            <div class="item-info">
+              <div class="item-name-row">
+                <span class="item-name">Альфа-Счет на мин. остаток</span>
+                <span class="badge-rate">13,9 %</span>
+              </div>
+              <span class="item-amount">2,40 млрд ₽</span>
+            </div>
+          </div>
+          <div class="product-item">
+            <div class="item-info">
+              <div class="item-name-row">
+                <span class="item-name">ВЭД расчеты</span>
+                <span class="badge-ved">Турция</span>
+              </div>
+              <span class="item-amount">Прямой контракт</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <button class="btn-new-product" onclick="alert('Заявка на подключение корпоративного продукта направлена персональному менеджеру')">
+        Новый продукт
+      </button>
+
+      <div class="client-mini-spec">
+        <div class="spec-row">
+          <span>ОКВЭД:</span>
+          <strong>01.11 Зерновые культуры</strong>
+        </div>
+        <div class="spec-row">
+          <span>Группа:</span>
+          <strong>GRP_AGRO_SOYUZ</strong>
+        </div>
+      </div>
+    </aside>
+
+    <!-- RIGHT MAIN CONTENT -->
+    <section class="main-content-pane">
+      
+      <!-- TAB: ГЛАВНЫЙ -->
+      <div class="tab-view active" id="view-main">
+        
+        <!-- Search Bar with QR & Plus -->
+        <div class="search-action-bar">
+          <div class="search-input-pill">
+            <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+            <input type="text" placeholder="Поиск по Альфа-Онлайн и новостям..." oninput="filterSearch(this.value)" />
+          </div>
+          <button class="action-square-btn" title="QR-код" onclick="alert('Сканирование платежного поручения B2B')">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect>
+              <rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect>
+            </svg>
+          </button>
+          <button class="action-square-btn" title="Создать" onclick="alert('Создание заявки на продукт')">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+          </button>
+        </div>
+
+        <!-- "Для вас" (Stories from screenshot) -->
+        <div class="section-container">
+          <div class="section-header-row">
+            <h3 class="section-heading">Для вас</h3>
+            <div class="carousel-nav-arrows">
+              <button class="nav-circle-btn">‹</button>
+              <button class="nav-circle-btn">›</button>
+            </div>
+          </div>
+
+          <div class="stories-carousel">
+            <div class="story-card" onclick="openInsightModal(0)">
+              <div class="story-graphic-top">
+                <span class="story-big-badge">14.0%</span>
+                <span class="story-sub-tag">ЦБ РФ • Ставка</span>
+              </div>
+              <div class="story-text-bottom">
+                <h4>Ключевая ставка 14% — зафиксируйте своп</h4>
+                <p>ЦМИ Альфа-Банка: жесткий сигнал до 2К27</p>
+              </div>
+            </div>
+
+            <div class="story-card" onclick="openInsightModal(1)">
+              <div class="story-graphic-top lavender-bg">
+                <span class="story-big-badge">ВЭД</span>
+                <span class="story-sub-tag">Турция • Зерно</span>
+              </div>
+              <div class="story-text-bottom">
+                <h4>Турция ввела сертификацию импорта</h4>
+                <p>Риск демереджа: аккредитивы Альфа-Банка</p>
+              </div>
+            </div>
+
+            <div class="story-card" onclick="openInsightModal(2)">
+              <div class="story-graphic-top blue-bg">
+                <span class="story-big-badge">25 млрд ₽</span>
+                <span class="story-sub-tag">Субсидии АПК</span>
+              </div>
+              <div class="story-text-bottom">
+                <h4>Льготный агролизинг Минпромторга</h4>
+                <p>Ставка от 4.5% годовых через Альфа-Лизинг</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- "Быстрые переводы" / Действия -->
+        <div class="section-container">
+          <div class="section-header-row">
+            <h3 class="section-heading">Быстрые действия</h3>
+          </div>
+          <div class="quick-actions-row">
+            <div class="quick-action-item" onclick="switchTab('payments')">
+              <div class="action-circle-icon icon-rainbow">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+                  <polyline points="2 17 12 22 22 17"></polyline>
+                  <polyline points="2 12 12 17 22 12"></polyline>
+                </svg>
+              </div>
+              <span class="action-label">B2B Сеть</span>
+            </div>
+            <div class="quick-action-item" onclick="openInsightModal(0)">
+              <div class="action-circle-icon icon-grey">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="16 3 21 3 21 8"></polyline><line x1="4" y1="20" x2="21" y2="3"></line>
+                </svg>
+              </div>
+              <span class="action-label">Цепочка (7)</span>
+            </div>
+            <div class="quick-action-item" onclick="switchTab('research')">
+              <div class="action-circle-icon icon-grey">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line>
+                </svg>
+              </div>
+              <span class="action-label">ЦМИ RAG (8)</span>
+            </div>
+            <div class="quick-action-item" onclick="switchTab('chat')">
+              <div class="action-circle-icon icon-initials">
+                <span>АИ</span>
+              </div>
+              <span class="action-label">Копилот</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- News Feed List -->
+        <div class="section-container">
+          <div class="section-header-row">
+            <div>
+              <h3 class="section-heading">Персонализированный радар событий</h3>
+              <p class="section-subheading">Многофакторное ранжирование с учетом B2B-контрагентов</p>
+            </div>
+            <div class="feed-filter-chips">
+              <button class="chip active">Все</button>
+              <button class="chip">Критичные (70%+)</button>
+            </div>
+          </div>
+
+          <div class="news-feed-list" id="newsFeedList">
+            <!-- Cards injected via JS -->
+          </div>
+        </div>
+
+      </div>
+
+      <!-- TAB: ПЛАТЕЖИ -->
+      <div class="tab-view" id="view-payments">
+        <div class="sub-view-header">
+          <h2>Расчетная B2B-сеть холдинга (df_Uid_payment_hack)</h2>
+          <p>Взаимосвязанные контрагенты и оценка передачи макрошоков</p>
+        </div>
+        <div class="graph-card-layout">
+          <div class="visual-network-box">
+            <div class="box-title">Топология расчетной сети</div>
+            <div class="network-svg-wrap" id="graphContainer">
+              <!-- SVG injected via JS -->
+            </div>
+          </div>
+          <div class="counterparty-table-box">
+            <div class="box-title">Реестр контрагентов</div>
+            <table class="alfa-data-table">
+              <thead>
+                <tr>
+                  <th>Контрагент</th>
+                  <th>Тип</th>
+                  <th>Сумма</th>
+                  <th>Доля</th>
+                  <th>Риск</th>
+                </tr>
+              </thead>
+              <tbody id="counterpartyRows">
+                <!-- Rows injected via JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB: ИЗБРАННОЕ -->
+      <div class="tab-view" id="view-favorites">
+        <div class="sub-view-header">
+          <h2>Избранные бизнес-события ❤️</h2>
+          <p>Критичные решения Совета директоров и Казначейства</p>
+        </div>
+        <div class="news-feed-list" id="favFeedList"></div>
+      </div>
+
+      <!-- TAB: ИСТОРИЯ / ЦМИ -->
+      <div class="tab-view" id="view-research">
+        <div class="sub-view-header">
+          <h2>Исследования Центра макроэкономических исследований Альфа-Банка</h2>
+          <p>Официальные аналитические обзоры и база знаний для RAG</p>
+        </div>
+        <div class="news-feed-list" id="researchFeedList"></div>
+      </div>
+
+      <!-- TAB: ЧАТЫ -->
+      <div class="tab-view" id="view-chat">
+        <div class="sub-view-header">
+          <h2>Диалог с Альфа-Аналитиком (Executive Copilot)</h2>
+          <p>Персональный аналитический ассистент по крупному бизнесу</p>
+        </div>
+        <div class="chat-app-box">
+          <div class="chat-thread" id="chatThread">
+            <div class="chat-msg ai">
+              <div class="msg-avatar">А</div>
+              <div class="msg-bubble">Здравствуйте! Задайте любой вопрос по влиянию ставки ЦБ, логистическим тарифам или финансовым инструментам Альфа-Банка.</div>
+            </div>
+          </div>
+          <div class="chat-bottom-bar">
+            <input type="text" id="chatInput" placeholder="Задайте вопрос аналитику..." onkeydown="if(event.key==='Enter')sendChat()" />
+            <button class="chat-send-btn" onclick="sendChat()">➔</button>
+          </div>
+        </div>
+      </div>
+
+    </section>
+  </main>
+
+  <!-- NATIVE DETAIL MODAL SHEET -->
+  <div class="sheet-backdrop hidden" id="sheetBackdrop" onclick="if(event.target===this)closeModal()">
+    <div class="sheet-modal">
+      <div class="sheet-header">
+        <div class="sheet-handle"></div>
+        <div class="sheet-top-row">
+          <div style="display:flex; gap:8px; align-items:center;">
+            <span class="badge-alfa-tag">АО «АЛЬФА-БАНК» | ИНСАЙТ</span>
+            <span class="badge-relevance-chip" id="modalScoreBadge">CRITICAL 94.8%</span>
+          </div>
+          <button class="sheet-close-btn" onclick="closeModal()">✕</button>
+        </div>
+        <h2 class="sheet-title" id="modalTitle">Заголовок события</h2>
+      </div>
+
+      <div class="sheet-body-content">
+        <!-- RAG GROUNDING MATRIX (ITEM 8) -->
+        <div class="grounding-matrix-box">
+          <div class="box-caption">
+            <strong>🎯 RAG Grounding Matrix (Пункт 8): [ФАКТ] + [ЦМИ АЛЬФА] + [ПРОФИЛЬ] ➔ [ИНСАЙТ]</strong>
+          </div>
+          <div class="matrix-grid-4">
+            <div class="matrix-tile">
+              <span class="tile-label">1. Первичный факт</span>
+              <p class="tile-val" id="modalFact">Решение Банка России</p>
+            </div>
+            <div class="matrix-tile tile-alfa">
+              <span class="tile-label">2. Исследование Альфы</span>
+              <p class="tile-val" id="modalResearch">Позиция ЦМИ Альфа-Банка</p>
+            </div>
+            <div class="matrix-tile">
+              <span class="tile-label">3. Особенности клиента</span>
+              <p class="tile-val" id="modalCompany">Выручка 48.5 млрд ₽, долг активен</p>
+            </div>
+            <div class="matrix-tile tile-insight">
+              <span class="tile-label">4. Персональный вывод</span>
+              <p class="tile-val" id="modalInsight">Рефинансирование и своп</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- IMPACT CHAIN (ITEM 7) -->
+        <div class="impact-chain-section">
+          <div class="impact-chain-header">
+            <strong>🔗 Пошаговая цепочка влияния (Impact Chain, Пункт 7)</strong>
+            <div class="chain-meta-pills">
+              <span class="pill-strength" id="modalStrength">Сила: CRITICAL</span>
+              <span class="pill-horizon" id="modalHorizon">Горизонт: 3-12 мес</span>
+            </div>
+          </div>
+          <div class="chain-flow-steps" id="modalChainSteps"></div>
+        </div>
+
+        <!-- SELF CHECK (ITEM 12) -->
+        <div class="self-check-card">
+          <div style="display:flex; align-items:center; gap:8px;">
+            <span class="check-icon">✓</span>
+            <div>
+              <strong style="color:#34D399;">Critic Self-Check 5/5:</strong>
+              <span>Все утверждения подтверждены • Источник проверен • Противоречий нет • Позиция Альфы отделена</span>
+            </div>
+          </div>
+          <span class="pill-novelty">Новизна: 96.5%</span>
+        </div>
+
+        <!-- 6 PILLARS -->
+        <div class="six-pillars-accordion" id="modalPillars"></div>
+
+        <!-- PRODUCTS -->
+        <div class="recommended-products-block">
+          <h4 style="font-size:12px; font-weight:700;">Рекомендованные продукты Альфа-Банка:</h4>
+          <div class="products-grid-list" id="modalProducts"></div>
+        </div>
+      </div>
+
+      <div class="sheet-footer">
+        <button class="sheet-dismiss-btn" onclick="closeModal()">Закрыть</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- CLIENT SWITCHER MODAL -->
+  <div class="client-modal-backdrop hidden" id="clientModal" onclick="if(event.target===this)toggleModal()">
+    <div class="client-modal-card">
+      <div class="modal-header">
+        <h3>Выбор корпоративного клиента</h3>
+        <button class="modal-close" onclick="toggleModal()">✕</button>
+      </div>
+      <div style="display:flex; flex-direction:column; gap:12px;">
+        <div>
+          <label style="font-size:11px; color:#8E93A0;">Клиент (>15 млрд ₽):</label>
+          <select id="selectClient" class="alfa-native-select" onchange="switchClient(this.value)">
             <option value="AGRO">U_AGRO_001 | ПАО «АгроСоюз» (48.5 млрд ₽, Турция)</option>
             <option value="METALL">U_METALL_002 | ПАО «УралМеталл» (135.0 млрд ₽, Китай)</option>
             <option value="RETAIL">U_RETAIL_003 | ООО «РусРитейл» (92.0 млрд ₽, Ритейл)</option>
           </select>
         </div>
-
-        <div class="flex flex-col">
-          <label class="text-[9px] font-semibold text-slate-400 uppercase tracking-wider mb-0.5">Роль ЛПР:</label>
-          <select id="roleSelect" onchange="renderApp()" class="text-xs bg-white/5 text-slate-100 border border-white/10 border-t-white/20 rounded-xl px-3 py-1.5 focus:outline-none focus:border-[#EF3124] cursor-pointer">
-            <option value="CEO">Генеральный директор</option>
-            <option value="CFO">Финансовый директор (CFO)</option>
-            <option value="TREASURER">Руководитель казначейства</option>
+        <div>
+          <label style="font-size:11px; color:#8E93A0;">Роль ЛПР:</label>
+          <select id="selectRole" class="alfa-native-select" onchange="switchRole(this.value)">
+            <option value="Генеральный директор" selected>Генеральный директор</option>
+            <option value="Финансовый директор (CFO)">Финансовый директор (CFO)</option>
+            <option value="Руководитель казначейства">Руководитель казначейства</option>
           </select>
         </div>
-
-        <a href="http://localhost:8080" target="_blank" class="self-end px-3.5 py-1.5 text-xs font-semibold bg-gradient-to-r from-[#EF3124] to-[#C91E12] text-white rounded-xl shadow-md shadow-red-600/30 border-t border-white/30 hover:opacity-95 transition flex items-center gap-1.5">
-          <span>⚡</span> Localhost:8080
-        </a>
       </div>
-    </header>
-
-    <!-- Client KPI Glass Ribbon -->
-    <div id="companyKpiStrip" class="liquid-glass-subtle rounded-2xl p-3.5 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3">
-      <!-- Injected via JS -->
-    </div>
-
-    <!-- Apple Segmented Control Floating Dock -->
-    <div class="flex items-center gap-1.5 p-1.5 bg-black/40 backdrop-blur-xl border border-white/10 rounded-full overflow-x-auto text-xs font-medium">
-      <button onclick="switchTab('radar')" id="tabBtn-radar" class="apple-pill-btn active px-4 py-2 text-white">⚡ Радар событий</button>
-      <button onclick="switchTab('graph')" id="tabBtn-graph" class="apple-pill-btn px-4 py-2 text-slate-400 hover:text-white">🕸️ B2B-контрагенты</button>
-      <button onclick="switchTab('research')" id="tabBtn-research" class="apple-pill-btn px-4 py-2 text-slate-400 hover:text-white">📚 Аналитика ЦМИ</button>
-      <button onclick="switchTab('trace')" id="tabBtn-trace" class="apple-pill-btn px-4 py-2 text-slate-400 hover:text-white">🤖 8-Шаговый Agentic Workflow</button>
-      <button onclick="switchTab('copilot')" id="tabBtn-copilot" class="apple-pill-btn px-4 py-2 text-slate-400 hover:text-white">💬 Executive Copilot</button>
-    </div>
-
-    <!-- TAB 1: RADAR -->
-    <div id="tab-radar" class="space-y-4">
-      <div class="flex justify-between items-center px-1">
-        <div>
-          <h2 class="text-base font-semibold text-white tracking-tight">Персонализированная лента событий</h2>
-          <p class="text-xs text-slate-400">Многофакторный скоринг на основе B2B-платежей, кредитного профиля, ВЭД-направлений и аналитики Альфа-Банка.</p>
-        </div>
-      </div>
-      <div id="newsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        <!-- News cards injected via JS -->
+      <div style="display:flex; justify-content:flex-end; margin-top:8px;">
+        <button class="btn-save-modal" onclick="toggleModal()">Применить</button>
       </div>
     </div>
-
-    <!-- TAB 2: SUPPLY CHAIN GRAPH -->
-    <div id="tab-graph" class="hidden space-y-4">
-      <div class="liquid-glass rounded-2xl p-5 space-y-4">
-        <div class="flex justify-between items-center flex-wrap gap-2">
-          <div>
-            <h3 class="text-sm font-semibold text-white">Топология расчетной сети холдинга (df_Uid_payment_hack)</h3>
-            <p class="text-xs text-slate-400">Оценка риска концентрации поставщиков сырья и покупателей продукции 1-го и 2-го порядка.</p>
-          </div>
-          <span class="text-[10px] font-semibold text-[#EF3124] bg-red-500/10 border border-red-500/20 px-2.5 py-1 rounded-full">
-            Корпоративный реестр B2B-платежей
-          </span>
-        </div>
-        <div id="graphContainer" class="h-72 bg-black/40 border border-white/5 rounded-xl flex items-center justify-center p-2 relative overflow-hidden">
-          <!-- Graph SVG rendered via JS -->
-        </div>
-        <div id="counterpartyList" class="overflow-x-auto text-xs">
-          <!-- Table rendered via JS -->
-        </div>
-      </div>
-    </div>
-
-    <!-- TAB 3: ALFA MACRO RESEARCH -->
-    <div id="tab-research" class="hidden space-y-4">
-      <div class="liquid-glass rounded-2xl p-5 space-y-3">
-        <h3 class="text-sm font-semibold text-white">Официальные исследования Центра макроэкономических исследований Альфа-Банка</h3>
-        <p class="text-xs text-slate-400">Фактологический фундамент RAG: позиции ведущих макроэкономистов банка по ключевой ставке, инфляции и товарным рынкам.</p>
-        <div id="researchList" class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
-          <!-- Research injected via JS -->
-        </div>
-      </div>
-    </div>
-
-    <!-- TAB 4: 8-STEP AGENTIC LIFECYCLE -->
-    <div id="tab-trace" class="hidden space-y-4">
-      <div class="liquid-glass rounded-2xl p-5 space-y-4">
-        <div class="flex items-center justify-between">
-          <div>
-            <h3 class="text-sm font-semibold text-white">8-Шаговый жизненный цикл агентного пайплайна (Пункт 11)</h3>
-            <p class="text-xs text-slate-400">Профиль ➔ Гипотезы ➔ Поиск ➔ Слияние & Новизна ➔ RAG Альфа ➔ Синтез & Impact Chain ➔ Self-Check (5 вопросов) ➔ Адаптация.</p>
-          </div>
-          <span class="px-2.5 py-1 text-[11px] font-semibold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 rounded-full">
-            Self-Check 5/5 PASSED
-          </span>
-        </div>
-        <div class="space-y-2.5 text-xs" id="traceList">
-          <!-- Steps injected via JS -->
-        </div>
-      </div>
-    </div>
-
-    <!-- TAB 5: EXECUTIVE COPILOT -->
-    <div id="tab-copilot" class="hidden space-y-4">
-      <div class="liquid-glass rounded-2xl p-5 max-w-3xl mx-auto space-y-4">
-        <div>
-          <h3 class="text-sm font-semibold text-white">Интерактивный диалог с Альфа-Аналитиком (Executive Copilot)</h3>
-          <p class="text-xs text-slate-400">Задавайте любые вопросы по структурированию сделок, защите ликвидности и влиянию регуляторных решений.</p>
-        </div>
-        <div id="chatMessages" class="h-72 overflow-y-auto bg-black/40 border border-white/5 rounded-xl p-4 space-y-3 text-xs">
-          <div class="bg-white/5 border border-white/10 p-3.5 rounded-2xl max-w-[85%]">
-            <span class="font-bold text-[#EF3124]">Альфа-Аналитик:</span> Здравствуйте! Я ваш персональный аналитический ассистент по крупному корпоративному бизнесу. Задайте любой вопрос по влиянию ставки ЦБ, логистическим тарифам, ВЭД-барьерам или финансовым продуктам Альфа-Банка.
-          </div>
-        </div>
-        <div class="flex gap-2">
-          <input type="text" id="userQuestion" placeholder="Например: 'Как захеджировать процентные расходы при ставке 14%?'" class="flex-grow bg-white/5 border border-white/10 rounded-full px-4 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-[#EF3124]" />
-          <button onclick="handleUserChat()" class="px-5 py-2.5 text-xs font-semibold bg-gradient-to-r from-[#EF3124] to-[#C91E12] text-white rounded-full shadow-md shadow-red-600/30 border-t border-white/30 hover:opacity-95 transition">Отправить</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- DEEP INSIGHT MODAL IN APPLE LIQUID GLASS -->
-    <div id="insightModal" class="hidden fixed inset-0 bg-black/75 backdrop-blur-md z-50 flex items-center justify-center p-3 sm:p-5 overflow-y-auto">
-      <div class="liquid-glass rounded-3xl max-w-5xl w-full p-5 sm:p-7 space-y-5 my-6 max-h-[92vh] overflow-y-auto border border-white/15">
-        <div class="flex justify-between items-start border-b border-white/10 pb-4">
-          <div>
-            <div class="flex items-center gap-2">
-              <span class="text-[10px] font-bold tracking-wider uppercase px-2.5 py-0.5 rounded-full bg-red-500/15 text-[#EF3124] border border-red-500/30">АО «Альфа-Банк» | Корпоративный Бизнес-Инсайт</span>
-              <span id="modalRelevanceBadge" class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-white/10 text-slate-200 border border-white/15">CRITICAL 94.8%</span>
-            </div>
-            <h2 id="modalNewsTitle" class="text-base sm:text-lg font-semibold text-white mt-1.5 leading-snug">Детальный анализ события</h2>
-          </div>
-          <button onclick="closeModal()" class="text-slate-400 hover:text-white text-2xl font-light px-2">&times;</button>
-        </div>
-
-        <!-- FACTUAL GROUNDING MATRIX (ITEM 8) -->
-        <div class="liquid-glass-subtle rounded-2xl p-4 space-y-2">
-          <div class="flex items-center justify-between">
-            <span class="text-[10px] font-bold text-cyan-400 tracking-wider uppercase flex items-center gap-1.5">
-              <span>🎯</span> RAG Grounding Matrix: [ФАКТ] + [ИССЛЕДОВАНИЕ АЛЬФЫ] + [ПРОФИЛЬ] ➔ [ИНСАЙТ]
-            </span>
-            <span class="text-[10px] text-slate-400">Slide 8 & 17 Standard</span>
-          </div>
-          <div class="grid grid-cols-1 md:grid-cols-4 gap-3 text-xs pt-1">
-            <div class="bg-white/5 p-3 rounded-xl border border-white/5">
-              <div class="text-[9px] font-bold text-slate-400 uppercase">1. Внешний факт</div>
-              <div id="groundingFact" class="text-slate-200 mt-1 line-clamp-3">Решение регулятора или макрошок</div>
-            </div>
-            <div class="bg-white/5 p-3 rounded-xl border border-red-500/30 bg-red-500/5">
-              <div class="text-[9px] font-bold text-[#EF3124] uppercase">2. Исследование Альфы</div>
-              <div id="groundingResearch" class="text-slate-200 mt-1 line-clamp-3">Позиция ЦМИ Альфа-Банка</div>
-            </div>
-            <div class="bg-white/5 p-3 rounded-xl border border-white/5">
-              <div class="text-[9px] font-bold text-slate-400 uppercase">3. Особенности компании</div>
-              <div id="groundingCompany" class="text-slate-200 mt-1">ОКВЭД, долг, ВЭД-направление</div>
-            </div>
-            <div class="bg-white/5 p-3 rounded-xl border border-emerald-500/30 bg-emerald-500/5">
-              <div class="text-[9px] font-bold text-emerald-400 uppercase">4. Персональный вывод</div>
-              <div id="groundingInsight" class="text-slate-200 mt-1 font-medium">Конкретный управленческий эффект</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- STEP-BY-STEP IMPACT CHAIN (ITEM 7) -->
-        <div class="liquid-glass-subtle rounded-2xl p-4 space-y-3">
-          <div class="flex items-center justify-between flex-wrap gap-2">
-            <div>
-              <h4 class="text-xs font-semibold text-white flex items-center gap-1.5">
-                <span class="text-[#EF3124]">🔗</span> Пошаговая цепочка влияния (Impact Chain)
-              </h4>
-              <p class="text-[11px] text-slate-400">Каузальная траектория от первичного события к конечной рентабельности и ликвидности бизнеса.</p>
-            </div>
-            <div id="impactChainMeta" class="flex gap-2 text-[10px] font-bold">
-              <!-- Strength & Horizon injected via JS -->
-            </div>
-          </div>
-          <div id="impactChainSteps" class="grid grid-cols-1 md:grid-cols-5 gap-3 pt-1">
-            <!-- Sequential steps injected via JS -->
-          </div>
-        </div>
-
-        <!-- 5-QUESTION CRITIC SELF-CHECK (ITEM 12) -->
-        <div class="liquid-glass-subtle rounded-2xl p-3.5 flex flex-wrap items-center justify-between gap-3 text-xs border border-emerald-500/20">
-          <div class="flex items-center gap-2">
-            <span class="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold text-xs">✓</span>
-            <div>
-              <span class="font-semibold text-emerald-400">Critic Self-Check 5/5:</span>
-              <span class="text-slate-300 ml-1">Утверждения проверены • Источники подтверждены • Противоречий нет • Позиция Альфы отделена • Данных достаточно</span>
-            </div>
-          </div>
-          <div class="text-[11px] font-mono text-emerald-400 font-bold bg-emerald-500/10 px-2.5 py-0.5 rounded-full border border-emerald-500/30">
-            Confidence: 0.98 | Novelty: 96.5%
-          </div>
-        </div>
-
-        <!-- 6 Pillars Container -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5" id="pillarsContainer">
-          <!-- Injected via JS -->
-        </div>
-
-        <!-- Products Container -->
-        <div class="liquid-glass-subtle rounded-2xl p-4 border border-red-500/20">
-          <h4 class="text-xs font-semibold text-white flex items-center gap-1.5">
-            <span>🎯</span> Рекомендованные продукты Альфа-Банка для нейтрализации рисков
-          </h4>
-          <div id="modalProducts" class="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-3">
-            <!-- Injected via JS -->
-          </div>
-        </div>
-
-        <div class="flex justify-end pt-2">
-          <button onclick="closeModal()" class="apple-pill-btn px-5 py-2 text-xs font-semibold text-slate-200">Закрыть</button>
-        </div>
-      </div>
-    </div>
-
   </div>
 
   <script>
-    const dataStore = {
+    const mockData = {
       clients: {
         AGRO: {
           id: "U_AGRO_001",
           name: "ПАО «АгроСоюз»",
-          revenue: "48.5 млрд ₽",
-          okved: "01.11 Выращивание зерновых культур",
-          debt: "Кредиты + Лизинг (CL_LOA=1)",
-          fts: "Экспорт: Турция (ФТС=1)",
+          revenue: "48,50 млрд ₽",
+          loan: "14,20 млрд ₽",
+          okved: "01.11 Зерновые культуры",
           group: "GRP_AGRO_SOYUZ",
           counterparties: [
-            { name: "АО «ХимСнаб Удобрения» (U_CHEM_004)", type: "ПОСТАВЩИК сырья", amount: "4.25 млрд ₽", risk: "HIGH", share: "8.8%" },
-            { name: "ООО «РусРитейл» (U_RETAIL_003)", type: "ПОКУПАТЕЛЬ зерна", amount: "11.80 млрд ₽", risk: "HIGH", share: "24.3%" },
-            { name: "АО «ТрансЕвразия Логистик» (U_LOGIST_006)", type: "ПОСТАВЩИК логистики", amount: "1.65 млрд ₽", risk: "MEDIUM", share: "3.4%" },
+            { name: "АО «ХимСнаб Удобрения»", type: "Поставщик", amount: "4.25 млрд ₽", share: "8.8%", risk: "HIGH" },
+            { name: "ООО «РусРитейл»", type: "Покупатель", amount: "11.80 млрд ₽", share: "24.3%", risk: "HIGH" },
+            { name: "АО «ТрансЕвразия Логистик»", type: "Транспорт", amount: "1.65 млрд ₽", share: "3.4%", risk: "MEDIUM" }
           ]
         },
         METALL: {
           id: "U_METALL_002",
           name: "ПАО «УралМеталл»",
-          revenue: "135.0 млрд ₽",
-          okved: "24.10 Производство стали и ферросплавов",
-          debt: "Кредиты (CL_LOA=1)",
-          fts: "Экспорт: Китай (ФТС=1)",
+          revenue: "135,00 млрд ₽",
+          loan: "38,40 млрд ₽",
+          okved: "24.10 Производство стали",
           group: "GRP_URALS_METALL",
           counterparties: [
-            { name: "АО «АгроМаш Завод» (U_MECH_007)", type: "ПОКУПАТЕЛЬ проката", amount: "3.10 млрд ₽", risk: "LOW", share: "2.3%" },
-            { name: "АО «ТрансЕвразия Логистик» (U_LOGIST_006)", type: "ПОСТАВЩИК логистики", amount: "5.40 млрд ₽", risk: "MEDIUM", share: "4.0%" },
+            { name: "АО «АгроМаш Завод»", type: "Покупатель", amount: "3.10 млрд ₽", share: "2.3%", risk: "LOW" },
+            { name: "АО «ТрансЕвразия Логистик»", type: "Транспорт", amount: "5.40 млрд ₽", share: "4.0%", risk: "MEDIUM" }
           ]
         },
         RETAIL: {
           id: "U_RETAIL_003",
           name: "ООО «РусРитейл»",
-          revenue: "92.0 млрд ₽",
-          okved: "47.11 Розничная торговля продуктами",
-          debt: "Кредиты + Факторинг",
-          fts: "Внутренний рынок",
+          revenue: "92,00 млрд ₽",
+          loan: "26,10 млрд ₽",
+          okved: "47.11 Розничные сети",
           group: "GRP_RUS_RETAIL",
           counterparties: [
-            { name: "ПАО «АгроСоюз» (U_AGRO_001)", type: "ПОСТАВЩИК продовольствия", amount: "11.80 млрд ₽", risk: "CRITICAL", share: "12.8%" },
+            { name: "ПАО «АгроСоюз»", type: "Поставщик", amount: "11.80 млрд ₽", share: "12.8%", risk: "CRITICAL" }
           ]
         }
       },
@@ -397,427 +822,268 @@
         {
           id: "NEWS-001",
           title: "Банк России сохранил ключевую ставку на уровне 14,0% и ужесточил сигнал по дальнейшей траектории ДКП",
-          summary: "Совет директоров Банка России 11 сентября 2026 года принял решение сохранить ключевую ставку на уровне 14,00% годовых, указав на необходимость длительного удержания жестких условий.",
+          summary: "Совет директоров Банка России 11 сентября 2026 года сохранил ключевую ставку на 14,0% годовых, предупредив о длительном периоде жестких условий.",
           source: "Пресс-служба Банка России",
           date: "11 сентября 2026",
           category: "Денежно-кредитная политика",
-          novelty_score: 96.5,
-          cross_verification: ["Банк России (Официальный пресс-релиз)", "Интерфакс-Экономика", "РБК Квоты"],
-          scores: { AGRO: 94.8, METALL: 89.2, RETAIL: 91.5 },
-          impact_chain: {
-            strength: "CRITICAL",
-            horizon: "3-12 мес",
-            dimensions: ["liquidity", "margin", "capex"],
-            steps: [
-              { title: "Ставка ЦБ 14% + сигнал", metric: "liquidity", dir: "NEUTRAL", desc: "Стоимость заимствований остается жесткой" },
-              { title: "Рост стоимости фондирования", metric: "margin", dir: "DOWN", desc: "Фиксация процентных расходов по кредитам" },
-              { title: "Заморозка долгосрочных инвестпрограмм", metric: "capex", dir: "DOWN", desc: "Проекты с доходностью ниже WACC замораживаются" },
-              { title: "Сжатие операционной маржинальности", metric: "margin", dir: "DOWN", desc: "Отвлечение свободного cash-flow на обслуживание" },
-              { title: "Размещение ликвидности в овернайт", metric: "liquidity", dir: "UP", desc: "Казначейская доходность 13.8-14.0% в Альфа-Банке" }
-            ]
-          },
+          score: "94.8%",
+          priority: "CRITICAL",
+          strength: "CRITICAL",
+          horizon: "3-12 мес",
+          steps: [
+            { title: "Ставка ЦБ 14% + сигнал", metric: "LIQUIDITY", dir: "↔" },
+            { title: "Рост стоимости фондирования", metric: "MARGIN", dir: "↓" },
+            { title: "Заморозка инвестпрограмм", metric: "CAPEX", dir: "↓" },
+            { title: "Сжатие операционной маржи", metric: "MARGIN", dir: "↓" },
+            { title: "Овернайт казначейства Альфы", metric: "LIQUIDITY", dir: "↑" }
+          ],
           grounding: {
-            fact: "Банк России сохранил ключевую ставку на уровне 14.0% и подтвердил жесткий сигнал.",
-            research: "Центр макроэкономических исследований Альфа-Банка: Пауза завершена, смягчения ранее 2К27 ожидать не следует.",
-            company: "ПАО «АгроСоюз» обслуживает кредитный и лизинговый портфель с плавающей ставкой.",
-            insight: "Необходимость рефинансирования с переходом на фиксированные транши или процентный своп (IRS)."
+            fact: "Банк России сохранил ставку на 14.0% и ужесточил сигнал.",
+            research: "ЦМИ Альфа-Банка: Пауза завершена, смягчения ранее 2К27 ожидать не следует.",
+            company: "ПАО «АгроСоюз» обслуживает портфель с плавающей ставкой.",
+            insight: "Необходимость фиксации ставок через процентный своп (IRS) Альфа-Банка."
           },
           products: [
-            { name: "Процентный своп (IRS) Альфа-Банка", desc: "Фиксация процентной ставки по кредитному портфелю" },
-            { name: "Овернайт депозиты и неснижаемый остаток (НСО)", desc: "Размещение свободной ликвидности по ставке до 13.9% годовых" }
+            { name: "Процентный своп (IRS) Альфа-Банка", benefit: "Фиксация процентной ставки по кредитам" },
+            { name: "Овернайт-депозиты (доходность 13.9%)", benefit: "Управление операционными остатками" }
           ]
         },
         {
           id: "NEWS-002",
-          title: "Турция ввела обязательную дополнительную сертификацию импортируемого продовольственного зерна",
-          summary: "Министерство сельского хозяйства Турции опубликовало указ о введении расширенной фитосанитарной сертификации для импорта зерновых культур.",
-          source: "Торговое представительство РФ в Турции",
+          title: "Турция ввела обязательную дополнительную сертификацию импортируемого зерна",
+          summary: "Министерство сельского хозяйства Турции опубликовало указ о расширенной фитосанитарной сертификации зерновых грузов.",
+          source: "Торгпредство РФ в Турции",
           date: "12 сентября 2026",
-          category: "ВЭД и регулирование",
-          novelty_score: 91.2,
-          cross_verification: ["Торгпредство РФ", "AgriCensus Mediterranean", "Reuters Commodity"],
-          scores: { AGRO: 98.4, METALL: 14.0, RETAIL: 42.1 },
-          impact_chain: {
-            strength: "CRITICAL",
-            horizon: "0-3 мес",
-            dimensions: ["supply", "liquidity", "margin"],
-            steps: [
-              { title: "Ввод сертификации в Турции", metric: "supply", dir: "DOWN", desc: "Ужесточение ввоза в портах Мерсин и Самсун" },
-              { title: "Задержка судов на рейде до 8-12 дней", metric: "supply", dir: "DOWN", desc: "Простой флота и рост демереджа" },
-              { title: "Кассовый разрыв по экспортной выручке", metric: "liquidity", dir: "DOWN", desc: "Задержка закрытия аккредитивов" },
-              { title: "Рост логистических издержек на 3.4%", metric: "margin", dir: "DOWN", desc: "Дополнительные инспекции и хранение" },
-              { title: "Ускоренное финансирование через Альфу", metric: "liquidity", dir: "UP", desc: "ВЭД-аккредитивы и факторинг выручки" }
-            ]
-          },
+          category: "ВЭД и таможня",
+          score: "98.4%",
+          priority: "CRITICAL",
+          strength: "CRITICAL",
+          horizon: "0-3 мес",
+          steps: [
+            { title: "Сертификация в портах Турции", metric: "SUPPLY", dir: "↓" },
+            { title: "Задержка судов на 8-12 дней", metric: "SUPPLY", dir: "↓" },
+            { title: "Кассовый разрыв по выручке", metric: "LIQUIDITY", dir: "↓" },
+            { title: "Рост издержек демереджа", metric: "MARGIN", dir: "↓" },
+            { title: "Предэкспортный факторинг Альфы", metric: "LIQUIDITY", dir: "↑" }
+          ],
           grounding: {
-            fact: "Указ Минсельхоза Турции о расширенной сертификации зерна из РФ.",
-            research: "Управление отраслевого анализа Альфа-Банка: Риски задержек судов до 10-14 дней в портах Турции.",
-            company: "ПАО «АгроСоюз» направляет в Турцию 32% экспортного объема зерновых культур.",
-            insight: "Опасность кассового разрыва и демереджа; требуется аккредитивная форма расчетов и предэкспортное финансирование."
+            fact: "Указ Минсельхоза Турции о дополнительной сертификации зерна.",
+            research: "Аналитики Альфа-Банка: Рост простоев в портах Мерсин и Самсун до 10-14 дней.",
+            company: "ПАО «АгроСоюз» поставляет в Турцию 32% экспортного зерна.",
+            insight: "Использование международных аккредитивов и покрытие кассового разрыва."
           },
           products: [
-            { name: "Международный документарный аккредитив", desc: "Безопасные расчеты с турецкими контрагентами" },
-            { name: "Предэкспортное финансирование ВЭД", desc: "Покрытие кассовых разрывов при задержке грузов" }
+            { name: "Международный аккредитив ВЭД", benefit: "Безопасные расчеты с турецкими покупателями" },
+            { name: "Предэкспортное финансирование", benefit: "Покрытие кассовых разрывов при задержке судов" }
           ]
         },
         {
           id: "NEWS-003",
-          title: "Минпромторг утвердил программу субсидирования закупки отечественной сельхозтехники",
-          summary: "Правительство расширило лимиты субсидирования льготного лизинга техники для агрохолдингов на 25 млрд рублей.",
-          source: "Пресс-служба Минпромторга РФ",
+          title: "Минпромторг расширил программу субсидирования закупки отечественной сельхозтехники",
+          summary: "Правительство утвердило дополнительный лимит 25 млрд рублей на субсидирование льготного лизинга техники.",
+          source: "Пресс-служба Минпромторга",
           date: "14 сентября 2026",
           category: "Господдержка",
-          novelty_score: 88.0,
-          cross_verification: ["Минпромторг РФ", "Росагролизинг", "Коммерсантъ АПК"],
-          scores: { AGRO: 87.5, METALL: 65.0, RETAIL: 28.0 },
-          impact_chain: {
-            strength: "HIGH",
-            horizon: "3-12 мес",
-            dimensions: ["capex", "margin"],
-            steps: [
-              { title: "Выделение 25 млрд ₽ субсидий", metric: "capex", dir: "UP", desc: "Льготная ставка лизинга до 5% годовых" },
-              { title: "Обновление комбайнового парка", metric: "capex", dir: "UP", desc: "Снижение потерь при уборке на 4.2%" },
-              { title: "Экономия на ТО импортной техники", metric: "margin", dir: "UP", desc: "Замещение дорогого европейского сервиса" },
-              { title: "Рост операционной эффективности", metric: "margin", dir: "UP", desc: "Увеличение валового сбора зерна" }
-            ]
-          },
+          score: "87.5%",
+          priority: "HIGH",
+          strength: "HIGH",
+          horizon: "3-12 мес",
+          steps: [
+            { title: "Лимит субсидий 25 млрд ₽", metric: "CAPEX", dir: "↑" },
+            { title: "Обновление комбайнового парка", metric: "CAPEX", dir: "↑" },
+            { title: "Снижение издержек на сервис", metric: "MARGIN", dir: "↑" },
+            { title: "Рост валового сбора зерна", metric: "REVENUE", dir: "↑" }
+          ],
           grounding: {
-            fact: "Минпромторг расширил лимиты субсидирования агролизинга на 25 млрд рублей.",
-            research: "Аналитический бюллетень Альфа-Банка по АПК: Субсидированная ставка 4.5-5.5% выгоднее рыночной ставки 17-18%.",
-            company: "ПАО «АгроСоюз» имеет активный портфель лизинга сельхозтехники.",
-            insight: "Рекомендуется досрочно подать заявку на субсидированный лизинг через Альфа-Лизинг до исчерпания лимитов."
+            fact: "Минпромторг расширил лимит агролизинга на 25 млрд рублей.",
+            research: "ЦМИ Альфа-Банка: Ставка лизинга 4.5-5.5% выгоднее рыночной ставки 17-18%.",
+            company: "ПАО «АгроСоюз» имеет активный портфель лизинга техники.",
+            insight: "Подача заявки в Альфа-Лизинг до исчерпания господдержки."
           },
           products: [
-            { name: "Альфа-Лизинг со спецсубсидией Минпромторга", desc: "Ставка от 4.5% годовых на зерноуборочную технику" },
-            { name: "Инвестиционный кредит с господдержкой", desc: "Финансирование модернизации элеваторов" }
+            { name: "Альфа-Лизинг с субсидией Минпромторга", benefit: "Ставка от 4.5% на комбайны и тракторы" }
           ]
         }
       ]
     };
 
-    function renderApp() {
-      const clientKey = document.getElementById('clientSelect').value;
-      const client = dataStore.clients[clientKey];
+    let activeClientKey = "AGRO";
 
-      // Render KPI strip
-      const strip = document.getElementById('companyKpiStrip');
-      strip.innerHTML = `
-        <div class="border-r border-white/5 pr-2">
-          <div class="text-[9px] uppercase font-semibold text-slate-400">Холдинг</div>
-          <div class="text-xs font-semibold text-white truncate">${client.name}</div>
+    function renderAll() {
+      const client = mockData.clients[activeClientKey];
+      document.getElementById("topCompanyName").textContent = client.name;
+      document.getElementById("dispRevenueVal").textContent = client.revenue;
+      document.getElementById("dispLoanVal").textContent = client.loan;
+
+      // News feed
+      const list = document.getElementById("newsFeedList");
+      list.innerHTML = mockData.news.map((n, idx) => `
+        <div class="news-item-card" onclick="openInsightModal(${idx})">
+          <div class="news-item-top">
+            <span class="news-category-tag">${n.category} • ${n.date}</span>
+            <div style="display:flex; gap:6px;">
+              <span class="news-score-badge score-critical">${n.score} (${n.priority})</span>
+            </div>
+          </div>
+          <h4 class="news-item-title">${n.title}</h4>
+          <p class="news-item-summary">${n.summary}</p>
+          <div class="news-item-footer">
+            <span class="news-source-label">📰 ${n.source}</span>
+            <span class="open-insight-link">Анализ ➔</span>
+          </div>
         </div>
-        <div class="border-r border-white/5 pr-2">
-          <div class="text-[9px] uppercase font-semibold text-slate-400">Выручка</div>
-          <div class="text-xs font-bold text-[#EF3124]">${client.revenue}</div>
-        </div>
-        <div class="border-r border-white/5 pr-2">
-          <div class="text-[9px] uppercase font-semibold text-slate-400">ОКВЭД</div>
-          <div class="text-xs font-medium text-slate-200 truncate">${client.okved}</div>
-        </div>
-        <div class="border-r border-white/5 pr-2">
-          <div class="text-[9px] uppercase font-semibold text-slate-400">Кредиты / Лизинг</div>
-          <div class="text-xs font-medium text-amber-400 truncate">${client.debt}</div>
-        </div>
-        <div class="border-r border-white/5 pr-2">
-          <div class="text-[9px] uppercase font-semibold text-slate-400">ВЭД / ФТС</div>
-          <div class="text-xs font-medium text-cyan-400">${client.fts}</div>
-        </div>
-        <div>
-          <div class="text-[9px] uppercase font-semibold text-slate-400">Группа компаний</div>
-          <div class="text-xs font-medium text-slate-300 truncate">${client.group}</div>
+      `).join("");
+
+      // Favorites
+      document.getElementById("favFeedList").innerHTML = list.innerHTML;
+
+      // Research
+      document.getElementById("researchFeedList").innerHTML = `
+        <div class="news-item-card">
+          <div class="news-item-top">
+            <span class="news-category-tag">ЦМИ АЛЬФА-БАНКА • 11.09.2026</span>
+          </div>
+          <h4 class="news-item-title">Ключевая ставка ЦБ РФ: пауза завершена, жесткая траектория до 2027 г.</h4>
+          <p class="news-item-summary">Аналитики Альфа-Банка прогнозируют среднюю ставку 13.8% на горизонте 12 месяцев. Рекомендуем долгосрочную фиксацию процентных условий.</p>
         </div>
       `;
 
-      // Render News Grid
-      const grid = document.getElementById('newsGrid');
-      grid.innerHTML = dataStore.news.map(n => {
-        const score = n.scores[clientKey] || 75.0;
-        const badgeColor = score >= 90 ? 'border-red-500/30 text-red-400 bg-red-500/10' : 'border-amber-500/30 text-amber-400 bg-amber-500/10';
-        return `
-          <div class="liquid-glass rounded-2xl p-5 flex flex-col justify-between space-y-4 cursor-pointer" onclick="openModal('${n.id}')">
-            <div class="space-y-2.5">
-              <div class="flex justify-between items-center text-[10px] font-semibold">
-                <span class="text-slate-400">${n.category} • ${n.date}</span>
-                <span class="px-2 py-0.5 rounded-full border ${badgeColor}">Скор: ${score}%</span>
-              </div>
-              <h3 class="text-sm font-semibold text-white hover:text-[#EF3124] transition line-clamp-2">${n.title}</h3>
-              <p class="text-xs text-slate-300 line-clamp-3">${n.summary}</p>
-              
-              <!-- Badges -->
-              <div class="flex items-center gap-2 pt-1 flex-wrap">
-                <span class="text-[10px] font-medium px-2 py-0.5 rounded-full bg-cyan-500/10 text-cyan-300 border border-cyan-500/20">
-                  ✨ Новизна: ${n.novelty_score}%
-                </span>
-                <span class="text-[10px] font-medium px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-300 border border-emerald-500/20">
-                  🛡️ Кросс-проверка: ${n.cross_verification.length} источника
-                </span>
-              </div>
-            </div>
+      // Counterparties
+      document.getElementById("counterpartyRows").innerHTML = client.counterparties.map(c => `
+        <tr>
+          <td><strong>${c.name}</strong></td>
+          <td>${c.type}</td>
+          <td>${c.amount}</td>
+          <td>${c.share}</td>
+          <td style="color:${c.risk==='CRITICAL'||c.risk==='HIGH'?'#EF3124':'#F59E0B'}; font-weight:700;">${c.risk}</td>
+        </tr>
+      `).join("");
 
-            <div class="pt-3 border-t border-white/5 flex justify-between items-center text-xs">
-              <span class="text-slate-400 text-[11px] truncate max-w-[60%]">Источник: ${n.source}</span>
-              <button class="text-[#EF3124] font-semibold hover:underline flex items-center gap-1">
-                Инсайт ➔
-              </button>
-            </div>
-          </div>
-        `;
-      }).join('');
-
-      // Render Graph & Counterparties
-      renderGraph(client);
-
-      // Render Research
-      renderResearch();
-
-      // Render Trace
-      renderTrace();
-    }
-
-    function renderGraph(client) {
-      const svg = `
-        <svg viewBox="0 0 600 220" class="w-full h-full" style="background: transparent;">
-          <defs>
-            <linearGradient id="gradCenter" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stop-color="#EF3124"/>
-              <stop offset="100%" stop-color="#99140C"/>
-            </linearGradient>
-            <filter id="glow">
-              <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
-              <feMerge>
-                <feMergeNode in="coloredBlur"/>
-                <feMergeNode in="SourceGraphic"/>
-              </feMerge>
-            </filter>
-          </defs>
-          <!-- Links -->
-          <line x1="300" y1="110" x2="120" y2="60" stroke="#EF3124" stroke-width="2" stroke-dasharray="4" opacity="0.6"/>
-          <line x1="300" y1="110" x2="480" y2="60" stroke="#38BDF8" stroke-width="2.5" opacity="0.7"/>
-          <line x1="300" y1="110" x2="300" y2="180" stroke="#F59E0B" stroke-width="1.8" opacity="0.5"/>
-
-          <!-- Center Client -->
-          <circle cx="300" cy="110" r="32" fill="url(#gradCenter)" filter="url(#glow)"/>
-          <text x="300" y="108" fill="#FFF" font-size="10" font-weight="bold" text-anchor="middle">${client.id}</text>
-          <text x="300" y="122" fill="#FEE2E2" font-size="8" text-anchor="middle">Холдинг</text>
-
-          <!-- Node 1: Raw supplier -->
-          <circle cx="120" cy="60" r="22" fill="rgba(18, 24, 38, 0.85)" stroke="#EF3124" stroke-width="1.5"/>
-          <text x="120" y="58" fill="#FFF" font-size="8" font-weight="bold" text-anchor="middle">ХимСнаб</text>
-          <text x="120" y="70" fill="#EF4444" font-size="7" text-anchor="middle">Сырье 8.8%</text>
-
-          <!-- Node 2: Key buyer -->
-          <circle cx="480" cy="60" r="26" fill="rgba(18, 24, 38, 0.85)" stroke="#38BDF8" stroke-width="1.5"/>
-          <text x="480" y="58" fill="#FFF" font-size="8" font-weight="bold" text-anchor="middle">РусРитейл</text>
-          <text x="480" y="70" fill="#38BDF8" font-size="7" text-anchor="middle">Покупатель 24.3%</text>
-
-          <!-- Node 3: Logistics -->
-          <circle cx="300" cy="180" r="20" fill="rgba(18, 24, 38, 0.85)" stroke="#F59E0B" stroke-width="1.5"/>
-          <text x="300" y="178" fill="#FFF" font-size="8" font-weight="bold" text-anchor="middle">Логистика</text>
-          <text x="300" y="190" fill="#F59E0B" font-size="7" text-anchor="middle">Ж/Д фрахт</text>
+      // SVG graph
+      document.getElementById("graphContainer").innerHTML = `
+        <svg viewBox="0 0 400 240" style="width:100%; height:100%;">
+          <line x1="200" y1="120" x2="80" y2="60" stroke="#EF3124" stroke-width="2" stroke-dasharray="3"/>
+          <line x1="200" y1="120" x2="320" y2="60" stroke="#38BDF8" stroke-width="2.5"/>
+          <line x1="200" y1="120" x2="200" y2="190" stroke="#F59E0B" stroke-width="1.8"/>
+          <circle cx="200" cy="120" r="28" fill="#EF3124"/>
+          <text x="200" y="118" fill="#FFF" font-size="9" font-weight="bold" text-anchor="middle">${client.id}</text>
+          <text x="200" y="130" fill="#FFF" font-size="7" text-anchor="middle">Холдинг</text>
+          <circle cx="80" cy="60" r="18" fill="#222328" stroke="#EF3124" stroke-width="1.5"/>
+          <text x="80" y="63" fill="#FFF" font-size="7" text-anchor="middle">Сырье</text>
+          <circle cx="320" cy="60" r="22" fill="#222328" stroke="#38BDF8" stroke-width="1.5"/>
+          <text x="320" y="63" fill="#FFF" font-size="7.5" text-anchor="middle">Ритейл</text>
+          <circle cx="200" cy="190" r="18" fill="#222328" stroke="#F59E0B" stroke-width="1.5"/>
+          <text x="200" y="193" fill="#FFF" font-size="7" text-anchor="middle">Ж/Д</text>
         </svg>
       `;
-      document.getElementById('graphContainer').innerHTML = svg;
-
-      // Table
-      const rows = client.counterparties.map(c => `
-        <tr class="border-b border-white/5 hover:bg-white/5">
-          <td class="py-2.5 font-semibold text-white">${c.name}</td>
-          <td class="py-2.5 text-slate-300">${c.type}</td>
-          <td class="py-2.5 font-medium text-slate-200">${c.amount}</td>
-          <td class="py-2.5 text-slate-300">${c.share}</td>
-          <td class="py-2.5">
-            <span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${c.risk === 'CRITICAL' || c.risk === 'HIGH' ? 'bg-red-500/15 text-red-400 border border-red-500/30' : 'bg-amber-500/15 text-amber-400 border border-amber-500/30'}">
-              ${c.risk}
-            </span>
-          </td>
-        </tr>
-      `).join('');
-
-      document.getElementById('counterpartyList').innerHTML = `
-        <table class="w-full text-left">
-          <thead>
-            <tr class="text-[9px] uppercase font-semibold text-slate-400 border-b border-white/10">
-              <th class="py-2">Контрагент</th>
-              <th class="py-2">Тип связи</th>
-              <th class="py-2">Объем платежей</th>
-              <th class="py-2">Доля оборота</th>
-              <th class="py-2">Уровень риска</th>
-            </tr>
-          </thead>
-          <tbody>${rows}</tbody>
-        </table>
-      `;
     }
 
-    function renderResearch() {
-      const container = document.getElementById('researchList');
-      container.innerHTML = `
-        <div class="liquid-glass rounded-2xl p-4 space-y-2 border-l-2 border-l-[#EF3124]">
-          <div class="text-[9px] font-bold text-slate-400 uppercase">Центр макроэкономических исследований Альфа-Банка • 11.09.2026</div>
-          <h4 class="text-xs font-semibold text-white">Ключевая ставка ЦБ РФ: сохранение на 14.0% и ужесточение риторики</h4>
-          <p class="text-xs text-slate-300">«Совет директоров Банка России 11 сентября 2026 года сохранил ключевую ставку на уровне 14,0%. Аналитики Альфа-Банка прогнозируют удержание ставки на уровне 13.8-14.0% до 2К27. Рекомендуем фиксацию ставок и овернайт-инструменты».</p>
-          <span class="inline-block text-[10px] font-medium text-[#EF3124] bg-red-500/10 px-2.5 py-0.5 rounded-full border border-red-500/20">RAG-индексировано</span>
-        </div>
-        <div class="liquid-glass rounded-2xl p-4 space-y-2 border-l-2 border-l-cyan-500">
-          <div class="text-[9px] font-bold text-slate-400 uppercase">Управление отраслевого анализа Альфа-Банка • 13.09.2026</div>
-          <h4 class="text-xs font-semibold text-white">Агропромышленный комплекс: влияние экспортных пошлин и логистики</h4>
-          <p class="text-xs text-slate-300">«Рост затрат на сертификацию и простой флота в Черноморском бассейне повышает потребность экспортеров в предэкспортном финансировании на 15-20%. Рекомендуются аккредитивы Альфа-Банка с отсрочкой платежа».</p>
-          <span class="inline-block text-[10px] font-medium text-cyan-400 bg-cyan-500/10 px-2.5 py-0.5 rounded-full border border-cyan-500/20">RAG-индексировано</span>
-        </div>
-      `;
+    function switchTab(name) {
+      document.querySelectorAll(".dock-tab").forEach(b => b.classList.remove("active"));
+      document.querySelectorAll(".tab-view").forEach(v => v.classList.remove("active"));
+      const tabBtn = event ? event.currentTarget : null;
+      if (tabBtn) tabBtn.classList.add("active");
+      const v = document.getElementById("view-" + name);
+      if (v) v.classList.add("active");
     }
 
-    function renderTrace() {
-      const container = document.getElementById('traceList');
-      const steps = [
-        { num: 1, name: "PROFILE_ANALYSIS", role: "Corporate Context Explorer", desc: "Анализ профиля U_AGRO_001: выручка 48.5 млрд ₽, ОКВЭД 01.11, ВЭД Турция, активен кредитный портфель." },
-        { num: 2, name: "HYPOTHESIS_PLANNING", role: "Strategic Planning Agent", desc: "Формулирование вектора поиска и 3 гипотез влияния решения регулятора на процентные расходы и инвестпрограмму." },
-        { num: 3, name: "NEWS_RETRIEVAL", role: "News Radar Intelligence", desc: "Извлечение параметров первичного события: «Банк России сохранил ставку на 14.0% и ужесточил сигнал» (ЦБ РФ)." },
-        { num: 4, name: "EVENT_CROSS_CHECK", role: "Fact Checking & Novelty Agent", desc: "Кросс-проверка факта по 3 независимым источникам (ЦБ РФ, Интерфакс, РБК). Расчет скора новизны: 96.5%." },
-        { num: 5, name: "ALFA_MACRO_RAG", role: "Alfa Macro Research RAG Agent", desc: "Гибридный векторный RAG-поиск по обзорам ЦМИ Альфа-Банка: извлечен макроотчет от 11.09.2026." },
-        { num: 6, name: "COGNITIVE_SYNTHESIS", role: "Senior Business Insight Architect", desc: "Синтез 6 обязательных блоков инсайта и каузальной цепочки Impact Chain (5 шагов влияния на margin, liquidity, capex)." },
-        { num: 7, name: "SELF_CHECK", role: "Independent Quality Critic", desc: "Self-Check по 5 контрольным вопросам: факты подтверждены, позиция Альфы отделена от AI (100/100, conf 0.98)." },
-        { num: 8, name: "ADAPTATION_AND_REFINE", role: "Self-Correction & Adaptation", desc: "Финализация персонализированного инсайта без снижения доверия. Готов к показу в кабинете ЛПР." }
-      ];
+    function openInsightModal(idx) {
+      const n = mockData.news[idx];
+      document.getElementById("modalTitle").textContent = n.title;
+      document.getElementById("modalScoreBadge").textContent = `${n.score} (${n.priority})`;
+      document.getElementById("modalFact").textContent = n.grounding.fact;
+      document.getElementById("modalResearch").textContent = n.grounding.research;
+      document.getElementById("modalCompany").textContent = n.grounding.company;
+      document.getElementById("modalInsight").textContent = n.grounding.insight;
+      document.getElementById("modalStrength").textContent = `Сила: ${n.strength}`;
+      document.getElementById("modalHorizon").textContent = `Горизонт: ${n.horizon}`;
 
-      container.innerHTML = steps.map(s => `
-        <div class="flex items-start gap-3 p-3 liquid-glass-subtle rounded-xl">
-          <div class="w-6 h-6 rounded-full bg-red-500/15 text-[#EF3124] border border-red-500/30 flex items-center justify-center font-bold text-xs flex-shrink-0">
-            ${s.num}
-          </div>
-          <div class="flex-grow">
-            <div class="flex items-center justify-between">
-              <span class="font-semibold text-white text-xs">${s.name} <span class="text-slate-400 font-normal">(${s.role})</span></span>
-              <span class="text-[10px] text-emerald-400 font-semibold">PASSED</span>
-            </div>
-            <p class="text-slate-300 text-[11px] mt-0.5">${s.desc}</p>
+      document.getElementById("modalChainSteps").innerHTML = n.steps.map((st, i) => `
+        <div class="chain-step-chip">
+          <span class="chip-step-num">Шаг ${i+1}</span>
+          <div class="chip-step-title">${st.title}</div>
+          <div class="chip-step-metric">
+            <span>${st.metric}</span>
+            <strong style="color:${st.dir==='↓'?'#F87171':'#34D399'}">${st.dir}</strong>
           </div>
         </div>
-      `).join('');
-    }
+      `).join("");
 
-    function openModal(newsId) {
-      const clientKey = document.getElementById('clientSelect').value;
-      const client = dataStore.clients[clientKey];
-      const item = dataStore.news.find(n => n.id === newsId);
-      if (!item) return;
-
-      document.getElementById('modalNewsTitle').innerText = item.title;
-      document.getElementById('modalRelevanceBadge').innerText = `СКОР: ${item.scores[clientKey]}% (${item.impact_chain.strength})`;
-
-      // Grounding Matrix
-      document.getElementById('groundingFact').innerText = item.grounding.fact;
-      document.getElementById('groundingResearch').innerText = item.grounding.research;
-      document.getElementById('groundingCompany').innerText = item.grounding.company;
-      document.getElementById('groundingInsight').innerText = item.grounding.insight;
-
-      // Impact Chain Meta
-      document.getElementById('impactChainMeta').innerHTML = `
-        <span class="px-2.5 py-0.5 rounded-full bg-red-500/20 text-red-400 border border-red-500/30">Сила: ${item.impact_chain.strength}</span>
-        <span class="px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-400 border border-amber-500/30">Горизонт: ${item.impact_chain.horizon}</span>
+      document.getElementById("modalPillars").innerHTML = `
+        <div class="pillar-box">
+          <div class="pillar-box-title">1. Что произошло?</div>
+          <p class="pillar-box-text">${n.summary}</p>
+        </div>
+        <div class="pillar-box">
+          <div class="pillar-box-title">2. Почему это важно для Вас?</div>
+          <p class="pillar-box-text">${n.grounding.insight}</p>
+        </div>
+        <div class="pillar-box">
+          <div class="pillar-box-title">3. Позиция ЦМИ Альфа-Банка</div>
+          <p class="pillar-box-text">${n.grounding.research}</p>
+        </div>
       `;
 
-      // Impact Chain Steps
-      document.getElementById('impactChainSteps').innerHTML = item.impact_chain.steps.map((st, idx) => {
-        const dirIcon = st.dir === 'DOWN' ? '↓' : (st.dir === 'UP' ? '↑' : '↔');
-        const metricColor = st.metric === 'margin' ? 'text-red-400' : (st.metric === 'liquidity' ? 'text-amber-400' : 'text-cyan-400');
-        return `
-          <div class="impact-step-chain liquid-glass-subtle p-3 rounded-xl flex flex-col justify-between">
-            <div>
-              <div class="text-[9px] font-semibold text-slate-400 flex justify-between items-center">
-                <span>Шаг ${idx + 1}</span>
-                <span class="${metricColor} uppercase font-mono">${st.metric}</span>
-              </div>
-              <div class="text-xs font-semibold text-white mt-1 leading-snug">${st.title}</div>
-              <p class="text-[11px] text-slate-400 mt-1">${st.desc}</p>
-            </div>
-            <div class="mt-2 text-xs font-bold text-slate-200 flex items-center gap-1">
-              <span class="text-sm">${dirIcon}</span>
-              <span class="text-[10px] font-mono uppercase text-slate-300">${st.dir}</span>
-            </div>
+      document.getElementById("modalProducts").innerHTML = n.products.map(pr => `
+        <div class="prod-banner">
+          <div>
+            <div class="prod-banner-title">${pr.name}</div>
+            <div class="prod-banner-desc">${pr.benefit}</div>
           </div>
-        `;
-      }).join('');
-
-      // 6 Pillars
-      const pillars = [
-        { title: "1. Суть события для компании", icon: "📌", text: `Для компании ${client.name} с выручкой ${client.revenue} решение регулятора и конъюнктура означают сохранение жестких финансовых рамок и необходимость адаптации денежных потоков.` },
-        { title: "2. Риски для бизнеса", icon: "⚠️", text: "Рост процентной нагрузки по кредитам с плавающей ставкой, удорожание факторинга для дебиторов и отсрочка инвестпрограмм расширения мощностей." },
-        { title: "3. Возможности для развития", icon: "💡", text: "Возможность размещения свободной казначейской ликвидности в овернайт-депозиты Альфа-Банка под 13.8-13.9% годовых и заключение долгосрочных контрактов." },
-        { title: "4. План действий компании", icon: "📋", text: "Провести ревизию кредитного портфеля, зафиксировать ставки по ключевым траншам, оптимизировать оборотный капитал через динамическое дисконтирование." },
-        { title: "5. Финансовые инструменты Банка", icon: "🏦", text: "Процентный своп (IRS) для фиксации расходов, факторинг с регрессом для поддержки дебиторов и спецпрограммы субсидированного лизинга." },
-        { title: "6. Финансовая оценка эффекта", icon: "📊", text: "Ожидаемый чистый финансовый эффект от хеджирования ставки и размещения остатков ликвидности оценивается в 120-180 млн рублей за 12 месяцев." }
-      ];
-
-      document.getElementById('pillarsContainer').innerHTML = pillars.map(p => `
-        <div class="liquid-glass-subtle p-3.5 rounded-xl">
-          <h4 class="text-xs font-semibold text-white flex items-center gap-1.5">
-            <span>${p.icon}</span> ${p.title}
-          </h4>
-          <p class="text-xs text-slate-300 mt-1.5 leading-relaxed">${p.text}</p>
+          <button class="prod-banner-btn" onclick="alert('Заявка по продукту «${pr.name}» направлена в Альфа-Банк')">Подключить</button>
         </div>
-      `).join('');
+      `).join("");
 
-      // Products
-      document.getElementById('modalProducts').innerHTML = item.products.map(pr => `
-        <div class="bg-white/5 p-3 rounded-xl border border-white/5">
-          <div class="text-xs font-semibold text-white flex items-center gap-1.5">
-            <span class="text-[#EF3124]">●</span> ${pr.name}
-          </div>
-          <p class="text-[11px] text-slate-400 mt-1">${pr.desc}</p>
-        </div>
-      `).join('');
-
-      document.getElementById('insightModal').classList.remove('hidden');
+      document.getElementById("sheetBackdrop").classList.remove("hidden");
     }
 
     function closeModal() {
-      document.getElementById('insightModal').classList.add('hidden');
+      document.getElementById("sheetBackdrop").classList.add("hidden");
     }
 
-    function switchTab(tabKey) {
-      ['radar', 'graph', 'research', 'trace', 'copilot'].forEach(t => {
-        const pane = document.getElementById(`tab-${t}`);
-        const btn = document.getElementById(`tabBtn-${t}`);
-        if (t === tabKey) {
-          pane.classList.remove('hidden');
-          btn.className = "apple-pill-btn active px-4 py-2 text-white";
-        } else {
-          pane.classList.add('hidden');
-          btn.className = "apple-pill-btn px-4 py-2 text-slate-400 hover:text-white";
-        }
-      });
+    function toggleModal() {
+      document.getElementById("clientModal").classList.toggle("hidden");
     }
 
-    function handleUserChat() {
-      const input = document.getElementById('userQuestion');
+    function switchClient(key) {
+      activeClientKey = key;
+      renderAll();
+    }
+
+    function switchRole(role) {
+      document.getElementById("topRoleName").textContent = role;
+    }
+
+    function filterSearch(txt) {
+      const q = txt.toLowerCase();
+      const filtered = mockData.news.filter(n => n.title.toLowerCase().includes(q) || n.summary.toLowerCase().includes(q));
+      const list = document.getElementById("newsFeedList");
+      list.innerHTML = filtered.map((n, idx) => `
+        <div class="news-item-card" onclick="openInsightModal(${idx})">
+          <div class="news-item-top">
+            <span class="news-category-tag">${n.category}</span>
+            <span class="news-score-badge score-critical">${n.score}</span>
+          </div>
+          <h4 class="news-item-title">${n.title}</h4>
+          <p class="news-item-summary">${n.summary}</p>
+        </div>
+      `).join("");
+    }
+
+    function sendChat() {
+      const input = document.getElementById("chatInput");
       const q = input.value.trim();
       if (!q) return;
-
-      const chat = document.getElementById('chatMessages');
-      chat.innerHTML += `
-        <div class="flex justify-end">
-          <div class="bg-gradient-to-r from-[#EF3124] to-[#C91E12] text-white p-3 rounded-2xl max-w-[80%] text-xs shadow-md">
-            ${q}
-          </div>
-        </div>
-      `;
-      input.value = '';
-
+      const t = document.getElementById("chatThread");
+      t.innerHTML += `<div class="chat-msg user"><div class="msg-avatar">Я</div><div class="msg-bubble">${q}</div></div>`;
+      input.value = "";
       setTimeout(() => {
-        chat.innerHTML += `
-          <div class="bg-white/5 border border-white/10 p-3.5 rounded-2xl max-w-[85%] text-xs">
-            <span class="font-bold text-[#EF3124]">Альфа-Аналитик:</span> На основе данных ЦМИ Альфа-Банка и финансового профиля вашего холдинга, наиболее эффективной стратегией при ставке 14.0% является заключение сделки процентного свопа (IRS) на 1.5-2 года в сочетании с размещением свободных остатков на овернайт-депозиты (доходность до 13.9% годовых). Это устраняет риск процентной волатильности и генерирует доходность на казначейском контуре.
-          </div>
-        `;
-        chat.scrollTop = chat.scrollHeight;
-      }, 350);
+        t.innerHTML += `<div class="chat-msg ai"><div class="msg-avatar">А</div><div class="msg-bubble">На основе данных ЦМИ Альфа-Банка по вашему холдингу рекомендуется заключение соглашения процентного свопа (IRS) на 1.5 года для нивелирования риска ставки 14.0% и размещения свободных средств в овернайт-депозиты Альфа-Банка под 13.9%.</div></div>`;
+        t.scrollTop = t.scrollHeight;
+      }, 300);
     }
 
-    // Initialize
-    window.addEventListener('DOMContentLoaded', () => {
-      renderApp();
-    });
+    window.onload = renderAll;
   </script>
 </body>
 </html>

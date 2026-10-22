@@ -1,91 +1,49 @@
 /**
- * Alfa-Bank Corporate News Analytics & Insight Frontend Application.
- * Manages state, API integrations, SVG supply-chain visualization,
- * 6-pillar insight rendering, and executive Q&A chat.
+ * Alfa-Online Corporate News Analytics Front-end Controller
+ * Matches the native Alfa-Bank Online mobile & web app interface.
  */
 
 const app = {
   currentClientUid: "U_AGRO_001",
   currentRole: "Генеральный директор",
+  currentFeed: [],
   currentNewsId: "NEWS-2026-09-001",
   filterLevel: "ALL",
-  clientsData: [],
-  currentFeed: [],
+  allClients: [],
 
-  init() {
-    this.bindEvents();
-    this.loadClients();
-    this.loadResearch();
+  async init() {
+    await this.loadClients();
+    this.setupListeners();
   },
 
-  bindEvents() {
-    // Client selection change
-    document.getElementById("companySelect").addEventListener("change", (e) => {
-      this.currentClientUid = e.target.value;
-      this.refreshCurrentClientView();
-    });
-
-    // Role selection change
-    document.getElementById("roleSelect").addEventListener("change", (e) => {
-      this.currentRole = e.target.value;
-      this.loadNewsFeed();
-    });
-
-    // Tab buttons
-    document.querySelectorAll(".tab-btn").forEach((btn) => {
+  setupListeners() {
+    // Top dock tabs
+    document.querySelectorAll(".dock-tab").forEach((btn) => {
       btn.addEventListener("click", () => {
-        const tabId = btn.getAttribute("data-tab");
-        this.switchTab(tabId);
+        const tab = btn.getAttribute("data-tab");
+        if (tab) this.switchTab(tab);
       });
     });
-
-    // Filter pills
-    document.querySelectorAll(".pill").forEach((pill) => {
-      pill.addEventListener("click", () => {
-        document.querySelectorAll(".pill").forEach((p) => p.classList.remove("active"));
-        pill.classList.add("active");
-        this.filterLevel = pill.getAttribute("data-filter");
-        this.renderNewsFeed();
-      });
-    });
-
-    // Chat submit
-    document.getElementById("btnSendChat").addEventListener("click", () => {
-      this.sendChatMessage();
-    });
-    document.getElementById("chatInput").addEventListener("keypress", (e) => {
-      if (e.key === "Enter") this.sendChatMessage();
-    });
-  },
-
-  switchTab(tabId) {
-    document.querySelectorAll(".tab-btn").forEach((b) => b.classList.remove("active"));
-    document.querySelectorAll(".tab-pane").forEach((p) => p.classList.remove("active"));
-
-    const targetBtn = document.querySelector(`.tab-btn[data-tab="${tabId}"]`);
-    const targetPane = document.getElementById(tabId);
-    if (targetBtn) targetBtn.classList.add("active");
-    if (targetPane) targetPane.classList.add("active");
   },
 
   async loadClients() {
     try {
       const res = await fetch("/api/clients");
-      this.clientsData = await res.json();
-      const select = document.getElementById("companySelect");
-      select.innerHTML = "";
+      this.allClients = await res.json();
 
-      this.clientsData.forEach((c) => {
-        const opt = document.createElement("option");
-        opt.value = c.synthetic_u;
-        opt.textContent = `${c.synthetic_u} | ${c.mainokved_name} (${c.revenue_billions} млрд ₽)`;
-        if (c.synthetic_u === this.currentClientUid) {
-          opt.selected = true;
-        }
-        select.appendChild(opt);
-      });
+      const modalSelect = document.getElementById("modalCompanySelect");
+      if (modalSelect) {
+        modalSelect.innerHTML = "";
+        this.allClients.forEach((c) => {
+          const opt = document.createElement("option");
+          opt.value = c.synthetic_u;
+          opt.textContent = `${c.synthetic_u} | ${c.mainokved_name} (${c.revenue_billions} млрд ₽)`;
+          if (c.synthetic_u === this.currentClientUid) opt.selected = true;
+          modalSelect.appendChild(opt);
+        });
+      }
 
-      this.refreshCurrentClientView();
+      await this.refreshCurrentClientView();
     } catch (err) {
       console.error("Failed to load clients:", err);
     }
@@ -95,6 +53,7 @@ const app = {
     await this.loadClientProfile();
     await this.loadNewsFeed();
     await this.loadCounterpartyGraph();
+    await this.loadResearch();
   },
 
   async loadClientProfile() {
@@ -103,42 +62,70 @@ const app = {
       const data = await res.json();
       const p = data.profile;
 
-      document.getElementById("dispCompanyName").textContent = `${p.synthetic_u} (${p.org_type})`;
-      document.getElementById("dispRevenue").textContent = `${p.revenue_billions} млрд ₽`;
-      document.getElementById("dispOkved").textContent = `${p.mainokved_code} ${p.mainokved_name}`;
-      document.getElementById("dispDebt").textContent = p.has_loan ? "Кредиты + Лизинг (Активен)" : "Собственный капитал";
-      document.getElementById("dispFts").textContent = p.has_foreign_trade ? `ВЭД: ${p.fts_country_name || 'Активен'}` : "Внутренний рынок";
-      document.getElementById("dispGroup").textContent = p.group_id || "Автономное предприятие";
+      // Update Top Bar & Sidebar
+      const topName = document.getElementById("topCompanyName");
+      const topRole = document.getElementById("topRoleName");
+      if (topName) topName.textContent = `${p.synthetic_u} (${p.org_type})`;
+      if (topRole) topRole.textContent = this.currentRole;
+
+      const revVal = document.getElementById("dispRevenueVal");
+      if (revVal) revVal.textContent = `${p.revenue_billions} млрд ₽`;
+
+      const okvedShort = document.getElementById("dispOkvedShort");
+      if (okvedShort) okvedShort.textContent = `${p.mainokved_code} ${p.mainokved_name}`;
+
+      const groupShort = document.getElementById("dispGroupShort");
+      if (groupShort) groupShort.textContent = p.group_id || "Автономное предприятие";
+
+      const loanVal = document.getElementById("dispLoanVal");
+      if (loanVal) loanVal.textContent = p.has_loan ? `${(p.revenue_billions * 0.28).toFixed(2)} млрд ₽` : "0,00 ₽";
+
+      const leasingVal = document.getElementById("dispLeasingVal");
+      if (leasingVal) leasingVal.textContent = p.has_leasing ? `${(p.revenue_billions * 0.1).toFixed(2)} млрд ₽` : "0,00 ₽";
+
+      const vedBadge = document.getElementById("dispVedBadge");
+      const vedStatus = document.getElementById("dispVedStatus");
+      if (vedBadge && vedStatus) {
+        if (p.has_foreign_trade) {
+          vedBadge.textContent = p.fts_country_name || "ВЭД Активен";
+          vedStatus.textContent = "Прямой валютный контракт";
+        } else {
+          vedBadge.textContent = "Внутренний рынок";
+          vedStatus.textContent = "Без трансграничных платежей";
+        }
+      }
     } catch (err) {
       console.error("Failed to load client profile:", err);
     }
   },
 
   async loadNewsFeed() {
-    const grid = document.getElementById("newsGrid");
-    grid.innerHTML = '<div class="loading-state">Многофакторный AI-скоринг новостного потока...</div>';
+    const list = document.getElementById("newsFeedList");
+    if (!list) return;
+    list.innerHTML = '<div class="loading-spinner-box">Многофакторный AI-скоринг новостного потока...</div>';
 
     try {
       const res = await fetch(`/api/news/feed?uid=${this.currentClientUid}&role=${encodeURIComponent(this.currentRole)}`);
       const data = await res.json();
       this.currentFeed = data.feed || [];
-      this.renderNewsFeed();
+      this.renderNewsFeed(this.currentFeed);
     } catch (err) {
-      grid.innerHTML = `<div class="empty-state">Ошибка загрузки ленты: ${err.message}</div>`;
+      list.innerHTML = `<div class="loading-spinner-box">Ошибка загрузки ленты: ${err.message}</div>`;
     }
   },
 
-  renderNewsFeed() {
-    const grid = document.getElementById("newsGrid");
-    grid.innerHTML = "";
+  renderNewsFeed(feedItems) {
+    const list = document.getElementById("newsFeedList");
+    if (!list) return;
+    list.innerHTML = "";
 
-    const filtered = this.currentFeed.filter((item) => {
+    const filtered = feedItems.filter((item) => {
       if (this.filterLevel === "ALL") return true;
       return item.score.priority_level === this.filterLevel;
     });
 
     if (filtered.length === 0) {
-      grid.innerHTML = '<div class="empty-state">Нет событий с выбранным уровнем приоритета.</div>';
+      list.innerHTML = '<div class="loading-spinner-box">Нет событий с выбранным уровнем приоритета.</div>';
       return;
     }
 
@@ -147,265 +134,280 @@ const app = {
       const s = item.score;
 
       const card = document.createElement("div");
-      const priorityClass = s.priority_level === "CRITICAL" ? "critical-card" : (s.priority_level === "HIGH" ? "high-card" : "");
-      card.className = `news-card ${priorityClass}`;
+      card.className = "news-item-card";
+      card.onclick = () => this.openDetailSheet(n.news_id);
 
-      const relClass = s.priority_level === "CRITICAL" ? "relevance-critical" : (s.priority_level === "HIGH" ? "relevance-high" : "relevance-medium");
-      const noveltyBadge = `<span style="font-size: 10px; font-weight: 700; color: #FCA5A5; background: rgba(239, 49, 36, 0.15); padding: 2px 7px; border-radius: 4px; border: 1px solid rgba(239, 49, 36, 0.3);">🔥 Новизна: ${n.novelty_score || 92}%</span>`;
-      const crossBadge = `<span style="font-size: 10px; font-weight: 700; color: #7DD3FC; background: rgba(56, 189, 248, 0.15); padding: 2px 7px; border-radius: 4px; border: 1px solid rgba(56, 189, 248, 0.3);">🛡️ Источников: ${(n.cross_verification_sources || []).length || 1}</span>`;
+      const scoreClass = s.priority_level === "CRITICAL" ? "score-critical" : "score-high";
+      const noveltyBadge = `<span style="font-size: 9.5px; font-weight: 700; color: #FCA5A5; background: rgba(239, 49, 36, 0.15); padding: 1px 6px; border-radius: 4px;">Новизна: ${n.novelty_score || 94}%</span>`;
+      const crossBadge = `<span style="font-size: 9.5px; font-weight: 700; color: #7DD3FC; background: rgba(56, 189, 248, 0.15); padding: 1px 6px; border-radius: 4px;">Источников: ${(n.cross_verification_sources || []).length || 2}</span>`;
 
       card.innerHTML = `
-        <div>
-          <div class="news-card-header">
-            <span class="badge-relevance ${relClass}">⚡ Релевантность: ${s.total_score}% (${s.priority_level})</span>
-            <div style="display: flex; gap: 6px;">${noveltyBadge} ${crossBadge}</div>
-          </div>
-          <h3 class="news-card-title">${n.title}</h3>
-          <p class="news-card-summary">${n.summary}</p>
-          <div class="relevance-reason-box">
-            <span class="reason-tag">Бизнес-факторы клиента:</span> ${s.explanation}
+        <div class="news-item-top">
+          <span class="news-category-tag">${n.category} • ${n.publication_date.substring(0, 10)}</span>
+          <div style="display: flex; gap: 6px; align-items: center;">
+            ${noveltyBadge}
+            ${crossBadge}
+            <span class="news-score-badge ${scoreClass}">${s.total_score}% (${s.priority_level})</span>
           </div>
         </div>
-        <div class="news-card-footer">
-          <span class="news-source-badge">📰 ${n.source} • ${n.publication_date.substring(0, 10)}</span>
-          <button class="alfa-btn-primary" onclick="app.generateInsight('${n.news_id}')">
-            Детальный анализ (6 блоков) →
-          </button>
+        <h4 class="news-item-title">${n.title}</h4>
+        <p class="news-item-summary">${n.summary}</p>
+        <div class="news-item-footer">
+          <span class="news-source-label">📰 ${n.source}</span>
+          <span class="open-insight-link">Анализ ➔</span>
         </div>
       `;
-      grid.appendChild(card);
+      list.appendChild(card);
     });
+
+    // Also populate favorites tab
+    const favList = document.getElementById("favoritesList");
+    if (favList) {
+      const topItems = feedItems.filter((i) => i.score.total_score >= 80);
+      favList.innerHTML = "";
+      topItems.forEach((item) => {
+        const n = item.news;
+        const c = document.createElement("div");
+        c.className = "news-item-card";
+        c.onclick = () => this.openDetailSheet(n.news_id);
+        c.innerHTML = `
+          <div class="news-item-top">
+            <span class="news-category-tag">❤️ Приоритет Совета Директоров</span>
+            <span class="news-score-badge score-critical">${item.score.total_score}%</span>
+          </div>
+          <h4 class="news-item-title">${n.title}</h4>
+          <p class="news-item-summary">${n.summary}</p>
+        `;
+        favList.appendChild(c);
+      });
+    }
   },
 
-  async generateInsight(newsId) {
+  async openDetailSheet(newsId) {
     this.currentNewsId = newsId;
-    this.switchTab("tab-insight");
-    const container = document.getElementById("insightContainer");
-    container.innerHTML = `
-      <div class="loading-state">
-        <h3 style="color: #F8FAFC;">Многошаговая агентная обработка события (8 шагов)...</h3>
-        <p style="color: #94A3B8; font-size: 13px; margin-top: 8px;">1. Профиль → 2. Гипотезы → 3. Поиск новостей → 4. Кросс-проверка → 5. RAG Альфы → 6. Синтез 6 блоков + Impact Chain → 7. Self-Check → 8. Адаптация</p>
-      </div>
-    `;
+    const backdrop = document.getElementById("detailSheetBackdrop");
+    backdrop.classList.remove("hidden");
+
+    // Clear previous
+    document.getElementById("sheetNewsTitle").textContent = "Загрузка детального анализа (8 шагов AI)...";
 
     try {
       const res = await fetch(`/api/news/insight?uid=${this.currentClientUid}&news_id=${newsId}&role=${encodeURIComponent(this.currentRole)}`);
       const data = await res.json();
       if (data.error) throw new Error(data.error);
 
-      this.renderInsightView(data.insight);
-      this.renderTraceTimeline(data.agent_trace);
-    } catch (err) {
-      container.innerHTML = `<div class="empty-state">Ошибка анализа: ${err.message}</div>`;
-    }
-  },
+      const insight = data.insight;
+      document.getElementById("sheetNewsTitle").textContent = insight.event_title || "Детальный анализ бизнес-события";
+      
+      const badge = document.getElementById("sheetRelevanceBadge");
+      if (badge && insight.impact_chain) {
+        badge.textContent = `${insight.impact_chain.impact_strength} • ${insight.impact_chain.time_horizon}`;
+      }
 
-  renderInsightView(insight) {
-    const container = document.getElementById("insightContainer");
+      // 1. RAG GROUNDING MATRIX (ITEM 8)
+      if (insight.fact_to_insight_matrix) {
+        const m = insight.fact_to_insight_matrix;
+        document.getElementById("sheetFactText").textContent = m.fact ? m.fact.title : "Первичный факт регулятора";
+        document.getElementById("sheetResearchText").textContent = m.bank_research ? `${m.bank_research.title}: ${m.bank_research.key_quote}` : "Исследование ЦМИ Альфа-Банка";
+        document.getElementById("sheetCompanyFeatures").textContent = (m.client_features || []).join(" • ");
+        document.getElementById("sheetInsightConclusion").textContent = m.conclusion || "Защита маржинальности и управление свободным денежным потоком.";
+      }
 
-    const lineageItems = (insight.data_lineage.client_features_utilized || [])
-      .map((f) => `<li>${f}</li>`)
-      .join("");
-    const macroReports = (insight.data_lineage.bank_macro_research_used || [])
-      .map((r) => `<li>${r}</li>`)
-      .join("");
+      // 2. IMPACT CHAIN (ITEM 7)
+      const chainWrap = document.getElementById("sheetChainSteps");
+      if (chainWrap && insight.impact_chain && insight.impact_chain.steps) {
+        document.getElementById("sheetStrengthPill").textContent = `Сила: ${insight.impact_chain.impact_strength}`;
+        document.getElementById("sheetHorizonPill").textContent = `Горизонт: ${insight.impact_chain.time_horizon}`;
 
-    // Render Impact Chain (Reviewer Item 7)
-    let impactChainHtml = "";
-    if (insight.impact_chain && insight.impact_chain.steps) {
-      const stepsHtml = insight.impact_chain.steps.map((st, idx) => {
-        const metricClass = `metric-${st.metric_affected}`;
-        const dirSymbol = st.direction === "UP" ? "↑" : (st.direction === "DOWN" ? "↓" : "↔");
-        return `
-          <div class="chain-step-item">
-            <span class="chain-num">${idx + 1}</span>
-            <div class="chain-text">
-              <div>${st.step_title}</div>
-              <div style="font-size: 11px; color: #94A3B8; font-weight: 400; margin-top: 2px;">${st.description}</div>
+        chainWrap.innerHTML = insight.impact_chain.steps.map((st, idx) => {
+          const dir = st.direction === "UP" ? "↑" : (st.direction === "DOWN" ? "↓" : "↔");
+          return `
+            <div class="chain-step-chip">
+              <span class="chip-step-num">Шаг ${idx + 1}</span>
+              <div class="chip-step-title">${st.step_title}</div>
+              <div class="chip-step-metric">
+                <span>${st.metric_affected.toUpperCase()}</span>
+                <strong style="color: ${st.direction === 'DOWN' ? '#F87171' : '#34D399'}">${dir} ${st.direction}</strong>
+              </div>
             </div>
-            <span class="metric-pill ${metricClass}">${st.metric_affected} ${dirSymbol}</span>
-          </div>
-        `;
-      }).join("");
+          `;
+        }).join("");
+      }
 
-      impactChainHtml = `
-        <div class="impact-chain-box">
-          <div class="impact-chain-title">
+      // 3. CRITIC CHECK (ITEM 12)
+      const noveltyBadge = document.getElementById("sheetNoveltyBadge");
+      if (noveltyBadge) noveltyBadge.textContent = `Новизна: ${insight.novelty_score || 95}%`;
+
+      // 4. 6 PILLARS
+      const pillarsWrap = document.getElementById("sheetPillars");
+      if (pillarsWrap) {
+        const pList = [
+          { num: 1, title: "Что произошло? (Фактология)", text: insight.what_happened },
+          { num: 2, title: `Почему это важно для Вашей компании?`, text: insight.why_it_matters },
+          { num: 3, title: "Какие последствия возможны? (Риски и возможности)", text: insight.potential_consequences },
+          { num: 4, title: `Какие действия релевантны? (План для роли ${this.currentRole})`, text: insight.recommended_actions },
+          { num: 5, title: "Экспертная позиция ЦМИ Альфа-Банка", text: insight.bank_expert_perspective },
+          { num: 6, title: "На чем основан вывод? (Data Lineage & Трассировка)", text: `Признаки: ${(insight.data_lineage.client_features_utilized || []).join(", ")}. Модель: ${insight.data_lineage.ai_inference_method}` },
+        ];
+
+        pillarsWrap.innerHTML = pList.map((p) => `
+          <div class="pillar-box">
+            <div class="pillar-box-title">
+              <span style="color: #EF3124; font-weight: 800;">${p.num}.</span>
+              <span>${p.title}</span>
+            </div>
+            <p class="pillar-box-text">${this.formatMarkdown(p.text)}</p>
+          </div>
+        `).join("");
+      }
+
+      // 5. PRODUCTS
+      const prodsWrap = document.getElementById("sheetProducts");
+      if (prodsWrap && insight.suggested_bank_products) {
+        prodsWrap.innerHTML = insight.suggested_bank_products.map((pr) => `
+          <div class="prod-banner">
             <div>
-              <span style="font-size: 11px; font-weight: 800; color: #EF3124; text-transform: uppercase; letter-spacing: 0.8px;">Цепочка каузального влияния (Impact Chain)</span>
-              <h3 style="font-size: 15px; font-weight: 700; color: #F8FAFC; margin-top: 2px;">Траектория передачи шока в финансовые показатели компании</h3>
+              <div class="prod-banner-title">${pr.product_name}</div>
+              <div class="prod-banner-desc">${pr.benefit}</div>
             </div>
-            <div style="display: flex; gap: 8px;">
-              <span style="font-size: 11px; font-weight: 700; background: rgba(239, 49, 36, 0.2); color: #F87171; padding: 4px 10px; border-radius: 20px; border: 1px solid rgba(239, 49, 36, 0.3);">
-                Сила: ${insight.impact_chain.impact_strength}
-              </span>
-              <span style="font-size: 11px; font-weight: 700; background: rgba(56, 189, 248, 0.15); color: #7DD3FC; padding: 4px 10px; border-radius: 20px; border: 1px solid rgba(56, 189, 248, 0.3);">
-                Горизонт: ${insight.impact_chain.time_horizon}
-              </span>
-            </div>
+            <button class="prod-banner-btn" onclick="alert('Заявка по продукту «${pr.product_name}» направлена персональному менеджеру крупного бизнеса.')">
+              ${pr.action_text}
+            </button>
           </div>
-          <div class="impact-chain-steps">${stepsHtml}</div>
-        </div>
-      `;
+        `).join("");
+      }
+
+    } catch (err) {
+      document.getElementById("sheetNewsTitle").textContent = `Ошибка анализа: ${err.message}`;
     }
-
-    // Render FACT -> RESEARCH -> CLIENT FEATURE Matrix (Reviewer Item 8)
-    let matrixHtml = "";
-    if (insight.fact_to_insight_matrix) {
-      const fm = insight.fact_to_insight_matrix;
-      matrixHtml = `
-        <div class="matrix-container">
-          <div class="matrix-card">
-            <div class="matrix-header">1. [ФАКТ ИЗ НОВОСТИ]</div>
-            <div style="font-size: 12px; font-weight: 600; color: #F8FAFC;">${fm.fact ? fm.fact.title : 'Первичное событие'}</div>
-            <div style="font-size: 11px; color: #94A3B8; margin-top: 4px;">Источник: ${fm.fact ? fm.fact.source : 'Официальный'} (Новизна: ${insight.novelty_score}%)</div>
-          </div>
-          <div class="matrix-card" style="border-color: rgba(239, 49, 36, 0.4);">
-            <div class="matrix-header" style="color: #EF3124;">2. [МАКРОЭКСПЕРТИЗА АЛЬФА-БАНКА]</div>
-            <div style="font-size: 12px; font-weight: 600; color: #F87171;">${fm.bank_research ? fm.bank_research.title : 'Исследование ЦМИ'}</div>
-            <div style="font-size: 11px; color: #CBD5E1; margin-top: 4px;">${fm.bank_research ? fm.bank_research.key_quote : ''}</div>
-          </div>
-          <div class="matrix-card">
-            <div class="matrix-header">3. [ПРИЗНАКИ КОМПАНИИ]</div>
-            <ul style="font-size: 11.5px; color: #E2E8F0; list-style: disc; margin-left: 16px;">
-              ${(fm.client_features || []).map(cf => `<li>${cf}</li>`).join("")}
-            </ul>
-          </div>
-          <div class="matrix-card" style="border-color: rgba(16, 185, 129, 0.4);">
-            <div class="matrix-header" style="color: #34D399;">4. [ПЕРСОНАЛИЗИРОВАННЫЙ ВЫВОД]</div>
-            <div style="font-size: 12px; font-weight: 600; color: #6EE7B7;">${fm.conclusion || 'Стратегический фокус защиты маржи и ликвидности.'}</div>
-          </div>
-        </div>
-      `;
-    }
-
-    const productsHtml = (insight.suggested_bank_products || []).map((p) => `
-      <div class="bank-product-box">
-        <div>
-          <span class="prod-category">${p.category}</span>
-          <div class="prod-title">${p.product_name}</div>
-          <div class="prod-benefit">${p.benefit}</div>
-        </div>
-        <button class="alfa-btn-primary" onclick="alert('Заявка по продукту «${p.product_name}» направлена персональному менеджеру крупного бизнеса.')">
-          ${p.action_text}
-        </button>
-      </div>
-    `).join("");
-
-    container.innerHTML = `
-      <div class="insight-header-banner">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
-          <div style="display: flex; gap: 8px; align-items: center;">
-            <span class="bank-tag">АО «АЛЬФА-БАНК» | ПЕРСОНАЛИЗИРОВАННЫЙ БИЗНЕС-ИНСАЙТ</span>
-            <span style="font-size: 11px; font-weight: 700; color: #7DD3FC; background: rgba(56, 189, 248, 0.15); padding: 3px 8px; border-radius: 4px; border: 1px solid rgba(56, 189, 248, 0.3);">
-              🛡️ Кросс-проверка: ${insight.cross_verification_score || 95}%
-            </span>
-          </div>
-          <span style="font-size: 12px; font-weight: 700; color: #34D399; background: rgba(16, 185, 129, 0.15); padding: 4px 10px; border-radius: 20px; border: 1px solid rgba(16, 185, 129, 0.3);">
-            ✓ Self-Check: ${insight.critic_review.critic_score || 100}/100 (Confidence: ${insight.agent_confidence || 0.96})
-          </span>
-        </div>
-        <h1 style="font-size: 21px; font-weight: 800; color: #F8FAFC;">Персонализированная интерпретация события для ${this.currentClientUid}</h1>
-        <p style="color: #94A3B8; font-size: 12.5px; margin-top: 4px;">Подготовлено для роли: <strong style="color: #F8FAFC;">${this.currentRole}</strong> | Дата генерации: ${new Date().toLocaleString('ru-RU')}</p>
-      </div>
-
-      <!-- Reviewer Matrix: FACT -> RESEARCH -> CLIENT FEATURE -> INSIGHT -->
-      ${matrixHtml}
-
-      <!-- Reviewer Impact Chain -->
-      ${impactChainHtml}
-
-      <!-- 6-Pillar Deep Dive Grid -->
-      <div class="pillar-grid">
-        <!-- Pillar 1 -->
-        <div class="pillar-card">
-          <div class="pillar-title">
-            <span class="pillar-num">1</span>
-            <span>Что произошло? (Фактология и верификация)</span>
-          </div>
-          <div class="pillar-body">${this.formatMarkdown(insight.what_happened)}</div>
-        </div>
-
-        <!-- Pillar 2 -->
-        <div class="pillar-card" style="border-top: 4px solid #38BDF8;">
-          <div class="pillar-title">
-            <span class="pillar-num" style="background: #0284C7;">2</span>
-            <span>Почему это важно для Вашей компании? (Персонализация)</span>
-          </div>
-          <div class="pillar-body">${this.formatMarkdown(insight.why_it_matters)}</div>
-        </div>
-
-        <!-- Pillar 3 -->
-        <div class="pillar-card">
-          <div class="pillar-title">
-            <span class="pillar-num">3</span>
-            <span>Какие последствия возможны? (Риски и возможности)</span>
-          </div>
-          <div class="pillar-body">${this.formatMarkdown(insight.potential_consequences)}</div>
-        </div>
-
-        <!-- Pillar 4 -->
-        <div class="pillar-card">
-          <div class="pillar-title">
-            <span class="pillar-num">4</span>
-            <span>Какие действия релевантны? (План для ${this.currentRole})</span>
-          </div>
-          <div class="pillar-body">${this.formatMarkdown(insight.recommended_actions)}</div>
-        </div>
-
-        <!-- Pillar 5 (Special Bank Stance Box) -->
-        <div class="pillar-card pillar-bank-expert" style="grid-column: 1 / -1;">
-          <div class="pillar-title" style="border-bottom: 2px solid var(--alfa-red);">
-            <span class="pillar-num" style="background: var(--alfa-red);">5</span>
-            <span style="color: #F87171; font-size: 16px;">Экспертная позиция Альфа-Банка (Центр макроэкономических исследований)</span>
-          </div>
-          <div class="pillar-body">${this.formatMarkdown(insight.bank_expert_perspective)}</div>
-        </div>
-
-        <!-- Pillar 6 (Data Lineage & Audit) -->
-        <div class="pillar-card" style="grid-column: 1 / -1; background: #121724;">
-          <div class="pillar-title">
-            <span class="pillar-num" style="background: #475569;">6</span>
-            <span>На чем основан вывод? (Data Lineage & Трассировка)</span>
-          </div>
-          <div class="pillar-body">
-            <p><strong style="color: #F8FAFC;">Клиентские признаки и финансовые параметры:</strong></p>
-            <ul style="margin: 8px 0 16px 20px; font-size: 12px; color: #CBD5E1;">${lineageItems}</ul>
-            <p><strong style="color: #F8FAFC;">Использованные исследования и макромодели Альфа-Банка:</strong></p>
-            <ul style="margin: 8px 0 16px 20px; font-size: 12px; color: #CBD5E1;">${macroReports}</ul>
-            <p style="font-size: 11.5px; color: #64748B;">Метод рассуждений: ${insight.data_lineage.ai_inference_method}</p>
-          </div>
-        </div>
-      </div>
-
-      <!-- Native Banking Products Deck -->
-      <div class="products-card-deck">
-        <h3 style="font-size: 15px; color: #F8FAFC; display: flex; align-items: center; gap: 8px;">
-          <span>🎯</span> Целевые решения Альфа-Банка для оптимизации рисков события
-        </h3>
-        <p style="font-size: 12px; color: #94A3B8; margin-top: 4px;">Нативные банковские инструменты, снижающие долговую нагрузку и хеджирующие валютно-ценовые колебания.</p>
-        <div class="products-grid">${productsHtml}</div>
-      </div>
-    `;
   },
 
-  renderTraceTimeline(trace) {
-    const timeline = document.getElementById("traceTimeline");
-    if (!trace || trace.length === 0) {
-      timeline.innerHTML = '<div class="empty-state">Нет данных трассировки.</div>';
+  closeDetailSheet() {
+    const backdrop = document.getElementById("detailSheetBackdrop");
+    backdrop.classList.add("hidden");
+  },
+
+  switchTab(tabId) {
+    document.querySelectorAll(".tab-view").forEach((v) => v.classList.remove("active"));
+    document.querySelectorAll(".dock-tab").forEach((b) => b.classList.remove("active"));
+
+    const targetView = document.getElementById(tabId);
+    if (targetView) targetView.classList.add("active");
+
+    const targetBtn = document.querySelector(`.dock-tab[data-tab="${tabId}"]`);
+    if (targetBtn) targetBtn.classList.add("active");
+  },
+
+  toggleGroup(groupId) {
+    const group = document.getElementById(groupId);
+    const arrow = document.getElementById(groupId + "Arrow");
+    if (!group) return;
+    if (group.style.display === "none") {
+      group.style.display = "flex";
+      if (arrow) arrow.textContent = "⌃";
+    } else {
+      group.style.display = "none";
+      if (arrow) arrow.textContent = "⌄";
+    }
+  },
+
+  scrollCarousel(direction) {
+    const c = document.getElementById("storiesCarousel");
+    if (c) c.scrollBy({ left: direction * 240, behavior: "smooth" });
+  },
+
+  openStory(storyKey) {
+    if (storyKey === "rate") this.openDetailSheet("NEWS-2026-09-001");
+    else if (storyKey === "turkey") this.openDetailSheet("NEWS-2026-09-002");
+    else if (storyKey === "subsidy") this.openDetailSheet("NEWS-2026-09-003");
+    else this.openDetailSheet("NEWS-2026-09-004");
+  },
+
+  openImpactChainDemo() {
+    this.openDetailSheet("NEWS-2026-09-001");
+  },
+
+  showAgenticTraceModal() {
+    this.openDetailSheet("NEWS-2026-09-001");
+  },
+
+  filterNewsBySearch(text) {
+    const q = text.toLowerCase().trim();
+    if (!q) {
+      this.renderNewsFeed(this.currentFeed);
       return;
     }
+    const filtered = this.currentFeed.filter((item) => {
+      return item.news.title.toLowerCase().includes(q) || item.news.summary.toLowerCase().includes(q);
+    });
+    this.renderNewsFeed(filtered);
+  },
 
-    timeline.innerHTML = trace.map((t) => `
-      <div class="trace-step-card">
-        <div class="trace-step-header">
-          <span class="trace-step-name">Шаг ${t.step_number}: ${t.step_name}</span>
-          <span class="trace-role">${t.agent_role}</span>
-        </div>
-        <div class="trace-summary">${t.action_summary}</div>
-        <pre class="trace-details-pre">${JSON.stringify(t.details, null, 2)}</pre>
-      </div>
-    `).join("");
+  setFeedFilter(level, btn) {
+    this.filterLevel = level;
+    document.querySelectorAll(".feed-filter-chips .chip").forEach((c) => c.classList.remove("active"));
+    if (btn) btn.classList.add("active");
+    this.renderNewsFeed(this.currentFeed);
+  },
+
+  toggleClientModal() {
+    const m = document.getElementById("clientModalBackdrop");
+    m.classList.toggle("hidden");
+  },
+
+  async changeClientFromModal(uid) {
+    this.currentClientUid = uid;
+    await this.refreshCurrentClientView();
+  },
+
+  async changeRoleFromModal(role) {
+    this.currentRole = role;
+    await this.refreshCurrentClientView();
+  },
+
+  requestNewProduct() {
+    alert("Заявка на подключение нового корпоративного продукта (Овернайт, IRS-своп, ВЭД-аккредитив) сформирована персональному менеджеру Альфа-Банка.");
+  },
+
+  async handleSendChat() {
+    const input = document.getElementById("chatTextInput");
+    const q = input.value.trim();
+    if (!q) return;
+
+    const thread = document.getElementById("chatThread");
+    
+    // User message
+    const userMsg = document.createElement("div");
+    userMsg.className = "chat-msg user";
+    userMsg.innerHTML = `<div class="msg-avatar">Я</div><div class="msg-bubble">${q}</div>`;
+    thread.appendChild(userMsg);
+    input.value = "";
+    thread.scrollTop = thread.scrollHeight;
+
+    // AI loading message
+    const aiMsg = document.createElement("div");
+    aiMsg.className = "chat-msg ai";
+    aiMsg.innerHTML = `<div class="msg-avatar">А</div><div class="msg-bubble"><em>Формирование аналитического ответа на базе исследований ЦМИ Альфа-Банка...</em></div>`;
+    thread.appendChild(aiMsg);
+    thread.scrollTop = thread.scrollHeight;
+
+    try {
+      const res = await fetch("/api/assistant/ask", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          uid: this.currentClientUid,
+          news_id: this.currentNewsId,
+          question: q,
+          role: this.currentRole,
+        }),
+      });
+      const data = await res.json();
+      aiMsg.querySelector(".msg-bubble").innerHTML = this.formatMarkdown(data.answer);
+      thread.scrollTop = thread.scrollHeight;
+    } catch (err) {
+      aiMsg.querySelector(".msg-bubble").textContent = `Ошибка ответа: ${err.message}`;
+    }
   },
 
   async loadCounterpartyGraph() {
@@ -414,19 +416,19 @@ const app = {
       const data = await res.json();
       const exposures = data.counterparty_exposures || [];
       const tbody = document.querySelector("#counterpartyTable tbody");
+      if (!tbody) return;
       tbody.innerHTML = "";
 
       if (exposures.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="6">Контрагенты в реестре не найдены.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="5">Контрагенты не найдены.</td></tr>';
       } else {
         exposures.forEach((exp) => {
           const tr = document.createElement("tr");
-          const riskColor = exp.risk_level === "HIGH" ? "color: #EF3124; font-weight:700;" : (exp.risk_level === "MEDIUM" ? "color: #D97706; font-weight:700;" : "color: #059669;");
+          const riskColor = exp.risk_level === "HIGH" ? "color: #EF3124; font-weight:700;" : (exp.risk_level === "MEDIUM" ? "color: #F59E0B; font-weight:700;" : "color: #10B981;");
           tr.innerHTML = `
             <td><strong>${exp.counterparty_name}</strong></td>
             <td>${exp.relation_type}</td>
             <td>${(exp.payment_amount / 1e9).toFixed(2)} млрд ₽</td>
-            <td>${exp.payment_count}</td>
             <td>${exp.share_of_turnover}%</td>
             <td style="${riskColor}">${exp.risk_level}</td>
           `;
@@ -442,13 +444,14 @@ const app = {
 
   renderGraphSvg(graphData) {
     const canvas = document.getElementById("graphCanvas");
+    if (!canvas) return;
     if (!graphData || !graphData.nodes || graphData.nodes.length === 0) {
-      canvas.innerHTML = '<div class="empty-state">Нет связей для визуализации</div>';
+      canvas.innerHTML = '<div style="color: #8E93A0; font-size: 12px;">Нет связей для визуализации</div>';
       return;
     }
 
-    const width = 540;
-    const height = 360;
+    const width = 480;
+    const height = 280;
     const centerX = width / 2;
     const centerY = height / 2;
 
@@ -457,15 +460,12 @@ const app = {
 
     let svgHtml = `<svg width="100%" height="100%" viewBox="0 0 ${width} ${height}" style="background: transparent;">
       <defs>
-        <marker id="arrow" viewBox="0 0 10 10" refX="24" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-          <path d="M 0 0 L 10 5 L 0 10 z" fill="#64748B"/>
+        <marker id="arrow" viewBox="0 0 10 10" refX="22" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 0 L 10 5 L 0 10 z" fill="#606470"/>
         </marker>
-        <filter id="glowRed" x="-20%" y="-20%" width="140%" height="140%">
-          <feDropShadow dx="0" dy="0" stdDeviation="4" flood-color="#EF3124" flood-opacity="0.6"/>
-        </filter>
       </defs>`;
 
-    const radius = 125;
+    const radius = 105;
     const nodeCoords = {};
     nodeCoords[rootNode.id] = { x: centerX, y: centerY };
 
@@ -478,35 +478,29 @@ const app = {
 
     // Draw edges
     (graphData.edges || []).forEach((e) => {
-      const from = nodeCoords[e.from] || { x: centerX, y: centerY };
-      const to = nodeCoords[e.to] || { x: centerX, y: centerY };
-      const color = e.type === "IN_PAYMENT" ? "#10B981" : "#EF3124";
-      svgHtml += `<line x1="${from.x}" y1="${from.y}" x2="${to.x}" y2="${to.y}" stroke="${color}" stroke-width="2.5" stroke-dasharray="${e.type === 'OUT_PAYMENT' ? '4 2' : 'none'}" marker-end="url(#arrow)"/>`;
+      const s = nodeCoords[e.from_id];
+      const t = nodeCoords[e.to_id];
+      if (s && t) {
+        const color = e.is_critical ? "#EF3124" : "#4A4D59";
+        svgHtml += `<line x1="${s.x}" y1="${s.y}" x2="${t.x}" y2="${t.y}" stroke="${color}" stroke-width="2" marker-end="url(#arrow)"/>`;
+      }
     });
 
-    // Draw nodes
+    // Draw other nodes
     otherNodes.forEach((node) => {
-      const coord = nodeCoords[node.id];
+      const c = nodeCoords[node.id];
       svgHtml += `
-        <circle cx="${coord.x}" cy="${coord.y}" r="22" fill="#181E2B" stroke="#334155" stroke-width="2"/>
-        <text x="${coord.x}" y="${coord.y + 36}" font-size="10" font-weight="700" text-anchor="middle" fill="#F8FAFC">
-          ${node.id}
-        </text>
-        <text x="${coord.x}" y="${coord.y + 4}" font-size="9" text-anchor="middle" fill="#94A3B8">
-          ${node.revenue_bln}B
-        </text>
+        <circle cx="${c.x}" cy="${c.y}" r="22" fill="#222328" stroke="#3A3C45" stroke-width="2"/>
+        <text x="${c.x}" y="${c.y - 3}" font-size="9" font-weight="700" text-anchor="middle" fill="#FFFFFF">${node.id}</text>
+        <text x="${c.x}" y="${c.y + 9}" font-size="7.5" text-anchor="middle" fill="#8E93A0">${node.revenue_bln} млрд ₽</text>
       `;
     });
 
-    // Draw central root node
+    // Central root
     svgHtml += `
-      <circle cx="${centerX}" cy="${centerY}" r="32" fill="#EF3124" stroke="#B91C1C" stroke-width="3" filter="url(#glowRed)"/>
-      <text x="${centerX}" y="${centerY - 4}" font-size="11" font-weight="900" text-anchor="middle" fill="#FFFFFF">
-        ${rootNode.id}
-      </text>
-      <text x="${centerX}" y="${centerY + 12}" font-size="9" text-anchor="middle" fill="#FEECEB">
-        ${rootNode.revenue_bln} млрд ₽
-      </text>
+      <circle cx="${centerX}" cy="${centerY}" r="28" fill="#EF3124" stroke="#B91C1C" stroke-width="2"/>
+      <text x="${centerX}" y="${centerY - 3}" font-size="10" font-weight="800" text-anchor="middle" fill="#FFFFFF">${rootNode.id}</text>
+      <text x="${centerX}" y="${centerY + 10}" font-size="8" text-anchor="middle" fill="#FFF">${rootNode.revenue_bln} млрд ₽</text>
     `;
 
     svgHtml += "</svg>";
@@ -515,67 +509,24 @@ const app = {
 
   async loadResearch() {
     const grid = document.getElementById("researchGrid");
+    if (!grid) return;
     try {
       const res = await fetch("/api/research");
       const reports = await res.json();
       grid.innerHTML = "";
 
       reports.forEach((r) => {
-        const card = document.createElement("div");
-        card.className = "research-card";
-        const sectors = (r.impacted_sectors || []).map((s) => `<span style="background: #F1F5F9; padding: 2px 6px; border-radius: 4px; font-size: 11px;">${s}</span>`).join(" ");
-
-        card.innerHTML = `
-          <div class="research-author">${r.author} • ${r.date}</div>
-          <h3>${r.title}</h3>
-          <p style="font-size: 13px; color: #475569; margin-bottom: 12px;">${r.summary}</p>
-          <div style="display: flex; gap: 6px; flex-wrap: wrap;">${sectors}</div>
+        const tile = document.createElement("div");
+        tile.className = "research-tile";
+        tile.innerHTML = `
+          <div style="font-size: 10px; font-weight: 700; color: #EF3124; text-transform: uppercase;">${r.author} • ${r.date}</div>
+          <h4>${r.title}</h4>
+          <p>${r.summary}</p>
         `;
-        grid.appendChild(card);
+        grid.appendChild(tile);
       });
     } catch (err) {
-      grid.innerHTML = `<div class="empty-state">Ошибка загрузки аналитики: ${err.message}</div>`;
-    }
-  },
-
-  async sendChatMessage() {
-    const input = document.getElementById("chatInput");
-    const question = input.value.trim();
-    if (!question) return;
-
-    const messages = document.getElementById("chatMessages");
-
-    // Add user message
-    const userBubble = document.createElement("div");
-    userBubble.className = "chat-bubble user";
-    userBubble.textContent = question;
-    messages.appendChild(userBubble);
-    input.value = "";
-    messages.scrollTop = messages.scrollHeight;
-
-    // Loading bubble
-    const aiBubble = document.createElement("div");
-    aiBubble.className = "chat-bubble ai";
-    aiBubble.innerHTML = "<em>Формирование ответа с привязкой к профилю клиента и исследованиям Альфа-Банка...</em>";
-    messages.appendChild(aiBubble);
-    messages.scrollTop = messages.scrollHeight;
-
-    try {
-      const res = await fetch("/api/assistant/ask", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          uid: this.currentClientUid,
-          news_id: this.currentNewsId,
-          question: question,
-          role: this.currentRole,
-        }),
-      });
-      const data = await res.json();
-      aiBubble.innerHTML = `<strong>Альфа-Аналитик:</strong>\n\n${this.formatMarkdown(data.answer)}`;
-      messages.scrollTop = messages.scrollHeight;
-    } catch (err) {
-      aiBubble.textContent = `Ошибка получения ответа: ${err.message}`;
+      grid.innerHTML = `<div class="loading-spinner-box">Ошибка загрузки аналитики: ${err.message}</div>`;
     }
   },
 
@@ -584,7 +535,6 @@ const app = {
     return text
       .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
       .replace(/\*(.*?)\*/g, "<em>$1</em>")
-      .replace(/• /g, "• ")
       .replace(/\n/g, "<br/>");
   },
 };

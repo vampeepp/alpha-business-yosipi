@@ -2,38 +2,555 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Альфа-Инсайт | Корпоративная новостная аналитика для крупного бизнеса</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Альфа-Онлайн | Корпоративный радар событий</title>
   <link rel="stylesheet" href="style.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
-<body>
-  <!-- Top Global Header styled in Alfa-Bank Corporate Identity -->
-  <header class="alfa-header">
-    <div class="header-container">
-      <div class="logo-area">
-        <div class="alfa-badge">А</div>
-        <div class="brand-titles">
-          <span class="bank-name">Альфа-Бизнес</span>
-          <span class="product-title">Альфа-Инсайт | Корпоративный Радар Событий</span>
+<body class="alfa-app">
+
+  <!-- TOP APP BAR (Identical to Alfa-Online reference screenshot) -->
+  <header class="app-top-bar">
+    <div class="top-bar-inner">
+      
+      <!-- User Profile Pill (Left) -->
+      <div class="user-profile-pill" id="profilePill" onclick="app.toggleClientModal()">
+        <div class="profile-avatar">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+            <circle cx="12" cy="7" r="4"></circle>
+          </svg>
+        </div>
+        <div class="profile-meta">
+          <span class="company-badge-name" id="topCompanyName">ПАО «АгроСоюз»</span>
+          <span class="company-sub-role" id="topRoleName">Генеральный директор</span>
+        </div>
+        <div class="profile-switch-btn" title="Сменить клиента / роль">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M9 18l6-6-6-6"/>
+          </svg>
         </div>
       </div>
 
-      <!-- Enterprise Client & Persona Switchers -->
-      <div class="client-controls">
-        <div class="control-group">
-          <label for="companySelect">Корпоративный клиент (>15 млрд ₽):</label>
-          <select id="companySelect" class="alfa-select">
-            <option value="" disabled selected>Загрузка клиентов...</option>
-          </select>
+      <!-- Segmented Navigation Pill Dock (Center/Right) -->
+      <nav class="app-nav-dock">
+        <button class="dock-tab active" data-tab="tab-main" onclick="app.switchTab('tab-main')">
+          <span class="dock-icon">🏠</span>
+          <span class="dock-label">Главный</span>
+        </button>
+        <button class="dock-tab" data-tab="tab-payments" onclick="app.switchTab('tab-payments')">
+          <span class="dock-icon">⇄</span>
+          <span class="dock-label">Платежи</span>
+        </button>
+        <button class="dock-tab dock-heart" data-tab="tab-favorites" onclick="app.switchTab('tab-favorites')">
+          <span class="dock-icon heart-icon">❤️</span>
+        </button>
+        <button class="dock-tab" data-tab="tab-research" onclick="app.switchTab('tab-research')">
+          <span class="dock-icon">🕒</span>
+          <span class="dock-label">История / ЦМИ</span>
+        </button>
+        <button class="dock-tab" data-tab="tab-chat" onclick="app.switchTab('tab-chat')">
+          <span class="dock-icon">💬</span>
+          <span class="dock-label">Чаты</span>
+        </button>
+      </nav>
+
+    </div>
+  </header>
+
+  <!-- MAIN TWO-COLUMN CONTAINER (Responsive: 1-col on mobile, 2-col on desktop) -->
+  <main class="app-main-layout">
+    
+    <!-- LEFT COLUMN: МОИ ПРОДУКТЫ (As shown in screenshot) -->
+    <aside class="left-sidebar">
+      <div class="sidebar-header">
+        <h2 class="sidebar-title">Мои продукты</h2>
+        <button class="gear-btn" onclick="app.toggleClientModal()" title="Настройки профиля и роли">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="3"></circle>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Total Balance Card -->
+      <div class="product-card total-balance-card" onclick="app.switchTab('tab-payments')">
+        <div class="balance-sub">
+          <span>Годовой оборот / выручка</span>
+          <span class="eye-icon">👁️</span>
+        </div>
+        <div class="balance-value" id="dispRevenueVal">48,50 млрд ₽</div>
+        <div class="card-chevron">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M9 18l6-6-6-6"/>
+          </svg>
+        </div>
+      </div>
+
+      <!-- Section: Финансирование / Карты -->
+      <div class="product-group">
+        <div class="group-header" onclick="app.toggleGroup('cardsGroup')">
+          <span class="group-name">Финансирование и счета</span>
+          <span class="group-arrow" id="cardsGroupArrow">⌃</span>
+        </div>
+        <div class="group-items" id="cardsGroup">
+          <div class="product-item">
+            <div class="item-info">
+              <span class="item-name">Кредитная линия (CL_LOA)</span>
+              <span class="item-amount" id="dispLoanVal">14,20 млрд ₽</span>
+            </div>
+            <div class="mini-alfa-card">
+              <div class="card-alfa-badge">А</div>
+              <span class="card-number">2084</span>
+              <span class="card-system">МИР</span>
+            </div>
+          </div>
+          <div class="product-item">
+            <div class="item-info">
+              <span class="item-name">Лизинг техники и спецкредит</span>
+              <span class="item-amount" id="dispLeasingVal">4,85 млрд ₽</span>
+            </div>
+            <div class="mini-alfa-card dark-red">
+              <div class="card-alfa-badge">А</div>
+              <span class="card-close">✕</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section: Накопления & Казначейство -->
+      <div class="product-group">
+        <div class="group-header" onclick="app.toggleGroup('savingsGroup')">
+          <span class="group-name">Казначейство и ВЭД</span>
+          <span class="group-arrow" id="savingsGroupArrow">⌃</span>
+        </div>
+        <div class="group-items" id="savingsGroup">
+          <div class="product-item">
+            <div class="item-info">
+              <div class="item-name-row">
+                <span class="item-name">Овернайт депозит (НСО)</span>
+                <span class="badge-rate" id="dispOvernightRate">13,9 %</span>
+              </div>
+              <span class="item-amount">2,40 млрд ₽</span>
+            </div>
+          </div>
+          <div class="product-item">
+            <div class="item-info">
+              <div class="item-name-row">
+                <span class="item-name">ВЭД расчеты (ФТС)</span>
+                <span class="badge-ved" id="dispVedBadge">Турция</span>
+              </div>
+              <span class="item-amount" id="dispVedStatus">Активный контракт</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Add Product Action Button -->
+      <button class="btn-new-product" onclick="app.requestNewProduct()">
+        + Новый продукт
+      </button>
+
+      <!-- Client Quick Specs -->
+      <div class="client-mini-spec">
+        <div class="spec-row">
+          <span>ОКВЭД:</span>
+          <strong id="dispOkvedShort">01.11 Выращивание зерновых</strong>
+        </div>
+        <div class="spec-row">
+          <span>Группа:</span>
+          <strong id="dispGroupShort">GRP_AGRO_SOYUZ</strong>
+        </div>
+      </div>
+    </aside>
+
+    <!-- RIGHT MAIN CONTENT AREA -->
+    <section class="main-content-pane">
+      
+      <!-- TAB 1: ГЛАВНЫЙ (Matches the main screen in screenshot) -->
+      <div class="tab-view active" id="tab-main">
+        
+        <!-- Search bar with QR and Plus buttons (Exact match from screenshot) -->
+        <div class="search-action-bar">
+          <div class="search-input-pill">
+            <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+            <input type="text" id="newsSearchInput" placeholder="Поиск по Альфа-Онлайн и событиям..." oninput="app.filterNewsBySearch(this.value)" />
+          </div>
+          <button class="action-square-btn" title="QR-код контракта" onclick="alert('Сканирование QR-кода платежного поручения или контракта B2B')">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="3" width="7" height="7"></rect>
+              <rect x="14" y="3" width="7" height="7"></rect>
+              <rect x="14" y="14" width="7" height="7"></rect>
+              <rect x="3" y="14" width="7" height="7"></rect>
+            </svg>
+          </button>
+          <button class="action-square-btn" title="Создать платеж / заявку" onclick="app.requestNewProduct()">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="12" y1="5" x2="12" y2="19"></line>
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+          </button>
         </div>
 
-        <div class="control-group">
-          <label for="roleSelect">Роль ЛПР (Лицо принимающее решения):</label>
-          <select id="roleSelect" class="alfa-select">
-            <option value="Генеральный директор" selected>Генеральный директор</option>
+        <!-- "Для вас" (Stories / High-Impact Carousel from screenshot) -->
+        <div class="section-container">
+          <div class="section-header-row">
+            <h3 class="section-heading">Для вас</h3>
+            <div class="carousel-nav-arrows">
+              <button class="nav-circle-btn" onclick="app.scrollCarousel(-1)">‹</button>
+              <button class="nav-circle-btn" onclick="app.scrollCarousel(1)">›</button>
+            </div>
+          </div>
+
+          <div class="stories-carousel" id="storiesCarousel">
+            
+            <!-- Story 1: Key rate -->
+            <div class="story-card story-rate" onclick="app.openStory('rate')">
+              <div class="story-graphic-top">
+                <span class="story-big-badge">14.0%</span>
+                <span class="story-sub-tag">ЦБ РФ • ДКП</span>
+              </div>
+              <div class="story-text-bottom">
+                <h4>Ключевая ставка 14% — зафиксируйте своп</h4>
+                <p>ЦМИ Альфа-Банка: удержание жестких условий до 2К27</p>
+              </div>
+            </div>
+
+            <!-- Story 2: Grain / Turkey -->
+            <div class="story-card story-export" onclick="app.openStory('turkey')">
+              <div class="story-graphic-top lavender-bg">
+                <span class="story-big-badge">ВЭД</span>
+                <span class="story-sub-tag">Турция • Зерно</span>
+              </div>
+              <div class="story-text-bottom">
+                <h4>Турция ввела сертификацию продовольствия</h4>
+                <p>Риск простоя судов: предэкспортный факторинг Альфы</p>
+              </div>
+            </div>
+
+            <!-- Story 3: Agroleasing Subsidy -->
+            <div class="story-card story-subsidies" onclick="app.openStory('subsidy')">
+              <div class="story-graphic-top blue-bg">
+                <span class="story-big-badge">25 млрд ₽</span>
+                <span class="story-sub-tag">Минпромторг</span>
+              </div>
+              <div class="story-text-bottom">
+                <h4>Субсидии на агротехнику: льготный лизинг</h4>
+                <p>Ставка от 4.5% годовых через Альфа-Лизинг</p>
+              </div>
+            </div>
+
+            <!-- Story 4: Railroad Tariffs -->
+            <div class="story-card story-rail" onclick="app.openStory('rail')">
+              <div class="story-graphic-top dark-bg">
+                <span class="story-big-badge">+13.8%</span>
+                <span class="story-sub-tag">РЖД • Логистика</span>
+              </div>
+              <div class="story-text-bottom">
+                <h4>Индексация грузовых ж/д тарифов</h4>
+                <p>Рост транспортных издержек контрагентов</p>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- "Быстрые переводы" / "Быстрые действия" (Circular avatars row from screenshot) -->
+        <div class="section-container">
+          <div class="section-header-row">
+            <h3 class="section-heading">Быстрые действия</h3>
+            <div class="carousel-nav-arrows">
+              <button class="nav-circle-btn">‹</button>
+              <button class="nav-circle-btn">›</button>
+            </div>
+          </div>
+
+          <div class="quick-actions-row">
+            <div class="quick-action-item" onclick="app.switchTab('tab-payments')">
+              <div class="action-circle-icon icon-rainbow">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+                  <polyline points="2 17 12 22 22 17"></polyline>
+                  <polyline points="2 12 12 17 22 12"></polyline>
+                </svg>
+              </div>
+              <span class="action-label">B2B Сеть</span>
+            </div>
+
+            <div class="quick-action-item" onclick="app.openImpactChainDemo()">
+              <div class="action-circle-icon icon-grey">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="16 3 21 3 21 8"></polyline>
+                  <line x1="4" y1="20" x2="21" y2="3"></line>
+                  <polyline points="21 16 21 21 16 21"></polyline>
+                  <line x1="15" y1="15" x2="21" y2="21"></line>
+                  <line x1="4" y1="4" x2="9" y2="9"></line>
+                </svg>
+              </div>
+              <span class="action-label">Цепочка (7)</span>
+            </div>
+
+            <div class="quick-action-item" onclick="app.switchTab('tab-research')">
+              <div class="action-circle-icon icon-grey">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <line x1="2" y1="12" x2="22" y2="12"></line>
+                  <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+                </svg>
+              </div>
+              <span class="action-label">ЦМИ RAG (8)</span>
+            </div>
+
+            <div class="quick-action-item" onclick="app.showAgenticTraceModal()">
+              <div class="action-circle-icon icon-avatar">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="3" y="11" width="18" height="10" rx="2"></rect>
+                  <circle cx="12" cy="5" r="2"></circle>
+                  <path d="M12 7v4"></path>
+                  <line x1="8" y1="16" x2="8" y2="16"></line>
+                  <line x1="16" y1="16" x2="16" y2="16"></line>
+                </svg>
+              </div>
+              <span class="action-label">Агенты (11)</span>
+            </div>
+
+            <div class="quick-action-item" onclick="app.switchTab('tab-chat')">
+              <div class="action-circle-icon icon-initials">
+                <span>АИ</span>
+              </div>
+              <span class="action-label">Копилот</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section: "Персонализированная лента событий" -->
+        <div class="section-container">
+          <div class="section-header-row">
+            <div>
+              <h3 class="section-heading">Персонализированный радар событий</h3>
+              <p class="section-subheading">Ранжирование с учетом B2B-контрагентов, ВЭД и кредитного плеча</p>
+            </div>
+            <div class="feed-filter-chips">
+              <button class="chip active" onclick="app.setFeedFilter('ALL', this)">Все</button>
+              <button class="chip" onclick="app.setFeedFilter('CRITICAL', this)">Критичные (70%+)</button>
+              <button class="chip" onclick="app.setFeedFilter('HIGH', this)">Высокие</button>
+            </div>
+          </div>
+
+          <div class="news-feed-list" id="newsFeedList">
+            <div class="loading-spinner-box">Загрузка персонализированных событий...</div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- TAB 2: ПЛАТЕЖИ И ГРАФ B2B-КОНТРАГЕНТОВ (df_Uid_payment_hack) -->
+      <div class="tab-view" id="tab-payments">
+        <div class="sub-view-header">
+          <h2>Расчетная B2B-сеть холдинга (df_Uid_payment_hack.csv)</h2>
+          <p>Финансовые потоки поставщиков сырья и покупателей продукции 1-го и 2-го порядка</p>
+        </div>
+
+        <div class="graph-card-layout">
+          <div class="visual-network-box">
+            <div class="box-title">Топология денежных потоков</div>
+            <div id="graphCanvas" class="network-svg-wrap"></div>
+          </div>
+
+          <div class="counterparty-table-box">
+            <div class="box-title">Реестр ключевых B2B-контрагентов</div>
+            <div class="table-scroll">
+              <table class="alfa-data-table" id="counterpartyTable">
+                <thead>
+                  <tr>
+                    <th>Контрагент</th>
+                    <th>Тип связи</th>
+                    <th>Объем</th>
+                    <th>Доля</th>
+                    <th>Риск</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr><td colspan="5">Загрузка данных...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 3: ИЗБРАННОЕ / ВАЖНЫЕ ИНСАЙТЫ -->
+      <div class="tab-view" id="tab-favorites">
+        <div class="sub-view-header">
+          <h2>Избранные корпоративные инсайты ❤️</h2>
+          <p>События, требующие оперативного решения Совета директоров и Казначейства</p>
+        </div>
+        <div id="favoritesList" class="news-feed-list">
+          <!-- Injected via JS -->
+        </div>
+      </div>
+
+      <!-- TAB 4: ИСТОРИЯ / ЦМИ АЛЬФА-БАНКА -->
+      <div class="tab-view" id="tab-research">
+        <div class="sub-view-header">
+          <h2>Библиотека Центра макроэкономических исследований Альфа-Банка</h2>
+          <p>Официальные отчеты, процентные прогнозы и база знаний для RAG-архитектуры</p>
+        </div>
+        <div class="research-grid" id="researchGrid">
+          <!-- Injected via JS -->
+        </div>
+      </div>
+
+      <!-- TAB 5: ЧАТЫ / EXECUTIVE COPILOT -->
+      <div class="tab-view" id="tab-chat">
+        <div class="sub-view-header">
+          <h2>Диалог с Альфа-Аналитиком (Executive Copilot)</h2>
+          <p>Уточняющие вопросы по структурированию сделок, хеджированию и защите маржи</p>
+        </div>
+        <div class="chat-app-box">
+          <div class="chat-thread" id="chatThread">
+            <div class="chat-msg ai">
+              <div class="msg-avatar">А</div>
+              <div class="msg-bubble">
+                Здравствуйте! Я персональный AI-аналитик Альфа-Банка по крупному корпоративному бизнесу. Задайте любой вопрос по влиянию решения ЦБ, логистическим тарифам или инструментам Альфа-Банка.
+              </div>
+            </div>
+          </div>
+          <div class="chat-bottom-bar">
+            <input type="text" id="chatTextInput" placeholder="Например: 'Как рефинансировать кредиты при ставке 14%?'" onkeydown="if(event.key==='Enter')app.handleSendChat()" />
+            <button class="chat-send-btn" onclick="app.handleSendChat()">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="22" y1="2" x2="11" y2="13"></line>
+                <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- NATIVE DETAIL BOTTOM SHEET / MODAL (Item 7, 8, 11, 12) -->
+  <div class="sheet-backdrop hidden" id="detailSheetBackdrop" onclick="if(event.target===this)app.closeDetailSheet()">
+    <div class="sheet-modal" id="detailSheet">
+      <div class="sheet-header">
+        <div class="sheet-handle"></div>
+        <div class="sheet-top-row">
+          <div class="sheet-badges">
+            <span class="badge-alfa-tag">АО «АЛЬФА-БАНК» | БИЗНЕС-ИНСАЙТ</span>
+            <span class="badge-relevance-chip" id="sheetRelevanceBadge">CRITICAL 94.8%</span>
+          </div>
+          <button class="sheet-close-btn" onclick="app.closeDetailSheet()">✕</button>
+        </div>
+        <h2 class="sheet-title" id="sheetNewsTitle">Детальный анализ бизнес-события</h2>
+      </div>
+
+      <div class="sheet-body-content">
+        
+        <!-- ITEM 8: RAG GROUNDING MATRIX -->
+        <div class="grounding-matrix-box">
+          <div class="box-caption">
+            <span class="caption-icon">🎯</span>
+            <strong>RAG Grounding Matrix (Пункт 8): [ФАКТ] + [ЦМИ АЛЬФА] + [ПРОФИЛЬ] ➔ [ИНСАЙТ]</strong>
+          </div>
+          <div class="matrix-grid-4">
+            <div class="matrix-tile">
+              <span class="tile-label">1. Первичный факт</span>
+              <p class="tile-val" id="sheetFactText">Решение регулятора</p>
+            </div>
+            <div class="matrix-tile tile-alfa">
+              <span class="tile-label">2. Исследование Альфы</span>
+              <p class="tile-val" id="sheetResearchText">ЦМИ Альфа-Банка</p>
+            </div>
+            <div class="matrix-tile">
+              <span class="tile-label">3. Особенности клиента</span>
+              <p class="tile-val" id="sheetCompanyFeatures">Выручка, ОКВЭД, долг</p>
+            </div>
+            <div class="matrix-tile tile-insight">
+              <span class="tile-label">4. Персональный вывод</span>
+              <p class="tile-val" id="sheetInsightConclusion">Управленческий план</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- ITEM 7: STEP-BY-STEP IMPACT CHAIN -->
+        <div class="impact-chain-section">
+          <div class="impact-chain-header">
+            <div>
+              <span class="caption-icon">🔗</span>
+              <strong>Пошаговая цепочка влияния (Impact Chain, Пункт 7)</strong>
+            </div>
+            <div class="chain-meta-pills">
+              <span class="pill-strength" id="sheetStrengthPill">Сила: CRITICAL</span>
+              <span class="pill-horizon" id="sheetHorizonPill">Горизонт: 3-12 мес</span>
+            </div>
+          </div>
+          <div class="chain-flow-steps" id="sheetChainSteps">
+            <!-- Injected via JS -->
+          </div>
+        </div>
+
+        <!-- ITEM 12: CRITIC SELF-CHECK 5/5 -->
+        <div class="self-check-card">
+          <div class="check-status-row">
+            <span class="check-icon">✓</span>
+            <div class="check-text">
+              <strong>Critic Self-Check 5/5 (Пункт 12):</strong>
+              <span>Все утверждения подтверждены • Источник проверен • Нет противоречий • Позиция Альфы отделена • Данных достаточно</span>
+            </div>
+          </div>
+          <div class="check-meta-badges">
+            <span class="pill-conf">Confidence: 0.98</span>
+            <span class="pill-novelty" id="sheetNoveltyBadge">Новизна: 96.5%</span>
+          </div>
+        </div>
+
+        <!-- 6 ANALYTICAL PILLARS -->
+        <div class="six-pillars-accordion" id="sheetPillars">
+          <!-- Injected via JS -->
+        </div>
+
+        <!-- RECOMMENDED BANK PRODUCTS -->
+        <div class="recommended-products-block">
+          <h4 class="block-title">Рекомендованные продукты Альфа-Банка для защиты бизнеса:</h4>
+          <div class="products-grid-list" id="sheetProducts">
+            <!-- Injected via JS -->
+          </div>
+        </div>
+
+      </div>
+
+      <div class="sheet-footer">
+        <button class="sheet-dismiss-btn" onclick="app.closeDetailSheet()">Закрыть</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- CLIENT & PERSONA SWITCHER MODAL -->
+  <div class="client-modal-backdrop hidden" id="clientModalBackdrop" onclick="if(event.target===this)app.toggleClientModal()">
+    <div class="client-modal-card">
+      <div class="modal-header">
+        <h3>Выбор клиента и роли ЛПР</h3>
+        <button class="modal-close" onclick="app.toggleClientModal()">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label>Корпоративный клиент (>15 млрд ₽):</label>
+          <select id="modalCompanySelect" class="alfa-native-select" onchange="app.changeClientFromModal(this.value)">
+            <!-- Injected via JS -->
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Роль ЛПР (Лицо, принимающее решения):</label>
+          <select id="modalRoleSelect" class="alfa-native-select" onchange="app.changeRoleFromModal(this.value)">
+            <option value="Генеральный директор" selected>Генеральный директор (CEO)</option>
             <option value="Финансовый директор (CFO)">Финансовый директор (CFO)</option>
             <option value="Руководитель казначейства">Руководитель казначейства</option>
             <option value="Главный бухгалтер">Главный бухгалтер</option>
@@ -41,188 +558,11 @@
           </select>
         </div>
       </div>
-    </div>
-  </header>
-
-  <!-- Client Executive Profile Bar -->
-  <section class="client-strip" id="clientStrip">
-    <div class="strip-container">
-      <div class="strip-item">
-        <span class="strip-label">Холдинг / Компания:</span>
-        <span class="strip-value" id="dispCompanyName">—</span>
-      </div>
-      <div class="strip-item">
-        <span class="strip-label">Годовая выручка:</span>
-        <span class="strip-value highlight-red" id="dispRevenue">—</span>
-      </div>
-      <div class="strip-item">
-        <span class="strip-label">Отрасль (ОКВЭД):</span>
-        <span class="strip-value" id="dispOkved">—</span>
-      </div>
-      <div class="strip-item">
-        <span class="strip-label">Кредитный профиль:</span>
-        <span class="strip-value" id="dispDebt">—</span>
-      </div>
-      <div class="strip-item">
-        <span class="strip-label">ВЭД / ФТС:</span>
-        <span class="strip-value" id="dispFts">—</span>
-      </div>
-      <div class="strip-item">
-        <span class="strip-label">Группа компаний:</span>
-        <span class="strip-value" id="dispGroup">—</span>
+      <div class="modal-footer">
+        <button class="btn-save-modal" onclick="app.toggleClientModal()">Применить</button>
       </div>
     </div>
-  </section>
-
-  <!-- Main Navigation Tabs -->
-  <main class="main-container">
-    <nav class="view-tabs">
-      <button class="tab-btn active" data-tab="tab-feed">
-        <span class="tab-icon">⚡</span> Персонализированный радар событий
-      </button>
-      <button class="tab-btn" data-tab="tab-insight">
-        <span class="tab-icon">🔍</span> Глубокая 6-факторная интерпретация
-      </button>
-      <button class="tab-btn" data-tab="tab-graph">
-        <span class="tab-icon">🕸️</span> Цепочки поставок и риск контрагентов
-      </button>
-      <button class="tab-btn" data-tab="tab-research">
-        <span class="tab-icon">📚</span> Аналитика Альфа-Банка (ЦМИ)
-      </button>
-      <button class="tab-btn" data-tab="tab-trace">
-        <span class="tab-icon">🤖</span> AI-Трассировка и аудит агента
-      </button>
-      <button class="tab-btn" data-tab="tab-chat">
-        <span class="tab-icon">💬</span> Диалог с Альфа-Аналитиком
-      </button>
-    </nav>
-
-    <!-- TAB 1: Personalized News Feed -->
-    <div class="tab-pane active" id="tab-feed">
-      <div class="pane-header">
-        <div>
-          <h2>Персонализированная лента бизнес-событий</h2>
-          <p class="subtitle">События отранжированы многофакторной моделью с учетом финансовой нагрузки, ВЭД и цепочек поставок клиента.</p>
-        </div>
-        <div class="filter-pills">
-          <button class="pill active" data-filter="ALL">Все события</button>
-          <button class="pill" data-filter="CRITICAL">Критичные (70%+)</button>
-          <button class="pill" data-filter="HIGH">Высокая релевантность</button>
-          <button class="pill" data-filter="MEDIUM">Умеренные</button>
-        </div>
-      </div>
-
-      <div class="news-grid" id="newsGrid">
-        <div class="loading-state">Загрузка персонализированного радара...</div>
-      </div>
-    </div>
-
-    <!-- TAB 2: Deep 6-Pillar Insight View -->
-    <div class="tab-pane" id="tab-insight">
-      <div class="insight-container" id="insightContainer">
-        <div class="empty-state">
-          <h3>Выберите новость из ленты событий для генерации детального 6-факторного бизнес-инсайта</h3>
-          <p>Автономный мультиагентный комплекс выполнит поиск по исследованиям Альфа-Банка, сопоставит риски контрагентов и сформирует план действий.</p>
-          <button class="alfa-btn-primary" onclick="app.switchTab('tab-feed')">Перейти к ленте событий</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- TAB 3: Counterparty Supply Chain Graph -->
-    <div class="tab-pane" id="tab-graph">
-      <div class="pane-header">
-        <div>
-          <h2>Цепочки создания стоимости и концентрация рисков (df_Uid_payment_hack)</h2>
-          <p class="subtitle">Анализ финансовых потоков B2B-контрагентов: поставщики сырья, покупатели продукции и риск передачи макрошоков.</p>
-        </div>
-      </div>
-
-      <div class="graph-layout">
-        <div class="graph-visual-card">
-          <div class="card-title">Топология расчетной сети холдинга</div>
-          <div id="graphCanvas" class="network-canvas"></div>
-        </div>
-        <div class="graph-table-card">
-          <div class="card-title">Реестр взаимосвязанных контрагентов</div>
-          <div class="table-responsive">
-            <table class="alfa-table" id="counterpartyTable">
-              <thead>
-                <tr>
-                  <th>Контрагент</th>
-                  <th>Тип связи</th>
-                  <th>Объем платежей</th>
-                  <th>Транзакций</th>
-                  <th>Доля оборота</th>
-                  <th>Уровень риска</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr><td colspan="6">Загрузка данных...</td></tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- TAB 4: Alfa-Bank Research Library -->
-    <div class="tab-pane" id="tab-research">
-      <div class="pane-header">
-        <div>
-          <h2>Библиотека аналитических материалов Центра макроэкономических исследований Альфа-Банка</h2>
-          <p class="subtitle">Официальные обзоры, прогнозы динамики ВВП, ключевой ставки ЦБ РФ, товарных рынков и инфляции (Слайд 17).</p>
-        </div>
-      </div>
-      <div class="research-grid" id="researchGrid">
-        <div class="loading-state">Загрузка макроисследований...</div>
-      </div>
-    </div>
-
-    <!-- TAB 5: AI Agent Audit & Traceability -->
-    <div class="tab-pane" id="tab-trace">
-      <div class="pane-header">
-        <div>
-          <h2>Аудит и трассируемость AI-Агентов (Agent Execution Trace)</h2>
-          <p class="subtitle">Полная прозрачность принятия решений: планирование, вызовы инструментов (Tools), контекстная память и блок самопроверки (Critic).</p>
-        </div>
-      </div>
-      <div class="trace-timeline" id="traceTimeline">
-        <div class="empty-state">
-          <p>Сформируйте инсайт по любой новости, чтобы просмотреть пошаговый лог работы AI-агентов.</p>
-        </div>
-      </div>
-    </div>
-
-    <!-- TAB 6: Interactive Executive Q&A -->
-    <div class="tab-pane" id="tab-chat">
-      <div class="pane-header">
-        <div>
-          <h2>Диалог с Альфа-Аналитиком (Executive Copilot)</h2>
-          <p class="subtitle">Задайте любой уточняющий вопрос по событию, влиянию на цепочки поставок или банковским инструментам.</p>
-        </div>
-      </div>
-
-      <div class="chat-container">
-        <div class="chat-messages" id="chatMessages">
-          <div class="chat-bubble ai">
-            <strong>Альфа-Аналитик:</strong> Здравствуйте! Я ваш персональный аналитический ассистент по корпоративному бизнесу. Задайте любой вопрос по текущему событию, влиянию на контрагентов, валютный контроль или управление ликвидностью.
-          </div>
-        </div>
-        <div class="chat-input-area">
-          <input type="text" id="chatInput" class="chat-input" placeholder="Например: 'Какой инструмент хеджирования выбрать при кредите на 10 млрд руб?'" />
-          <button class="alfa-btn-primary" id="btnSendChat">Отправить</button>
-        </div>
-      </div>
-    </div>
-  </main>
-
-  <!-- Footer -->
-  <footer class="alfa-footer">
-    <div class="footer-container">
-      <div>© 2026 АО «Альфа-Банк». Сервис новостной аналитики для принятия корпоративных бизнес-решений.</div>
-      <div class="tech-stack-tag">Enterprise Architecture: Hexagonal Multi-Agent System | Microservices & Docker Ready</div>
-    </div>
-  </footer>
+  </div>
 
   <script src="app.js"></script>
 </body>
