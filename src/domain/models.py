@@ -172,23 +172,35 @@ class ImpactChain:
 
 @dataclass
 class NewsItem:
-    """Represents an external news article or market event."""
+    """Represents an external news article or market event with clustering and multi-perspective views."""
     news_id: str
     title: str
     publication_date: str
     source: str
     summary: str
-    full_content: str
-    category: str
+    full_content: str = ""
+    category: str = "Макроэкономика"
     entities: List[str] = field(default_factory=list)
     tags: List[str] = field(default_factory=list)
     urgency: str = "MEDIUM"
     sentiment: str = "NEUTRAL"
     novelty_score: float = 90.0
     cross_verification_sources: List[str] = field(default_factory=list)
+    source_cluster_count: int = 1
+    url: str = ""
+    risk_opportunity: str = "RISK"  # "RISK", "OPPORTUNITY", "NEUTRAL"
+    impact_strength: str = "HIGH"   # "CRITICAL", "HIGH", "MODERATE"
+    time_horizon: str = "Среднесрочный (3-12 мес)"
+    affected_dimensions: List[str] = field(default_factory=lambda: ["margin", "liquidity"])
+    counterparty_link: Optional[str] = None
+    fact_statement: str = ""
+    alfa_view: str = ""
+    ai_view: str = ""
+    relevance_reason: str = ""
 
     def to_dict(self) -> Dict[str, Any]:
         return asdict(self)
+
 
 
 @dataclass

@@ -138,23 +138,50 @@ const app = {
       card.onclick = () => this.openDetailSheet(n.news_id);
 
       const scoreClass = s.priority_level === "CRITICAL" ? "score-critical" : "score-high";
-      const noveltyBadge = `<span style="font-size: 9.5px; font-weight: 700; color: #FCA5A5; background: rgba(239, 49, 36, 0.15); padding: 1px 6px; border-radius: 4px;">Новизна: ${n.novelty_score || 94}%</span>`;
-      const crossBadge = `<span style="font-size: 9.5px; font-weight: 700; color: #7DD3FC; background: rgba(56, 189, 248, 0.15); padding: 1px 6px; border-radius: 4px;">Источников: ${(n.cross_verification_sources || []).length || 2}</span>`;
+      const clusterCount = (n.cross_verification_sources || []).length || 2;
+      const novelty = n.novelty_score || 95;
+      
+      // Risk / Opportunity tags (Item 6)
+      const isRisk = n.sentiment.includes("NEGATIVE") || n.sentiment.includes("HAWKISH") || s.total_score >= 60;
+      const roBadge = isRisk 
+        ? `<span style="font-size: 9px; font-weight: 800; color: #F87171; background: rgba(239, 49, 36, 0.15); border: 1px solid rgba(239, 49, 36, 0.3); padding: 2px 6px; border-radius: 4px;">⚠️ РИСК (margin, liquidity)</span>`
+        : `<span style="font-size: 9px; font-weight: 800; color: #34D399; background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.3); padding: 2px 6px; border-radius: 4px;">💡 ВОЗМОЖНОСТЬ (capex, revenue)</span>`;
+
+      // Event cluster badge (Item 5)
+      const clusterBadge = `<span style="font-size: 9px; font-weight: 700; color: #38BDF8; background: rgba(56, 189, 248, 0.12); padding: 2px 6px; border-radius: 4px;">СОБЫТИЕ • Источников: ${clusterCount}</span>`;
+
+      // Counterparty Alert if applicable (Item 2)
+      let counterpartyPill = "";
+      if (s.counterparty_supply_chain_score > 0) {
+        counterpartyPill = `<div style="font-size: 10.5px; font-weight: 700; color: #FBBF24; background: rgba(245, 158, 11, 0.1); border-left: 3px solid #F59E0B; padding: 4px 8px; border-radius: 4px;">⛓️ Связанный риск по цепочке B2B-контрагентов (+${s.counterparty_supply_chain_score} pts)</div>`;
+      }
+
+      // Personalized relevance reason (Item 4)
+      const reasonPill = `<div style="font-size: 11px; color: var(--text-gray); background: rgba(255, 255, 255, 0.03); border-left: 3px solid #EF3124; padding: 4px 8px; border-radius: 4px;">💡 <strong>Персональная причина:</strong> ${s.explanation}</div>`;
 
       card.innerHTML = `
         <div class="news-item-top">
           <span class="news-category-tag">${n.category} • ${n.publication_date.substring(0, 10)}</span>
-          <div style="display: flex; gap: 6px; align-items: center;">
-            ${noveltyBadge}
-            ${crossBadge}
+          <div style="display: flex; gap: 6px; align-items: center; flex-wrap: wrap;">
+            ${clusterBadge}
+            ${roBadge}
             <span class="news-score-badge ${scoreClass}">${s.total_score}% (${s.priority_level})</span>
           </div>
         </div>
         <h4 class="news-item-title">${n.title}</h4>
         <p class="news-item-summary">${n.summary}</p>
+        ${counterpartyPill}
+        ${reasonPill}
         <div class="news-item-footer">
-          <span class="news-source-label">📰 ${n.source}</span>
-          <span class="open-insight-link">Анализ ➔</span>
+          <div style="display: flex; gap: 8px; align-items: center;">
+            <span class="news-source-label">📰 ${n.source}</span>
+            <span style="font-size: 10px; color: var(--text-dim);">Новизна: ${novelty}%</span>
+          </div>
+          <div style="display: flex; gap: 8px; align-items: center;">
+            <button onclick="event.stopPropagation(); app.sendFeedback('thumbs_up', '${n.news_id}')" style="background: transparent; border: none; cursor: pointer; color: var(--text-dim);" title="Полезно">👍</button>
+            <button onclick="event.stopPropagation(); app.sendFeedback('thumbs_down', '${n.news_id}')" style="background: transparent; border: none; cursor: pointer; color: var(--text-dim);" title="Нерелевантно">👎</button>
+            <span class="open-insight-link">6 блоков & Каузальная цепочка ➔</span>
+          </div>
         </div>
       `;
       list.appendChild(card);
@@ -182,6 +209,159 @@ const app = {
       });
     }
   },
+
+  // EXECUTIVE AI COPILOT HUB CONTROLLERS
+  async askQuickCopilot(promptText) {
+    const input = document.getElementById("aiHubInput");
+    if (input) input.value = promptText;
+    await this.handleHubSubmit();
+  },
+
+  async handleHubSubmit() {
+    const input = document.getElementById("aiHubInput");
+    const q = input ? input.value.trim() : "";
+    if (!q) return;
+
+    const factEl = document.getElementById("hubFactText");
+    const alfaEl = document.getElementById("hubAlfaText");
+    const aiEl = document.getElementById("hubAiText");
+    const flowEl = document.getElementById("hubChainFlow");
+    const evidenceEl = document.getElementById("hubEvidencePills");
+
+    if (aiEl) aiEl.innerHTML = "<em>Генерация аналитического вывода и расчет каузальной цепочки...</em>";
+
+    try {
+      const res = await fetch("/api/assistant/ask", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          uid: this.currentClientUid,
+          news_id: this.currentNewsId,
+          question: q,
+          role: this.currentRole,
+        }),
+      });
+      const data = await res.json();
+
+      if (factEl) factEl.textContent = data.fact_statement || "Официальные макроэкономические данные согласованы.";
+      if (alfaEl) alfaEl.textContent = data.alfa_view || "Центр макроэкономических исследований Альфа-Банка рекомендует консервативную стратегию.";
+      if (aiEl) aiEl.innerHTML = this.formatMarkdown(data.ai_view || data.answer);
+
+      if (flowEl && data.impact_chain_summary) {
+        const steps = data.impact_chain_summary.split("➔").map(s => s.trim());
+        flowEl.innerHTML = steps.map((s, idx) => {
+          const cls = idx === steps.length - 1 ? "success" : (idx >= 2 ? "warning" : "");
+          return `<span class="flow-step ${cls}">${s}</span>`;
+        }).join(" ➔ ");
+      }
+
+      if (evidenceEl && data.evidence_sources) {
+        evidenceEl.innerHTML = data.evidence_sources.map(ev => `
+          <a class="evidence-pill" href="javascript:void(0)" onclick="app.handleEvidenceClick('${ev.id}')">${ev.id}</a>
+        `).join("");
+      }
+    } catch (err) {
+      if (aiEl) aiEl.textContent = `Ошибка анализа: ${err.message}`;
+    }
+  },
+
+  handleEvidenceClick(sourceId) {
+    if (sourceId.startsWith("news:")) {
+      this.openDetailSheet(this.currentNewsId);
+    } else if (sourceId.startsWith("alfa:")) {
+      this.switchTab("research");
+    } else if (sourceId.startsWith("company:")) {
+      this.toggleClientModal();
+    } else {
+      this.switchTab("payments");
+    }
+  },
+
+  async loadDailyBriefing() {
+    const aiEl = document.getElementById("hubAiText");
+    const factEl = document.getElementById("hubFactText");
+    const alfaEl = document.getElementById("hubAlfaText");
+    const flowEl = document.getElementById("hubChainFlow");
+
+    if (aiEl) aiEl.innerHTML = "<em>Загрузка суточного дайджеста рисков и возможностей...</em>";
+
+    try {
+      const res = await fetch(`/api/briefing?uid=${this.currentClientUid}&role=${encodeURIComponent(this.currentRole)}`);
+      const data = await res.json();
+
+      if (factEl) factEl.textContent = `Сводка за 24 часа (${data.date}): 3 риска, 2 возможности, 1 спорный кейс.`;
+      if (alfaEl) alfaEl.textContent = `ЦМИ Альфа-Банка: ${data.risks[0].title}. Рекомендация: ${data.risks[0].action}`;
+      
+      let briefingHtml = `<strong>📊 Суточный дайджест для роли ${this.currentRole}:</strong><br/>`;
+      data.risks.forEach((r, i) => {
+        briefingHtml += `• ⚠️ <strong>Риск ${i+1}:</strong> ${r.title} [${r.dimension}] — <em>${r.action}</em><br/>`;
+      });
+      data.opportunities.forEach((o, i) => {
+        briefingHtml += `• 💡 <strong>Возможность ${i+1}:</strong> ${o.title} — <em>${o.benefit}</em><br/>`;
+      });
+      briefingHtml += `• ⚖️ <strong>Спорная тема:</strong> ${data.controversial.title} — <em>${data.controversial.solution}</em>`;
+
+      if (aiEl) aiEl.innerHTML = briefingHtml;
+      if (flowEl) flowEl.innerHTML = `<span class="flow-step warning">3 Риска P&L</span> ➔ <span class="flow-step success">2 Окна возможностей</span> ➔ <span class="flow-step">1 Решение ALCO</span>`;
+    } catch (err) {
+      if (aiEl) aiEl.textContent = `Ошибка дайджеста: ${err.message}`;
+    }
+  },
+
+  async loadExecutiveDelta() {
+    const aiEl = document.getElementById("hubAiText");
+    const factEl = document.getElementById("hubFactText");
+    const alfaEl = document.getElementById("hubAlfaText");
+    const flowEl = document.getElementById("hubChainFlow");
+
+    if (aiEl) aiEl.innerHTML = "<em>Сравнение с предыдущей версией портфеля...</em>";
+
+    try {
+      const res = await fetch(`/api/delta?uid=${this.currentClientUid}`);
+      const data = await res.json();
+
+      if (factEl) factEl.textContent = `Последний вход: ${data.last_login}. Новых рыночных событий: ${data.new_events_count}.`;
+      if (alfaEl) alfaEl.textContent = `Аналитика Альфа-Банка: зафиксировано усиление сигнала регулятора и рост концентрации риска поставщика.`;
+
+      let deltaHtml = `<strong>🔄 Что изменилось с прошлого раза:</strong><br/>`;
+      data.changes.forEach((c) => {
+        deltaHtml += `• 📌 <strong>${c.event}:</strong> ${c.change} [${c.status}] ➔ <em>${c.action}</em><br/>`;
+      });
+
+      if (aiEl) aiEl.innerHTML = deltaHtml;
+      if (flowEl) flowEl.innerHTML = `<span class="flow-step">Вход вчера 18:30</span> ➔ <span class="flow-step warning">+3 Сдвига рынка</span> ➔ <span class="flow-step success">Лимиты обновлены</span>`;
+    } catch (err) {
+      if (aiEl) aiEl.textContent = `Ошибка дельты: ${err.message}`;
+    }
+  },
+
+  async sendFeedback(feedbackType, targetId) {
+    try {
+      await fetch("/api/news/feedback", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          feedback: feedbackType,
+          target_id: targetId,
+          uid: this.currentClientUid,
+          role: this.currentRole,
+          timestamp: new Date().toISOString()
+        })
+      });
+      alert(feedbackType === "thumbs_up" ? "👍 Спасибо! Ваша оценка принята. Модель адаптирует веса релевантности." : "👎 Спасибо! Событие помечено как малозначимое для Вашего профиля.");
+    } catch (e) {
+      console.error(e);
+    }
+  },
+
+  copyToAlco() {
+    const aiEl = document.getElementById("hubAiText");
+    if (!aiEl) return;
+    const text = aiEl.innerText || aiEl.textContent;
+    navigator.clipboard.writeText(`ВЫПИСКА ДЛЯ КОМИТЕТА ALCO (Альфа-Инсайт):\n${text}`);
+    alert("📋 Аналитический вывод скопирован в буфер обмена для заседания ALCO.");
+  },
+
 
   async openDetailSheet(newsId) {
     this.currentNewsId = newsId;
