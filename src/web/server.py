@@ -138,8 +138,21 @@ class AlfaApiHandler(SimpleHTTPRequestHandler):
             return self._send_json_response([r.to_dict() for r in reports])
 
         # Default: Serve static files (HTML, JS, CSS)
-        if path == "/" or path == "":
-            self.path = "/index.html"
+        if path == "/" or path == "" or path == "/index.html":
+            index_path = STATIC_DIR / "index.html"
+            if index_path.exists():
+                content = index_path.read_bytes()
+                self.send_response(200)
+                self.send_header("Content-Type", "text/html; charset=utf-8")
+                self.send_header("Content-Length", str(len(content)))
+                self.send_header("Cache-Control", "no-cache, no-store, must-revalidate")
+                self.send_header("Pragma", "no-cache")
+                self.send_header("Expires", "0")
+                self._send_cors_headers()
+                self.end_headers()
+                self.wfile.write(content)
+                return
+
         return super().do_GET()
 
     def do_POST(self):
