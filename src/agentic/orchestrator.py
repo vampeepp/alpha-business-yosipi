@@ -5,6 +5,8 @@ Planning -> Tool Calling -> Synthesis -> Self-Critique & Adaptation -> Audit Tra
 Also provides interactive contextual Q&A for executive decision-makers (Slide 10, Criterion 10).
 """
 
+import os
+import logging
 from typing import Dict, Any, List, Tuple
 from datetime import datetime
 from src.domain.models import CompanyProfile, NewsItem, PersonalizedInsight, AgentTraceStep
@@ -12,6 +14,8 @@ from src.agentic.tools import AgentToolRegistry
 from src.agentic.planner import StrategicPlannerAgent
 from src.agentic.analyzer import InsightAnalyzerAgent
 from src.agentic.critic import SelfCritiqueAgent
+
+logger = logging.getLogger("AlfaNewsAnalytics.Orchestrator")
 
 
 class MultiAgentOrchestrator:
@@ -256,6 +260,31 @@ class MultiAgentOrchestrator:
             alfa_view = "Аналитическое управление Альфа-Банка рекомендует консервативное управление процентным риском и использование инструментов овернайт-размещения."
 
         ai_view = "\n".join(response_parts)
+
+        # Call live LLM model (qwen/qwen3.8-27b) if OPENAI_API_KEY is configured
+        api_key = os.getenv("OPENAI_API_KEY", "").strip()
+        if api_key:
+            try:
+                import sys
+                from pathlib import Path
+                root_dir = str(Path(__file__).resolve().parent.parent.parent)
+                if root_dir not in sys.path:
+                    sys.path.insert(0, root_dir)
+                from llm_advisor import LLMAdvisor
+                advisor = LLMAdvisor()
+                system_prompt = (
+                    f"Ты корпоративный финансовый AI-аналитик Альфа-Банка. "
+                    f"Роль пользователя: {role}. "
+                    f"Компания: {company.synthetic_u}, выручка: {company.revenue_billions} млрд ₽, "
+                    f"ОКВЭД: {company.mainokved_code}. "
+                    f"Событие: {news.title}."
+                )
+                user_prompt = f"Вопрос пользователя: {question}\nСформулируй аналитический вывод с точки зрения влияния на P&L, риски и банковские продукты Альфа-Банка."
+                llm_response = advisor.query_chat_completion(system_prompt, user_prompt, timeout=12)
+                if llm_response and len(llm_response.strip()) > 15:
+                    ai_view = llm_response.strip()
+            except Exception as e:
+                logger.warning(f"Live LLM call error: {e}. Falling back to domain rules.")
 
         # Evidence tracing links (Item 10)
         evidence_sources = [
