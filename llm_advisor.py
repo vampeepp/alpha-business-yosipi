@@ -20,6 +20,31 @@ from typing import Dict, Any, Optional, List
 DEFAULT_BASE_URL = "https://changellenge.up.railway.app/v1"
 FALLBACK_BASE_URL = "https://api.alfahack-gateway26.ru/v1"
 DEFAULT_MODEL = "qwen/qwen3.8-27b"
+
+def _load_local_env():
+    env_paths = [
+        os.path.join(os.path.dirname(os.path.abspath(__file__)), ".env"),
+        os.path.join(os.getcwd(), ".env")
+    ]
+    for p in env_paths:
+        if os.path.isfile(p):
+            try:
+                with open(p, "r", encoding="utf-8") as f:
+                    for line in f:
+                        line = line.strip()
+                        if not line or line.startswith("#"):
+                            continue
+                        if "=" in line:
+                            k, v = line.split("=", 1)
+                            k = k.strip()
+                            v = v.strip().strip("\"'")
+                            if k not in os.environ:
+                                os.environ[k] = v
+            except Exception:
+                pass
+            break
+
+_load_local_env()
 LOCAL_FALLBACK_KEY = os.getenv("OPENAI_API_KEY", "")
 
 
@@ -94,7 +119,11 @@ class LLMAdvisor:
                         if choices:
                             return choices[0].get("message", {}).get("content", "")
             except urllib.error.HTTPError as he:
-                sys.stderr.write(f"[LLMAdvisor] HTTP {he.code} from {url}\n")
+                try:
+                    err_body = he.read().decode("utf-8", errors="ignore")
+                except Exception:
+                    err_body = ""
+                sys.stderr.write(f"[LLMAdvisor] HTTP {he.code} from {url}: {err_body}\n")
             except Exception as ex:
                 sys.stderr.write(f"[LLMAdvisor] Connection error to {url}: {ex}\n")
 

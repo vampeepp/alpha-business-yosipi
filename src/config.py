@@ -11,6 +11,27 @@ from pathlib import Path
 BASE_DIR = Path(__file__).resolve().parent.parent
 DATA_DIR = BASE_DIR / "data"
 
+# Automatically load local .env if present
+def _load_env_file():
+    env_file = BASE_DIR / ".env"
+    if env_file.is_file():
+        try:
+            with open(env_file, "r", encoding="utf-8") as f:
+                for line in f:
+                    line = line.strip()
+                    if not line or line.startswith("#"):
+                        continue
+                    if "=" in line:
+                        k, v = line.split("=", 1)
+                        k = k.strip()
+                        v = v.strip().strip("\"'")
+                        if k not in os.environ:
+                            os.environ[k] = v
+        except Exception:
+            pass
+
+_load_env_file()
+
 # Data file locations conforming to Hackathon Appendix 1 & 2
 CLIENT_DATA_CSV = DATA_DIR / "df_Uid_data_hack.csv"
 PERSONS_DATA_CSV = DATA_DIR / "df_Fid_Uid_link_hack.csv"
