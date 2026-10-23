@@ -120,10 +120,10 @@ class InsightAnalyzerAgent:
 
         potential_consequences = (
             f"**Ключевые риски для P&L и ликвидности:**\n"
-            + "\n".join([f"• ⚠️ {r}" for r in risks])
+            + "\n".join([f"• {r}" for r in risks])
             + "\n\n"
             + f"**Стратегические возможности:**\n"
-            + "\n".join([f"• 💡 {o}" for o in opportunities])
+            + "\n".join([f"• {o}" for o in opportunities])
         )
 
         # -------------------------------------------------------------
@@ -156,7 +156,7 @@ class InsightAnalyzerAgent:
             bank_expert_perspective = (
                 f"**Экспертная позиция Центра макроэкономических исследований Альфа-Банка:**\n\n"
                 f"«{full_txt[:420]}...»\n\n"
-                f"📌 *Источник экспертизы банка:* Исследование **«{top_macro.get('title')}»** (от {top_macro.get('date')}, автор: {top_macro.get('author')}).\n\n"
+                f"*Источник экспертизы банка:* Исследование **«{top_macro.get('title')}»** (от {top_macro.get('date')}, автор: {top_macro.get('author')}).\n\n"
                 f"**Ключевые индикаторы и макропрогнозы банка:**\n"
                 + "\n".join([f"• {k}: **{v}**" for k, v in top_macro.get("key_indicators", {}).items()])
                 + "\n\n"

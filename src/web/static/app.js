@@ -144,8 +144,8 @@ const app = {
       // Risk / Opportunity tags (Item 6)
       const isRisk = n.sentiment.includes("NEGATIVE") || n.sentiment.includes("HAWKISH") || s.total_score >= 60;
       const roBadge = isRisk 
-        ? `<span style="font-size: 9px; font-weight: 800; color: #F87171; background: rgba(239, 49, 36, 0.15); border: 1px solid rgba(239, 49, 36, 0.3); padding: 2px 6px; border-radius: 4px;">⚠️ РИСК (margin, liquidity)</span>`
-        : `<span style="font-size: 9px; font-weight: 800; color: #34D399; background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.3); padding: 2px 6px; border-radius: 4px;">💡 ВОЗМОЖНОСТЬ (capex, revenue)</span>`;
+        ? `<span style="font-size: 9px; font-weight: 800; color: #F87171; background: rgba(239, 49, 36, 0.15); border: 1px solid rgba(239, 49, 36, 0.3); padding: 2px 6px; border-radius: 4px;">РИСК (margin, liquidity)</span>`
+        : `<span style="font-size: 9px; font-weight: 800; color: #34D399; background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.3); padding: 2px 6px; border-radius: 4px;">ВОЗМОЖНОСТЬ (capex, revenue)</span>`;
 
       // Event cluster badge (Item 5)
       const clusterBadge = `<span style="font-size: 9px; font-weight: 700; color: #38BDF8; background: rgba(56, 189, 248, 0.12); padding: 2px 6px; border-radius: 4px;">СОБЫТИЕ • Источников: ${clusterCount}</span>`;
@@ -153,11 +153,11 @@ const app = {
       // Counterparty Alert if applicable (Item 2)
       let counterpartyPill = "";
       if (s.counterparty_supply_chain_score > 0) {
-        counterpartyPill = `<div style="font-size: 10.5px; font-weight: 700; color: #FBBF24; background: rgba(245, 158, 11, 0.1); border-left: 3px solid #F59E0B; padding: 4px 8px; border-radius: 4px;">⛓️ Связанный риск по цепочке B2B-контрагентов (+${s.counterparty_supply_chain_score} pts)</div>`;
+        counterpartyPill = `<div style="font-size: 10.5px; font-weight: 700; color: #FBBF24; background: rgba(245, 158, 11, 0.1); border-left: 3px solid #F59E0B; padding: 4px 8px; border-radius: 4px;">Связанный риск по цепочке B2B-контрагентов (+${s.counterparty_supply_chain_score} pts)</div>`;
       }
 
       // Personalized relevance reason (Item 4)
-      const reasonPill = `<div style="font-size: 11px; color: var(--text-gray); background: rgba(255, 255, 255, 0.03); border-left: 3px solid #EF3124; padding: 4px 8px; border-radius: 4px;">💡 <strong>Персональная причина:</strong> ${s.explanation}</div>`;
+      const reasonPill = `<div style="font-size: 11px; color: var(--text-gray); background: rgba(255, 255, 255, 0.03); border-left: 3px solid #EF3124; padding: 4px 8px; border-radius: 4px;"><strong>Персональная причина:</strong> ${s.explanation}</div>`;
 
       card.innerHTML = `
         <div class="news-item-top">
@@ -174,13 +174,17 @@ const app = {
         ${reasonPill}
         <div class="news-item-footer">
           <div style="display: flex; gap: 8px; align-items: center;">
-            <span class="news-source-label">📰 ${n.source}</span>
+            <span class="news-source-label">${n.source}</span>
             <span style="font-size: 10px; color: var(--text-dim);">Новизна: ${novelty}%</span>
           </div>
           <div style="display: flex; gap: 8px; align-items: center;">
-            <button onclick="event.stopPropagation(); app.sendFeedback('thumbs_up', '${n.news_id}')" style="background: transparent; border: none; cursor: pointer; color: var(--text-dim);" title="Полезно">👍</button>
-            <button onclick="event.stopPropagation(); app.sendFeedback('thumbs_down', '${n.news_id}')" style="background: transparent; border: none; cursor: pointer; color: var(--text-dim);" title="Нерелевантно">👎</button>
-            <span class="open-insight-link">6 блоков & Каузальная цепочка ➔</span>
+            <button onclick="event.stopPropagation(); app.sendFeedback('thumbs_up', '${n.news_id}')" style="background: transparent; border: none; cursor: pointer; color: var(--text-dim); display: inline-flex; align-items: center;" title="Полезно">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"></path></svg>
+            </button>
+            <button onclick="event.stopPropagation(); app.sendFeedback('thumbs_down', '${n.news_id}')" style="background: transparent; border: none; cursor: pointer; color: var(--text-dim); display: inline-flex; align-items: center;" title="Нерелевантно">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3zm7-13h3a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2h-3"></path></svg>
+            </button>
+            <span class="open-insight-link">6 блоков & Каузальная цепочка &rarr;</span>
           </div>
         </div>
       `;
@@ -199,7 +203,7 @@ const app = {
         c.onclick = () => this.openDetailSheet(n.news_id);
         c.innerHTML = `
           <div class="news-item-top">
-            <span class="news-category-tag">❤️ Приоритет Совета Директоров</span>
+            <span class="news-category-tag">Приоритет Совета Директоров</span>
             <span class="news-score-badge score-critical">${item.score.total_score}%</span>
           </div>
           <h4 class="news-item-title">${n.title}</h4>
@@ -290,11 +294,11 @@ const app = {
 
       if (flowEl && data.impact_chain_summary) {
         if (chainRow) chainRow.style.display = "flex";
-        const steps = data.impact_chain_summary.split("➔").map(s => s.trim());
+        const steps = data.impact_chain_summary.split(/➔|->|&rarr;/).map(s => s.trim());
         flowEl.innerHTML = steps.map((s, idx) => {
           const cls = idx === steps.length - 1 ? "success" : (idx >= 2 ? "warning" : "");
           return `<span class="flow-step ${cls}">${s}</span>`;
-        }).join(" ➔ ");
+        }).join(" &rarr; ");
       } else if (chainRow) {
         chainRow.style.display = "none";
       }
@@ -335,7 +339,7 @@ const app = {
     if (hist) {
       const uMsg = document.createElement("div");
       uMsg.className = "chatgpt-msg user";
-      uMsg.innerHTML = `<div class="chatgpt-user-bubble">📊 Сформируй суточный дайджест рисков и возможностей (Daily Briefing)</div>`;
+      uMsg.innerHTML = `<div class="chatgpt-user-bubble">Сформируй суточный дайджест рисков и возможностей (Daily Briefing)</div>`;
       hist.appendChild(uMsg);
     }
 
@@ -358,18 +362,18 @@ const app = {
       if (factEl) factEl.textContent = `Сводка за 24 часа (${data.date}): 3 риска, 2 возможности, 1 спорный кейс.`;
       if (alfaEl) alfaEl.textContent = `ЦМИ Альфа-Банка: ${data.risks[0].title}. Рекомендация: ${data.risks[0].action}`;
       
-      let briefingHtml = `<strong>📊 Суточный дайджест для роли ${this.currentRole}:</strong><br/>`;
+      let briefingHtml = `<strong>Суточный дайджест для роли ${this.currentRole}:</strong><br/>`;
       data.risks.forEach((r, i) => {
-        briefingHtml += `• ⚠️ <strong>Риск ${i+1}:</strong> ${r.title} [${r.dimension}] — <em>${r.action}</em><br/>`;
+        briefingHtml += `• <strong>Риск ${i+1}:</strong> ${r.title} [${r.dimension}] — <em>${r.action}</em><br/>`;
       });
       data.opportunities.forEach((o, i) => {
-        briefingHtml += `• 💡 <strong>Возможность ${i+1}:</strong> ${o.title} — <em>${o.benefit}</em><br/>`;
+        briefingHtml += `• <strong>Возможность ${i+1}:</strong> ${o.title} — <em>${o.benefit}</em><br/>`;
       });
-      briefingHtml += `• ⚖️ <strong>Спорная тема:</strong> ${data.controversial.title} — <em>${data.controversial.solution}</em>`;
+      briefingHtml += `• <strong>Спорная тема:</strong> ${data.controversial.title} — <em>${data.controversial.solution}</em>`;
 
       if (aiEl) aiEl.innerHTML = briefingHtml;
       if (chainRow) chainRow.style.display = "flex";
-      if (flowEl) flowEl.innerHTML = `<span class="flow-step warning">3 Риска P&L</span> ➔ <span class="flow-step success">2 Окна возможностей</span> ➔ <span class="flow-step">1 Решение ALCO</span>`;
+      if (flowEl) flowEl.innerHTML = `<span class="flow-step warning">3 Риска P&L</span> &rarr; <span class="flow-step success">2 Окна возможностей</span> &rarr; <span class="flow-step">1 Решение ALCO</span>`;
 
       if (thread) thread.scrollTop = thread.scrollHeight;
     } catch (err) {
@@ -383,7 +387,7 @@ const app = {
     if (hist) {
       const uMsg = document.createElement("div");
       uMsg.className = "chatgpt-msg user";
-      uMsg.innerHTML = `<div class="chatgpt-user-bubble">🔄 Что изменилось с моего прошлого входа в систему? (Executive Delta)</div>`;
+      uMsg.innerHTML = `<div class="chatgpt-user-bubble">Что изменилось с моего прошлого входа в систему? (Executive Delta)</div>`;
       hist.appendChild(uMsg);
     }
 
@@ -409,13 +413,13 @@ const app = {
       if (factEl) factEl.textContent = `Последний вход: ${data.last_login}. Новых рыночных событий: ${data.new_events_count}.`;
       if (alfaEl) alfaEl.textContent = `Аналитика Альфа-Банка: зафиксировано усиление сигнала регулятора и рост концентрации риска поставщика.`;
 
-      let deltaHtml = `<strong>🔄 Что изменилось с прошлого раза:</strong><br/>`;
+      let deltaHtml = `<strong>Что изменилось с прошлого раза:</strong><br/>`;
       data.changes.forEach((c) => {
-        deltaHtml += `• 📌 <strong>${c.event}:</strong> ${c.change} [${c.status}] ➔ <em>${c.action}</em><br/>`;
+        deltaHtml += `• <strong>${c.event}:</strong> ${c.change} [${c.status}] &rarr; <em>${c.action}</em><br/>`;
       });
 
       if (aiEl) aiEl.innerHTML = deltaHtml;
-      if (flowEl) flowEl.innerHTML = `<span class="flow-step">Вход вчера 18:30</span> ➔ <span class="flow-step warning">+3 Сдвига рынка</span> ➔ <span class="flow-step success">Лимиты обновлены</span>`;
+      if (flowEl) flowEl.innerHTML = `<span class="flow-step">Вход вчера 18:30</span> &rarr; <span class="flow-step warning">+3 Сдвига рынка</span> &rarr; <span class="flow-step success">Лимиты обновлены</span>`;
 
       if (thread) thread.scrollTop = thread.scrollHeight;
     } catch (err) {
@@ -436,7 +440,7 @@ const app = {
           timestamp: new Date().toISOString()
         })
       });
-      alert(feedbackType === "thumbs_up" ? "👍 Спасибо! Ваша оценка принята. Модель адаптирует веса релевантности." : "👎 Спасибо! Событие помечено как малозначимое для Вашего профиля.");
+      alert(feedbackType === "thumbs_up" ? "Спасибо! Ваша оценка принята. Модель адаптирует веса релевантности." : "Спасибо! Событие помечено как малозначимое для Вашего профиля.");
     } catch (e) {
       console.error(e);
     }
@@ -447,7 +451,7 @@ const app = {
     if (!aiEl) return;
     const text = aiEl.innerText || aiEl.textContent;
     navigator.clipboard.writeText(`ВЫПИСКА ДЛЯ КОМИТЕТА ALCO (Альфа-Инсайт):\n${text}`);
-    alert("📋 Аналитический вывод скопирован в буфер обмена для заседания ALCO.");
+    alert("Аналитический вывод скопирован в буфер обмена для заседания ALCO.");
   },
 
 

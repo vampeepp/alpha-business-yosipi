@@ -736,22 +736,32 @@
 
       <nav class="app-nav-dock">
         <button class="dock-tab active" onclick="switchTab('main')">
-          <span class="dock-icon">🏠</span>
+          <span class="dock-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+          </span>
           <span class="dock-label">Главный</span>
         </button>
         <button class="dock-tab" onclick="switchTab('payments')">
-          <span class="dock-icon">⇄</span>
+          <span class="dock-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="17 1 21 5 17 9"></polyline><path d="M3 11V9a4 4 0 0 1 4-4h14"></path><polyline points="7 23 3 19 7 15"></polyline><path d="M21 13v2a4 4 0 0 1-4 4H3"></path></svg>
+          </span>
           <span class="dock-label">Платежи</span>
         </button>
         <button class="dock-tab dock-heart" onclick="switchTab('favorites')">
-          <span class="dock-icon heart-icon">❤️</span>
+          <span class="dock-icon heart-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg>
+          </span>
         </button>
         <button class="dock-tab" onclick="switchTab('research')">
-          <span class="dock-icon">🕒</span>
+          <span class="dock-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+          </span>
           <span class="dock-label">История / ЦМИ</span>
         </button>
         <button class="dock-tab" onclick="switchTab('chat')">
-          <span class="dock-icon">💬</span>
+          <span class="dock-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+          </span>
           <span class="dock-label">Чаты</span>
         </button>
       </nav>
@@ -776,7 +786,7 @@
       <div class="product-card total-balance-card" onclick="switchTab('payments')">
         <div class="balance-sub">
           <span>Годовой оборот / выручка</span>
-          <span>👁️</span>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
         </div>
         <div class="balance-value" id="dispRevenueVal">48,50 млрд ₽</div>
         <div class="card-chevron"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg></div>
@@ -806,7 +816,7 @@
             </div>
             <div class="mini-alfa-card dark-red">
               <div class="card-alfa-badge">А</div>
-              <span class="card-close">✕</span>
+              <span class="card-close">&times;</span>
             </div>
           </div>
         </div>
@@ -904,36 +914,40 @@
                 <!-- 3-Views Breakdown (FACT / ALFA VIEW / AI VIEW) -->
                 <div class="chatgpt-view-callouts">
                   <div class="chatgpt-callout fact-callout">
-                    <div class="callout-header">📘 Что известно фактически (FACT)</div>
+                    <div class="callout-header">Что известно фактически (FACT)</div>
                     <div class="callout-text" id="hubFactText"></div>
                   </div>
                   <div class="chatgpt-callout alfa-callout">
-                    <div class="callout-header">🔴 Экспертиза ЦМИ Альфа-Банка (ALFA VIEW)</div>
+                    <div class="callout-header">Экспертиза ЦМИ Альфа-Банка (ALFA VIEW)</div>
                     <div class="callout-text" id="hubAlfaText"></div>
                   </div>
                   <div class="chatgpt-callout ai-callout">
-                    <div class="callout-header">🟣 Персонализированный вывод (AI VIEW)</div>
+                    <div class="callout-header">Персонализированный вывод (AI VIEW)</div>
                     <div class="callout-text" id="hubAiText"></div>
                   </div>
                 </div>
 
                 <!-- Impact Chain Summary -->
                 <div class="chatgpt-chain-row" id="hubChainRow" style="display: none;">
-                  <span class="chain-prefix">⛓️ Каузальная цепочка:</span>
+                  <span class="chain-prefix">Каузальная цепочка:</span>
                   <div class="chain-flow-pills" id="hubChainFlow"></div>
                 </div>
 
                 <!-- Evidence / Source Tracing -->
                 <div class="chatgpt-evidence-row" id="hubEvidenceRow" style="display: none;">
-                  <span class="evidence-prefix">📌 Основания вывода:</span>
+                  <span class="evidence-prefix">Основания вывода:</span>
                   <div class="evidence-pills" id="hubEvidencePills"></div>
                 </div>
 
                 <!-- Action Toolbar -->
                 <div class="chatgpt-msg-actions">
-                  <button class="chatgpt-action-pill" onclick="app.copyToAlco()">📋 В протокол ALCO</button>
-                  <button class="chatgpt-action-icon" onclick="app.sendFeedback('thumbs_up', 'HUB_LAST')" title="Полезно">👍</button>
-                  <button class="chatgpt-action-icon" onclick="app.sendFeedback('thumbs_down', 'HUB_LAST')" title="Нерелевантно">👎</button>
+                  <button class="chatgpt-action-pill" onclick="app.copyToAlco()">В протокол ALCO</button>
+                  <button class="chatgpt-action-icon" onclick="app.sendFeedback('thumbs_up', 'HUB_LAST')" title="Полезно">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"></path></svg>
+                  </button>
+                  <button class="chatgpt-action-icon" onclick="app.sendFeedback('thumbs_down', 'HUB_LAST')" title="Нерелевантно">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3zm7-13h3a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2h-3"></path></svg>
+                  </button>
                 </div>
               </div>
             </div>
@@ -1100,7 +1114,7 @@
       <!-- TAB: ИЗБРАННОЕ -->
       <div class="tab-view" id="view-favorites">
         <div class="sub-view-header">
-          <h2>Избранные бизнес-события ❤️</h2>
+          <h2>Избранные бизнес-события</h2>
           <p>Критичные решения Совета директоров и Казначейства</p>
         </div>
         <div class="news-feed-list" id="favFeedList"></div>
@@ -1130,7 +1144,7 @@
           </div>
           <div class="chat-bottom-bar">
             <input type="text" id="chatInput" placeholder="Задайте вопрос аналитику..." onkeydown="if(event.key==='Enter')sendChat()" />
-            <button class="chat-send-btn" onclick="sendChat()">➔</button>
+            <button class="chat-send-btn" onclick="sendChat()">&rarr;</button>
           </div>
         </div>
       </div>
@@ -1148,7 +1162,7 @@
             <span class="badge-alfa-tag">АО «АЛЬФА-БАНК» | ИНСАЙТ</span>
             <span class="badge-relevance-chip" id="modalScoreBadge">CRITICAL 94.8%</span>
           </div>
-          <button class="sheet-close-btn" onclick="closeModal()">✕</button>
+          <button class="sheet-close-btn" onclick="closeModal()">&times;</button>
         </div>
         <h2 class="sheet-title" id="modalTitle">Заголовок события</h2>
       </div>
@@ -1157,7 +1171,7 @@
         <!-- RAG GROUNDING MATRIX (ITEM 8) -->
         <div class="grounding-matrix-box">
           <div class="box-caption">
-            <strong>🎯 RAG Grounding Matrix (Пункт 8): [ФАКТ] + [ЦМИ АЛЬФА] + [ПРОФИЛЬ] ➔ [ИНСАЙТ]</strong>
+            <strong>RAG Grounding Matrix: [ФАКТ] + [ЦМИ АЛЬФА] + [ПРОФИЛЬ] &rarr; [ИНСАЙТ]</strong>
           </div>
           <div class="matrix-grid-4">
             <div class="matrix-tile">
@@ -1182,7 +1196,7 @@
         <!-- IMPACT CHAIN (ITEM 7) -->
         <div class="impact-chain-section">
           <div class="impact-chain-header">
-            <strong>🔗 Пошаговая цепочка влияния (Impact Chain, Пункт 7)</strong>
+            <strong>Пошаговая цепочка влияния (Impact Chain)</strong>
             <div class="chain-meta-pills">
               <span class="pill-strength" id="modalStrength">Сила: CRITICAL</span>
               <span class="pill-horizon" id="modalHorizon">Горизонт: 3-12 мес</span>
@@ -1224,7 +1238,7 @@
     <div class="client-modal-card">
       <div class="modal-header">
         <h3>Выбор корпоративного клиента</h3>
-        <button class="modal-close" onclick="toggleModal()">✕</button>
+        <button class="modal-close" onclick="toggleModal()">&times;</button>
       </div>
       <div style="display:flex; flex-direction:column; gap:12px;">
         <div>
@@ -1400,8 +1414,8 @@
           <h4 class="news-item-title">${n.title}</h4>
           <p class="news-item-summary">${n.summary}</p>
           <div class="news-item-footer">
-            <span class="news-source-label">📰 ${n.source}</span>
-            <span class="open-insight-link">Анализ ➔</span>
+            <span class="news-source-label">${n.source}</span>
+            <span class="open-insight-link">Анализ &rarr;</span>
           </div>
         </div>
       `).join("");
