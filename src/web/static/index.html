@@ -1605,6 +1605,19 @@
       `).join("");
     }
 
+    function formatMarkdownWithLinks(text) {
+      if (!text) return "";
+      return text
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
+        .replace(/\*(.*?)\*/g, "<em>$1</em>")
+        .replace(/\[(.*?)\]\((https?:\/\/[^\s\)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer" style="color: #EF3124; text-decoration: underline; font-weight: 600;">$1 &nearr;</a>')
+        .replace(/\n\n/g, "<br><br>")
+        .replace(/\n/g, "<br>");
+    }
+
     // --- Real-time AI Assistant Chat (Dedicated Tab) ---
     async function sendChat() {
       const input = document.getElementById("chatInput");
@@ -1640,12 +1653,7 @@
         const data = await res.json();
         const bubble = aiMsg.querySelector(".msg-bubble");
         const answerText = data.ai_view || data.answer || "Ответ не сформирован.";
-        bubble.innerHTML = answerText
-          .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
-          .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
-          .replace(/\*(.*?)\*/g, "<em>$1</em>")
-          .replace(/\n\n/g, "<br><br>")
-          .replace(/\n/g, "<br>");
+        bubble.innerHTML = formatMarkdownWithLinks(answerText);
         t.scrollTop = t.scrollHeight;
       } catch (err) {
         aiMsg.querySelector(".msg-bubble").textContent = "Ошибка получения ответа: " + err.message;
@@ -1706,12 +1714,7 @@
         
         const aiRaw = data.ai_view || data.answer || "";
         if (aiEl) {
-          aiEl.innerHTML = aiRaw
-            .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
-            .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
-            .replace(/\*(.*?)\*/g, "<em>$1</em>")
-            .replace(/\n\n/g, "<br><br>")
-            .replace(/\n/g, "<br>");
+          aiEl.innerHTML = formatMarkdownWithLinks(aiRaw);
         }
 
         if (flowEl && data.impact_chain_summary) {
