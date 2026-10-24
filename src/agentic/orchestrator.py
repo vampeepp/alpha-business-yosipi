@@ -221,19 +221,61 @@ class MultiAgentOrchestrator:
 
         # 2. Retrieve and rank news items for this specific company
         all_news = list(self.repo.news_items.values())
-        scored_news = []
-        for n in all_news:
-            sc = self.scorer.score(company, n, role)
-            scored_news.append((n, sc.total_score))
-        scored_news.sort(key=lambda x: x[1], reverse=True)
-        top_news_items = [x[0] for x in scored_news[:5]]
 
         q_lower = question.lower()
-        is_general_news_query = any(w in q_lower for w in ["новост", "что нового", "сводк", "событи", "обзор", "сегодня", "рынк", "ситуаци"])
+        is_five_year_query = any(w in q_lower for w in [
+            "5 лет", "пять лет", "5-лет", "5ти лет", "прошедшие 5", "последние 5", "за 5",
+            "истори", "ретроспектив", "хронологи", "динамик", "за все годы", "архив",
+            "2021", "2022", "2023", "2024", "2025"
+        ])
+        is_general_news_query = is_five_year_query or any(w in q_lower for w in ["новост", "что нового", "сводк", "событи", "обзор", "сегодня", "рынк", "ситуаци"])
+
+        # Group news by year
+        news_by_year = {}
+        for n in all_news:
+            yr = n.publication_date[:4] if n.publication_date else "2026"
+            news_by_year.setdefault(yr, []).append(n)
+
+        if is_five_year_query:
+            top_news_items = []
+            for yr in sorted(news_by_year.keys()):
+                items_in_year = news_by_year[yr]
+                scored_yr = [(item, self.scorer.score(company, item, role).total_score) for item in items_in_year]
+                scored_yr.sort(key=lambda x: x[1], reverse=True)
+                top_news_items.extend([x[0] for x in scored_yr[:2]])
+        else:
+            scored_news = []
+            for n in all_news:
+                sc = self.scorer.score(company, n, role)
+                scored_news.append((n, sc.total_score))
+            scored_news.sort(key=lambda x: x[1], reverse=True)
+            top_news_items = [x[0] for x in scored_news[:6]]
 
         # 3. Formulate Fallback Domain View
         response_parts = []
-        if is_general_news_query:
+        if is_five_year_query:
+            response_parts.append(
+                f"Уважаемый {role}! Подготовил для Вас подробную **хронологическую ретроспективу ключевых событий за прошедшие 5 лет (2021–2026 гг.)**, "
+                f"оказавших определяющее влияние на операционную и финансовую деятельность компании **{company.synthetic_u}** (ОКВЭД {company.mainokved_code}, выручка {company.revenue_billions} млрд ₽):\n"
+            )
+            for yr in sorted(news_by_year.keys()):
+                items_in_year = [it for it in top_news_items if it.publication_date[:4] == yr]
+                if not items_in_year:
+                    items_in_year = news_by_year[yr][:1]
+                response_parts.append(f"### {yr} год:")
+                for item in items_in_year:
+                    url_str = item.url or "https://www.cbr.ru/hd_base/KeyRate/"
+                    response_parts.append(
+                        f"* **[{item.title}]({url_str})**\n"
+                        f"  • *Источник:* [{item.source}]({url_str}) ({item.publication_date[:10]})\n"
+                        f"  • *Влияние на бизнес:* {item.summary[:200]}...\n"
+                    )
+            response_parts.append(
+                "### Финансовые выводы Альфа-Банка за 5-летний цикл:\n"
+                "• **Процентная нагрузка:** Волатильность ставки от 4.25% до 21.0% подтвердила критическую необходимость процентных свопов (IRS) для фиксации стоимости кредитного портфеля.\n"
+                "• **Ликвидность и казначейство:** Государственные интервенции и курсовые пошлины потребовали внедрения гибкого факторинга и инструментов размещения свободной ликвидности (овернайт под ключевую ставку)."
+            )
+        elif is_general_news_query:
             response_parts.append(
                 f"Уважаемый {role}! Ниже ключевая подборка самых важных макроэкономических и отраслевых событий "
                 f"для компании **{company.synthetic_u}** (ОКВЭД {company.mainokved_code}, выручка {company.revenue_billions} млрд ₽):\n"
@@ -305,47 +347,58 @@ class MultiAgentOrchestrator:
                 # Build enriched news briefing context with concrete article URLs
                 news_feed_context_lines = []
                 for idx, item in enumerate(top_news_items, 1):
+                    yr = item.publication_date[:4] if item.publication_date else ""
                     news_feed_context_lines.append(
-                        f"[{idx}] Название статьи: {item.title}\n"
-                        f"    - Издание / Источник: {item.source}\n"
+                        f"[{idx}] Год: {yr} | Статья: {item.title}\n"
+                        f"    - Источник: {item.source}\n"
                         f"    - Точная ссылка на статью (URL): {item.url or 'https://www.cbr.ru/press/event/?id=32929'}\n"
                         f"    - Категория: {item.category} | Дата: {item.publication_date[:10]}\n"
-                        f"    - Содержание: {item.summary}"
+                        f"    - Краткое содержание: {item.summary}"
                     )
                 news_feed_context = "\n\n".join(news_feed_context_lines)
 
                 system_prompt = (
-                    f"Ты корпоративный финансовый AI-аналитик Альфа-Банка для бизнеса.\n"
+                    f"Ты профессиональный корпоративный финансовый AI-аналитик Альфа-Банка для крупного бизнеса.\n"
                     f"Роль собеседника: {role}.\n"
                     f"Клиент: {company.synthetic_u} (ОКВЭД: {company.mainokved_code} — {company.mainokved_name}, выручка: {company.revenue_billions} млрд ₽).\n"
                     f"Кредиты в Альфа-Банке: {'Да (активны)' if company.has_loan else 'Нет'}. Лизинг: {'Да' if company.has_leasing else 'Нет'}. "
                     f"ВЭД: {company.fts_country_name if company.has_foreign_trade else 'Нет'}.\n\n"
-                    f"БАЗА АКТУАЛЬНЫХ ПРОВЕРЕННЫХ НОВОСТЕЙ (Каждая новость содержит точное название статьи и проверенный рабочий URL):\n"
+                    f"БАЗА АКТУАЛЬНЫХ ПРОВЕРЕННЫХ НОВОСТЕЙ ЗА 5 ЛЕТ (2021 — 2026 гг.) С ТОЧНЫМИ ССЫЛКАМИ НА СТАТЬИ:\n"
                     f"{news_feed_context}"
                 )
 
-                user_prompt = (
-                    f"Вопрос пользователя: \"{question}\"\n\n"
-                    f"ОБЯЗАТЕЛЬНЫЕ ТРЕБОВАНИЯ К ОФОРМЛЕНИЮ ССЫЛОК НА СТАТЬИ:\n"
-                    f"1. Пользователь требует, чтобы вывод и сама новость ОБЯЗАТЕЛЬНО содержали прямые кликабельные ссылки на КОНКРЕТНЫЕ СТАТЬИ, на которых они основаны.\n"
-                    f"2. Формат гиперссылки строго Markdown: [Точное название статьи](URL) — например:\n"
-                    f"   - [Госзакупки зерна в интервенционный фонд РФ начнутся 29 октября](https://www.interfax.ru/business/1124645)\n"
-                    f"   - [Заявление Председателя Банка России Эльвиры Набиуллиной](https://www.cbr.ru/press/event/?id=32929)\n"
-                    f"   - [Выручка ФосАгро в III квартале выросла на 15%, чистая прибыль упала на 37%](https://www.interfax.ru/business/1124667)\n"
-                    f"   - [Рубль в пятницу вырос и обновил максимум с начала августа в паре с юанем](https://www.interfax.ru/business/1124629)\n"
-                    f"   - [Комитет Думы предложил рассмотреть микширующие механизмы в рамках проекта о налоге на сверхдоходы компаний](https://www.interfax.ru/business/1124643)\n"
-                    f"   - [Reuters: переговоры России, Украины и США могут пройти в ОАЭ или Швейцарии](https://www.kommersant.ru/doc/9059796)\n"
-                    f"3. КАТЕГОРИЧЕСКИ ЗАПРЕЩЕНО выдумывать фиктивные URL (никаких /doc/agri_export_duties и т.д., они возвращают 404 error)!\n"
-                    f"   Бери URL ТОЛЬКО из поля 'Точная ссылка на статью (URL)' соответствующей новости выше.\n"
-                    f"4. В конце своего ответа ОБЯЗАТЕЛЬНО сформируй блок:\n"
-                    f"### Первоисточники и конкретные статьи, на которых основан вывод:\n"
-                    f"где для каждой новости, упомянутой в твоем ответе, укажи строку:\n"
-                    f"- [Точное название статьи](URL) — Издание, дата.\n\n"
-                    f"СТРУКТУРА АНАЛИТИЧЕСКОГО ОТВЕТА:\n"
-                    f"1. Дай структурированный обзор самых полезных и критичных событий для компании {company.synthetic_u} (ОКВЭД {company.mainokved_code}).\n"
-                    f"2. Для каждого события подробно опиши: суть новости, прямую ссылку на конкретную статью и точное влияние на финансовый контур компании (выручка, себестоимость, маржинальность, процентные расходы по кредитам).\n"
-                    f"3. Предложи конкретные финансовые продукты Альфа-Банка для оптимизации (IRS-хеджирование ставок, электронный факторинг, овернайт-депозиты, ВЭД-расчеты)."
-                )
+                if is_five_year_query:
+                    user_prompt = (
+                        f"Вопрос пользователя: \"{question}\"\n\n"
+                        f"ПОЛЬЗОВАТЕЛЬ ЗАПРОСИЛ ПОЛНЫЙ ОБЗОР НОВОСТЕЙ И СОБЫТИЙ ЗА ПРОШЕДШИЕ 5 ЛЕТ (2021 — 2026 гг.).\n\n"
+                        f"ОБЯЗАТЕЛЬНАЯ СТРУКТУРА ОТВЕТА:\n"
+                        f"1. Дай структурированный хронологический анализ ПО ГОДАМ: 2021, 2022, 2023, 2024, 2025, 2026.\n"
+                        f"2. Для каждого года укажи ключевые события (динамика ставки ЦБ, зерновой демпфер и пошлины, удобрения, налоги, ВЭД), оформляя кликабельные ссылки на статьи строго в формате: [Точное название статьи](URL).\n"
+                        f"3. Для каждого года поясни, как именно эти события повлияли на показатели компании {company.synthetic_u} (ОКВЭД {company.mainokved_code}, выручка {company.revenue_billions} млрд ₽).\n"
+                        f"4. Сделай резюме 5-летнего цикла: как трансформировался риск-профиль и какие продукты Альфа-Банка (IRS-свопы, факторинг, ВЭД-расчеты) защищают маржинальность компании.\n"
+                        f"5. В самом конце добавь блок:\n"
+                        f"### Первоисточники и статьи за 5 лет (2021-2026):\n"
+                        f"где укажи список конкретных статей со ссылками по годам.\n\n"
+                        f"СТРОГИЕ ПРАВИЛА ПО ССЫЛКАМ:\n"
+                        f"- Копируй URL ТОЛЬКО из поля 'Точная ссылка на статью (URL)' соответствующей новости выше. Категорически запрещено выдумывать свои URL!"
+                    )
+                else:
+                    user_prompt = (
+                        f"Вопрос пользователя: \"{question}\"\n\n"
+                        f"ОБЯЗАТЕЛЬНЫЕ ТРЕБОВАНИЯ К ОФОРМЛЕНИЮ ССЫЛОК НА СТАТЬИ:\n"
+                        f"1. Пользователь требует, чтобы вывод и сама новость ОБЯЗАТЕЛЬНО содержали прямые кликабельные ссылки на КОНКРЕТНЫЕ СТАТЬИ, на которых они основаны.\n"
+                        f"2. Формат гиперссылки строго Markdown: [Точное название статьи](URL).\n"
+                        f"3. КАТЕГОРИЧЕСКИ ЗАПРЕЩЕНО выдумывать фиктивные URL (никаких /doc/agri_export_duties и т.д., они возвращают 404 error)!\n"
+                        f"   Бери URL ТОЛЬКО из поля 'Точная ссылка на статью (URL)' соответствующей новости выше.\n"
+                        f"4. В конце своего ответа ОБЯЗАТЕЛЬНО сформируй блок:\n"
+                        f"### Первоисточники и конкретные статьи, на которых основан вывод:\n"
+                        f"где для каждой новости, упомянутой в твоем ответе, укажи строку:\n"
+                        f"- [Точное название статьи](URL) — Издание, дата.\n\n"
+                        f"СТРУКТУРА АНАЛИТИЧЕСКОГО ОТВЕТА:\n"
+                        f"1. Дай структурированный обзор самых полезных и критичных событий для компании {company.synthetic_u} (ОКВЭД {company.mainokved_code}).\n"
+                        f"2. Для каждого события подробно опиши: суть новости, прямую ссылку на конкретную статью и точное влияние на финансовый контур компании (выручка, себестоимость, маржинальность, процентные расходы по кредитам).\n"
+                        f"3. Предложи конкретные финансовые продукты Альфа-Банка для оптимизации (IRS-хеджирование ставок, электронный факторинг, овернайт-депозиты, ВЭД-расчеты)."
+                    )
 
                 llm_response = advisor.query_chat_completion(system_prompt, user_prompt, timeout=30)
                 if llm_response and len(llm_response.strip()) > 30:
