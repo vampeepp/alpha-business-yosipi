@@ -44,10 +44,10 @@ SERVER_HOST = os.getenv("HOST", "0.0.0.0")
 SERVER_PORT = int(os.getenv("PORT", "8080"))
 
 # LLM Configuration conforming to AlfaHack / Boosters instructions
-# Model default: qwen/qwen3.8-27b
+# Model default: google/gemma-4-26b-a4b-it (also supports qwen/qwen3.6-35b-a3b)
 # Primary Base URL: https://changellenge.up.railway.app/v1
 # Fallback Base URL: https://api.alfahack-gateway26.ru/v1
-DEFAULT_LLM_MODEL = os.getenv("OPENAI_MODEL", os.getenv("LLM_MODEL", "qwen/qwen3.8-27b"))
+DEFAULT_LLM_MODEL = os.getenv("OPENAI_MODEL", os.getenv("LLM_MODEL", "google/gemma-4-26b-a4b-it"))
 LLM_API_BASE = os.getenv("OPENAI_BASE_URL", os.getenv("LLM_API_BASE", "https://changellenge.up.railway.app/v1"))
 LLM_API_KEY = os.getenv("OPENAI_API_KEY", os.getenv("LLM_API_KEY", ""))
 

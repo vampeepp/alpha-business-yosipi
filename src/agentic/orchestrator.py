@@ -280,7 +280,7 @@ class MultiAgentOrchestrator:
                     f"Событие: {news.title}."
                 )
                 user_prompt = f"Вопрос пользователя: {question}\nСформулируй аналитический вывод с точки зрения влияния на P&L, риски и банковские продукты Альфа-Банка."
-                llm_response = advisor.query_chat_completion(system_prompt, user_prompt, timeout=12)
+                llm_response = advisor.query_chat_completion(system_prompt, user_prompt, timeout=25)
                 if llm_response and len(llm_response.strip()) > 15:
                     ai_view = llm_response.strip()
             except Exception as e:

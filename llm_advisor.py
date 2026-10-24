@@ -19,7 +19,8 @@ from typing import Dict, Any, Optional, List
 # Competition Defaults
 DEFAULT_BASE_URL = "https://changellenge.up.railway.app/v1"
 FALLBACK_BASE_URL = "https://api.alfahack-gateway26.ru/v1"
-DEFAULT_MODEL = "qwen/qwen3.8-27b"
+DEFAULT_MODEL = "google/gemma-4-26b-a4b-it"
+FALLBACK_MODELS = ["google/gemma-4-26b-a4b-it", "qwen/qwen3.6-35b-a3b", "deepseek/deepseek-v4.1-flash"]
 
 def _load_local_env():
     env_paths = [
