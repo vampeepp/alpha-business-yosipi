@@ -47,10 +47,10 @@ class InsightAnalyzerAgent:
         # -------------------------------------------------------------
         what_happened = (
             f"**Фактическая хроника события:** {news.summary}\n\n"
-            f"• **Первоисточник:** {news.source} (Дата публикации: {news.publication_date[:10]}).\n"
+            f"• **Статья первоисточника:** [{news.title}]({news.url or 'https://www.cbr.ru'}) ({news.source}, дата: {news.publication_date[:10]}).\n"
             f"• **Ключевые субъекты и регуляторы:** {', '.join(news.entities) if news.entities else 'Регуляторы рынка'}.\n"
             f"• **Статус достоверности:** Фактологически подтвержденное рыночное событие официальных органов/информагентств. "
-            f"Все первичные параметры (ставки, пошлины, тарифы) сверены с официальными пресс-релизами."
+            f"Все первичные параметры (ставки, пошлины, тарифы) сверены с официальными публикациями."
         )
 
         # -------------------------------------------------------------
@@ -176,6 +176,8 @@ class InsightAnalyzerAgent:
         data_lineage = {
             "primary_news_source": {
                 "source": news.source,
+                "title": news.title,
+                "url": news.url,
                 "publication_date": news.publication_date,
                 "category": news.category,
                 "news_id": news.news_id,

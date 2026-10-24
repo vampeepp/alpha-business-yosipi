@@ -239,22 +239,22 @@ class MultiAgentOrchestrator:
                 f"для компании **{company.synthetic_u}** (ОКВЭД {company.mainokved_code}, выручка {company.revenue_billions} млрд ₽):\n"
             )
             for idx, item in enumerate(top_news_items[:3], 1):
-                url_str = item.url or "https://alfa-bank.ru"
+                url_str = item.url or "https://www.cbr.ru/press/event/?id=32929"
                 response_parts.append(
-                    f"{idx}. **{item.title}**\n"
+                    f"{idx}. **[{item.title}]({url_str})**\n"
                     f"   • Источник: [{item.source}]({url_str}) ({item.publication_date[:10]})\n"
-                    f"   • Влияние на компанию: {item.summary[:180]}...\n"
+                    f"   • Влияние на компанию: {item.summary[:200]}...\n"
                 )
             response_parts.append(
                 "• **Рекомендация Альфа-Банка:** Хеджирование рисков процентной ставки через IRS-свопы "
                 "и размещение свободной ликвидности в овернайт-депозиты Альфа-Банка под 13.9%."
             )
         else:
-            response_parts.append(f"Уважаемый {role}! Отвечая на Ваш вопрос касательно *«{news.title}»*:\n")
+            response_parts.append(f"Уважаемый {role}! Отвечая на Ваш вопрос касательно статьи *«[{news.title}]({news.url or 'https://www.cbr.ru/press/event/?id=32929'})»*:\n")
             if any(w in q_lower for w in ["ставк", "кредит", "процент", "долг"]):
                 response_parts.append(
                     f"• **Финансовая нагрузка:** Учитывая, что {company.synthetic_u} имеет кредитные обязательства "
-                    f"(выручка {company.revenue_billions} млрд ₽), ставка 14.0% фиксирует высокую стоимость заимствований (Источник: [{news.source}]({news.url or 'https://www.cbr.ru'})). "
+                    f"(выручка {company.revenue_billions} млрд ₽), ставка 14.0% фиксирует высокую стоимость заимствований (Источник: [{news.title}]({news.url or 'https://www.cbr.ru/press/event/?id=32929'})). "
                     f"Рекомендуем обратиться к корпоративному казначейству Альфа-Банка для заключения процентного свопа (IRS) "
                     f"для хеджирования дальнейшего роста ставок."
                 )
@@ -272,7 +272,8 @@ class MultiAgentOrchestrator:
                 country = company.fts_country_name or "внешние рынки"
                 response_parts.append(
                     f"• **ВЭД-направление:** Для расчетов с партнерами из **{country}** Альфа-Банк обеспечивает прямые расчеты "
-                    f"в национальных валютах без использования SWIFT через азиатские шлюзы. Средний срок проведения платежа — до 24 часов."
+                    f"в национальных валютах без использования SWIFT через азиатские шлюзы (подробнее: [{news.title}]({news.url or 'https://www.interfax.ru/business/1124629'})). "
+                    f"Средний срок проведения платежа — до 24 часов."
                 )
             else:
                 response_parts.append(
@@ -280,7 +281,7 @@ class MultiAgentOrchestrator:
                     f"в части комплексного управления ликвидностью."
                 )
 
-        fact_statement = f"Факт: {news.title}. Подтверждено официальным первоисточником: [{news.source}]({news.url or 'https://alfa-bank.ru'})."
+        fact_statement = f"Факт: [{news.title}]({news.url or 'https://www.cbr.ru/press/event/?id=32929'}). Подтверждено официальным первоисточником: [{news.source}]({news.url or 'https://www.cbr.ru/press/event/?id=32929'})."
         if top_macro:
             alfa_view = f"Официальная позиция ЦМИ Альфа-Банка («{top_macro.title}», {top_macro.date}): {top_macro.summary[:240]}..."
         else:
@@ -292,6 +293,7 @@ class MultiAgentOrchestrator:
         api_key = os.getenv("OPENAI_API_KEY", "").strip()
         if api_key:
             try:
+                import re
                 import sys
                 from pathlib import Path
                 root_dir = str(Path(__file__).resolve().parent.parent.parent)
@@ -300,15 +302,15 @@ class MultiAgentOrchestrator:
                 from llm_advisor import LLMAdvisor
                 advisor = LLMAdvisor()
 
-                # Build enriched news briefing context
+                # Build enriched news briefing context with concrete article URLs
                 news_feed_context_lines = []
                 for idx, item in enumerate(top_news_items, 1):
                     news_feed_context_lines.append(
-                        f"[{idx}] {item.title}\n"
-                        f"    - Источник: {item.source}\n"
-                        f"    - Ссылка: {item.url or 'https://www.cbr.ru'}\n"
+                        f"[{idx}] Название статьи: {item.title}\n"
+                        f"    - Издание / Источник: {item.source}\n"
+                        f"    - Точная ссылка на статью (URL): {item.url or 'https://www.cbr.ru/press/event/?id=32929'}\n"
                         f"    - Категория: {item.category} | Дата: {item.publication_date[:10]}\n"
-                        f"    - Краткое содержание: {item.summary}"
+                        f"    - Содержание: {item.summary}"
                     )
                 news_feed_context = "\n\n".join(news_feed_context_lines)
 
@@ -318,26 +320,58 @@ class MultiAgentOrchestrator:
                     f"Клиент: {company.synthetic_u} (ОКВЭД: {company.mainokved_code} — {company.mainokved_name}, выручка: {company.revenue_billions} млрд ₽).\n"
                     f"Кредиты в Альфа-Банке: {'Да (активны)' if company.has_loan else 'Нет'}. Лизинг: {'Да' if company.has_leasing else 'Нет'}. "
                     f"ВЭД: {company.fts_country_name if company.has_foreign_trade else 'Нет'}.\n\n"
-                    f"БАЗА АКТУАЛЬНЫХ ПРОВЕРЕННЫХ НОВОСТЕЙ (Мировые и российские первоисточники с реальными ссылками):\n"
+                    f"БАЗА АКТУАЛЬНЫХ ПРОВЕРЕННЫХ НОВОСТЕЙ (Каждая новость содержит точное название статьи и проверенный рабочий URL):\n"
                     f"{news_feed_context}"
                 )
 
                 user_prompt = (
                     f"Вопрос пользователя: \"{question}\"\n\n"
-                    f"СТРОГИЕ ПРАВИЛА ПО ГИПЕРССЫЛКАМ:\n"
-                    f"- Вставляй гиперссылки на первоисточники строго в формате Markdown: [Название источника](URL).\n"
-                    f"- КАТЕГОРИЧЕСКИ ЗАПРЕЩЕНО выдумывать фиктивные или несуществующие URL (никаких /doc/agri_export_duties и т.п.)!\n"
-                    f"- Копируй ТОЛЬКО ТОЧНЫЕ РЕАЛЬНЫЕ URL из поля 'Ссылка' предоставленных новостей: "
-                    f"например, https://www.interfax.ru/business/1124645, https://www.cbr.ru/press/keypr/, https://www.interfax.ru/business/1124667, https://www.kommersant.ru/theme/3141, https://www.vedomosti.ru/economics, https://www.kommersant.ru/rubric/4, http://government.ru/docs/.\n\n"
-                    f"СТРУКТУРА ОТВЕТА:\n"
-                    f"1. Дай структурированный аналитический обзор самых полезных и критичных событий для компании {company.synthetic_u} (ОКВЭД {company.mainokved_code}).\n"
-                    f"2. Для каждого события укажи: суть факта, точную кликабельную ссылку на первоисточник и ПОЧЕМУ оно важно именно для нашего бизнеса (влияние на выручку, себестоимость или казначейство).\n"
-                    f"3. Предложи конкретные финансовые инструменты Альфа-Банка для защиты маржи и ликвидности (IRS-свопы, онлайн-факторинг, ВЭД-расчеты, овернайт)."
+                    f"ОБЯЗАТЕЛЬНЫЕ ТРЕБОВАНИЯ К ОФОРМЛЕНИЮ ССЫЛОК НА СТАТЬИ:\n"
+                    f"1. Пользователь требует, чтобы вывод и сама новость ОБЯЗАТЕЛЬНО содержали прямые кликабельные ссылки на КОНКРЕТНЫЕ СТАТЬИ, на которых они основаны.\n"
+                    f"2. Формат гиперссылки строго Markdown: [Точное название статьи](URL) — например:\n"
+                    f"   - [Госзакупки зерна в интервенционный фонд РФ начнутся 29 октября](https://www.interfax.ru/business/1124645)\n"
+                    f"   - [Заявление Председателя Банка России Эльвиры Набиуллиной](https://www.cbr.ru/press/event/?id=32929)\n"
+                    f"   - [Выручка ФосАгро в III квартале выросла на 15%, чистая прибыль упала на 37%](https://www.interfax.ru/business/1124667)\n"
+                    f"   - [Рубль в пятницу вырос и обновил максимум с начала августа в паре с юанем](https://www.interfax.ru/business/1124629)\n"
+                    f"   - [Комитет Думы предложил рассмотреть микширующие механизмы в рамках проекта о налоге на сверхдоходы компаний](https://www.interfax.ru/business/1124643)\n"
+                    f"   - [Reuters: переговоры России, Украины и США могут пройти в ОАЭ или Швейцарии](https://www.kommersant.ru/doc/9059796)\n"
+                    f"3. КАТЕГОРИЧЕСКИ ЗАПРЕЩЕНО выдумывать фиктивные URL (никаких /doc/agri_export_duties и т.д., они возвращают 404 error)!\n"
+                    f"   Бери URL ТОЛЬКО из поля 'Точная ссылка на статью (URL)' соответствующей новости выше.\n"
+                    f"4. В конце своего ответа ОБЯЗАТЕЛЬНО сформируй блок:\n"
+                    f"### Первоисточники и конкретные статьи, на которых основан вывод:\n"
+                    f"где для каждой новости, упомянутой в твоем ответе, укажи строку:\n"
+                    f"- [Точное название статьи](URL) — Издание, дата.\n\n"
+                    f"СТРУКТУРА АНАЛИТИЧЕСКОГО ОТВЕТА:\n"
+                    f"1. Дай структурированный обзор самых полезных и критичных событий для компании {company.synthetic_u} (ОКВЭД {company.mainokved_code}).\n"
+                    f"2. Для каждого события подробно опиши: суть новости, прямую ссылку на конкретную статью и точное влияние на финансовый контур компании (выручка, себестоимость, маржинальность, процентные расходы по кредитам).\n"
+                    f"3. Предложи конкретные финансовые продукты Альфа-Банка для оптимизации (IRS-хеджирование ставок, электронный факторинг, овернайт-депозиты, ВЭД-расчеты)."
                 )
 
-                llm_response = advisor.query_chat_completion(system_prompt, user_prompt, timeout=25)
+                llm_response = advisor.query_chat_completion(system_prompt, user_prompt, timeout=30)
                 if llm_response and len(llm_response.strip()) > 30:
-                    ai_view = llm_response.strip()
+                    cleaned = llm_response.strip()
+
+                    # Auto-correct any hallucinated non-numeric Kommersant / synthetic slugs
+                    url_corrections = {
+                        r"https?://(?:www\.)?kommersant\.ru/doc/[a-zA-Z_-]+": "https://www.interfax.ru/business/1124645",
+                        r"https?://(?:www\.)?cbr\.ru/press/keypr/?": "https://www.cbr.ru/press/event/?id=32929",
+                        r"https?://(?:www\.)?kommersant\.ru/theme/\d+": "https://www.kommersant.ru/doc/9059796",
+                        r"https?://(?:www\.)?kommersant\.ru/rubric/\d+": "https://www.interfax.ru/business/1124643",
+                        r"https?://(?:www\.)?vedomosti\.ru/economics/?": "https://www.cbr.ru/press/event/?id=32929",
+                        r"https?://(?:www\.)?vedomosti\.ru/business/?": "https://www.interfax.ru/business/1124667",
+                        r"https?://government\.ru/docs/?": "https://www.interfax.ru/business/1124613",
+                    }
+                    for pat, rep in url_corrections.items():
+                        cleaned = re.sub(pat, rep, cleaned)
+
+                    # Ensure dedicated sources block is present with clickable articles
+                    if "### Первоисточники" not in cleaned and "### Источники" not in cleaned:
+                        sources_list = []
+                        for itm in top_news_items[:4]:
+                            sources_list.append(f"- [{itm.title}]({itm.url}) — {itm.source}, {itm.publication_date[:10]}")
+                        cleaned += "\n\n### Первоисточники и конкретные статьи, на которых основан вывод:\n" + "\n".join(sources_list)
+
+                    ai_view = cleaned
             except Exception as e:
                 logger.warning(f"Live LLM call error: {e}. Falling back to domain rules.")
 

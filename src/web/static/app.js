@@ -519,7 +519,11 @@ const app = {
           { num: 3, title: "Какие последствия возможны? (Риски и возможности)", text: insight.potential_consequences },
           { num: 4, title: `Какие действия релевантны? (План для роли ${this.currentRole})`, text: insight.recommended_actions },
           { num: 5, title: "Экспертная позиция ЦМИ Альфа-Банка", text: insight.bank_expert_perspective },
-          { num: 6, title: "На чем основан вывод? (Data Lineage & Трассировка)", text: `Признаки: ${(insight.data_lineage.client_features_utilized || []).join(", ")}. Модель: ${insight.data_lineage.ai_inference_method}` },
+          { 
+            num: 6, 
+            title: "На чем основан вывод? (Data Lineage & Трассировка первоисточников)", 
+            text: `• **Статья первоисточника:** [${insight.data_lineage?.primary_news_source?.title || 'Официальная публикация'}](${insight.data_lineage?.primary_news_source?.url || 'https://www.cbr.ru'})\n• **Анализируемые признаки компании:** ${(insight.data_lineage?.client_features_utilized || []).join(", ")}\n• **Модель анализа:** ${insight.data_lineage?.ai_inference_method || 'Автономный когнитивный синтез'}` 
+          },
         ];
 
         pillarsWrap.innerHTML = pList.map((p) => `
