@@ -91,10 +91,19 @@ class LLMAdvisor:
                 # Log and fallback to direct HTTP / fallback URL
                 sys.stderr.write(f"[LLMAdvisor] OpenAI SDK error: {e}. Trying raw HTTP...\n")
 
-        # 2. Raw HTTP request to primary base_url, then fallback_base_url
-        urls_to_try = [f"{self.base_url}/chat/completions"]
-        if self.base_url != FALLBACK_BASE_URL:
-            urls_to_try.append(f"{FALLBACK_BASE_URL}/chat/completions")
+        # 2. Raw HTTP request trying primary base_url, then alternative gateways
+        all_gateways = [
+            self.base_url,
+            DEFAULT_BASE_URL,
+            FALLBACK_BASE_URL
+        ]
+        urls_to_try = []
+        seen = set()
+        for gw in all_gateways:
+            clean = gw.rstrip("/")
+            if clean and clean not in seen:
+                seen.add(clean)
+                urls_to_try.append(f"{clean}/chat/completions")
 
         payload = {
             "model": self.model,
