@@ -1605,18 +1605,160 @@
       `).join("");
     }
 
-    function sendChat() {
+    // --- Real-time AI Assistant Chat (Dedicated Tab) ---
+    async function sendChat() {
       const input = document.getElementById("chatInput");
       const q = input.value.trim();
       if (!q) return;
       const t = document.getElementById("chatThread");
-      t.innerHTML += `<div class="chat-msg user"><div class="msg-avatar">Я</div><div class="msg-bubble">${q}</div></div>`;
+      
+      // 1. Append user bubble
+      t.innerHTML += `<div class="chat-msg user"><div class="msg-avatar">Я</div><div class="msg-bubble">${q.replace(/</g, "&lt;").replace(/>/g, "&gt;")}</div></div>`;
       input.value = "";
-      setTimeout(() => {
-        t.innerHTML += `<div class="chat-msg ai"><div class="msg-avatar">А</div><div class="msg-bubble">На основе данных ЦМИ Альфа-Банка по вашему холдингу рекомендуется заключение соглашения процентного свопа (IRS) на 1.5 года для нивелирования риска ставки 14.0% и размещения свободных средств в овернайт-депозиты Альфа-Банка под 13.9%.</div></div>`;
+      t.scrollTop = t.scrollHeight;
+
+      // 2. Append thinking bubble
+      const aiMsg = document.createElement("div");
+      aiMsg.className = "chat-msg ai";
+      aiMsg.innerHTML = `<div class="msg-avatar">А</div><div class="msg-bubble"><em>Альфа-Ассистент анализирует контекст холдинга и генерирует персональный вывод...</em></div>`;
+      t.appendChild(aiMsg);
+      t.scrollTop = t.scrollHeight;
+
+      try {
+        const clientUid = document.getElementById("clientSelect") ? document.getElementById("clientSelect").value : "U_AGRO_001";
+        const role = document.getElementById("roleSelect") ? document.getElementById("roleSelect").value : "Генеральный директор";
+        const res = await fetch("/api/assistant/ask", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            uid: clientUid,
+            news_id: "NEWS-2026-09-001",
+            question: q,
+            role: role,
+          }),
+        });
+        const data = await res.json();
+        const bubble = aiMsg.querySelector(".msg-bubble");
+        const answerText = data.ai_view || data.answer || "Ответ не сформирован.";
+        bubble.innerHTML = answerText
+          .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+          .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
+          .replace(/\*(.*?)\*/g, "<em>$1</em>")
+          .replace(/\n\n/g, "<br><br>")
+          .replace(/\n/g, "<br>");
         t.scrollTop = t.scrollHeight;
-      }, 300);
+      } catch (err) {
+        aiMsg.querySelector(".msg-bubble").textContent = "Ошибка получения ответа: " + err.message;
+      }
     }
+
+    // --- Executive AI Hub (Mini-window on Main Page) ---
+    async function handleHubSubmit() {
+      const input = document.getElementById("aiHubInput");
+      const q = input ? input.value.trim() : "";
+      if (!q) return;
+
+      const thread = document.getElementById("chatgptThread");
+      if (thread) thread.style.display = "flex";
+
+      const hist = document.getElementById("chatgptHistoryContainer");
+      if (hist) {
+        const uMsg = document.createElement("div");
+        uMsg.className = "chatgpt-msg user";
+        uMsg.innerHTML = `<div class="chatgpt-user-bubble">${q.replace(/</g, "&lt;").replace(/>/g, "&gt;")}</div>`;
+        hist.appendChild(uMsg);
+      }
+      if (input) input.value = "";
+
+      const factEl = document.getElementById("hubFactText");
+      const alfaEl = document.getElementById("hubAlfaText");
+      const aiEl = document.getElementById("hubAiText");
+      const flowEl = document.getElementById("hubChainFlow");
+      const evidenceEl = document.getElementById("hubEvidencePills");
+      const chainRow = document.getElementById("hubChainRow");
+      const evidenceRow = document.getElementById("hubEvidenceRow");
+      const respMsg = document.getElementById("chatgptActiveResponseMsg");
+
+      if (respMsg) respMsg.style.display = "flex";
+      if (aiEl) aiEl.innerHTML = "<em>Анализ позиции ЦБ, P&L холдинга и вычисление рекомендаций...</em>";
+      if (factEl) factEl.textContent = "Сверка фактов с официальными регуляторными источниками...";
+      if (alfaEl) alfaEl.textContent = "Сопоставление с исследованиями ЦМИ Альфа-Банка...";
+
+      if (thread) thread.scrollTop = thread.scrollHeight;
+
+      try {
+        const clientUid = document.getElementById("clientSelect") ? document.getElementById("clientSelect").value : "U_AGRO_001";
+        const role = document.getElementById("roleSelect") ? document.getElementById("roleSelect").value : "Генеральный директор";
+        const res = await fetch("/api/assistant/ask", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            uid: clientUid,
+            news_id: "NEWS-2026-09-001",
+            question: q,
+            role: role,
+          }),
+        });
+        const data = await res.json();
+
+        if (factEl) factEl.textContent = data.fact_statement || "Фактические данные согласованы с открытыми источниками.";
+        if (alfaEl) alfaEl.textContent = data.alfa_view || "Центр макроэкономических исследований Альфа-Банка рекомендует консервативную стратегию.";
+        
+        const aiRaw = data.ai_view || data.answer || "";
+        if (aiEl) {
+          aiEl.innerHTML = aiRaw
+            .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+            .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
+            .replace(/\*(.*?)\*/g, "<em>$1</em>")
+            .replace(/\n\n/g, "<br><br>")
+            .replace(/\n/g, "<br>");
+        }
+
+        if (flowEl && data.impact_chain_summary) {
+          if (chainRow) chainRow.style.display = "flex";
+          const steps = data.impact_chain_summary.split(/➔|->|&rarr;/).map(s => s.trim());
+          flowEl.innerHTML = steps.map((s, idx) => {
+            const cls = idx === steps.length - 1 ? "success" : (idx >= 2 ? "warning" : "");
+            return `<span class="flow-step ${cls}">${s}</span>`;
+          }).join(" &rarr; ");
+        } else if (chainRow) {
+          chainRow.style.display = "none";
+        }
+
+        if (evidenceEl && data.evidence_sources && data.evidence_sources.length > 0) {
+          if (evidenceRow) evidenceRow.style.display = "flex";
+          evidenceEl.innerHTML = data.evidence_sources.map(ev => `
+            <span class="evidence-pill">${ev.name || ev.id}</span>
+          `).join("");
+        } else if (evidenceRow) {
+          evidenceRow.style.display = "none";
+        }
+
+        if (thread) thread.scrollTop = thread.scrollHeight;
+      } catch (err) {
+        if (aiEl) aiEl.textContent = "Ошибка анализа: " + err.message;
+      }
+    }
+
+    // Expose app object for inline onclick handlers
+    window.app = {
+      handleHubSubmit: handleHubSubmit,
+      copyToAlco: function() {
+        const aiText = document.getElementById("hubAiText")?.innerText || "";
+        if (navigator.clipboard) {
+          navigator.clipboard.writeText("Выписка в протокол ALCO:\n" + aiText);
+        }
+        alert("Аналитический вывод скопирован в буфер обмена для комитета ALCO.");
+      },
+      sendFeedback: function(type, id) {
+        fetch("/api/news/feedback", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ feedback: type, target: id })
+        });
+        alert("Спасибо за оценку! Модель скоринга адаптирована.");
+      }
+    };
 
     // --- Browser Navigation: History Popstate (Back / Forward arrows) ---
     window.addEventListener('popstate', (e) => {
